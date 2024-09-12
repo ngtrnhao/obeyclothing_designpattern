@@ -1,35 +1,23 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import HomePage from './pages/HomePage';
 import Login from './components/Login';
 import Register from './components/Register';
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
-
-function Home() {
-  return (
-    <div>
-      <h1>Trang chủ</h1>
-      <nav>
-        <ul>
-          <li><Link to="/login">Đăng nhập</Link></li>
-          <li><Link to="/register">Đăng ký</Link></li>
-          <li><Link to="/forgot-password">Quên mật khẩu</Link></li>
-        </ul>
-      </nav>
-    </div>
-  );
-}
+import MainLayout from './layouts/MainLayout';
+import styles from './App.module.css';
 
 function App() {
   return (
     <Router>
-      <div className="App">
+      <div className={styles.app}>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password/:resetToken" element={<ResetPassword />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<MainLayout><Login /></MainLayout>} />
+          <Route path="/register" element={<MainLayout><Register /></MainLayout>} />
+          <Route path="/forgot-password" element={<MainLayout><ForgotPassword /></MainLayout>} />
+          <Route path="/reset-password/:resetToken" element={<MainLayout><ResetPassword /></MainLayout>} />
         </Routes>
       </div>
     </Router>

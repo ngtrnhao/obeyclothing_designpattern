@@ -1,0 +1,32 @@
+.homeContainer {
+  text-align: center;
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.homeTitle {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.homeDescription {
+  font-size: 1.2rem;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.userInfo {
+  background-color: #f0f0f0;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 2rem;
+}
+
+.adminMessage {
+  color: #e74c3c;
+  font-weight: bold;
+  margin-top: 0.5rem;
+}

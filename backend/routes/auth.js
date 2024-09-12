@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const User = require('../models/User');
 const router = express.Router();
+const checkRole = require ('../middleware/checkRole')
 
 // Nodemailer transporter
 let transporter = nodemailer.createTransport({
@@ -13,74 +14,138 @@ let transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS
   }
 });
+//admin
+router.get('/users',checkRole('admin'),async(req,res)=>{
+  try{
+    const users = await User.find({},'-password');
+    res.json(users);
 
+  }catch(error){
+    res.status(500).json({message:'Lỗi server'}); 
+
+  }
+  const express = require('express');
+const router = express.Router();
+const authMiddleware = require('../middleware/authMiddleware');
+const adminMiddleware = require('../middleware/adminMiddleware');
+const User = require('../models/User');
+
+// Áp dụng middleware xác thực và kiểm tra quyền admin cho tất cả các routes
+router.use(authMiddleware);
+router.use(adminMiddleware);
+
+// Get all users
+router.get('/users', async (req, res) => {
+  try {
+    const users = await User.find({}, '-password');
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
+});
+
+// Change user role
+router.patch('/users/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { role } = req.body;
+
+    if (!['user', 'admin'].includes(role)) {
+      return res.status(400).json({ message: 'Vai trò không hợp lệ' });
+    }
+
+    const user = await User.findByIdAndUpdate(userId, { role }, { new: true });
+
+    if (!user) {
+      return res.status(404).json({ message: 'Không tìm thấy người dùng' });
+    }
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
+});
+
+// Thêm các routes admin khác ở đây
+
+module.exports = router;
+});
 // Đăng ký
 router.post('/register', async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, role, adminSecret } = req.body;
+    console.log('Registration attempt:', { username, email, role, adminSecret });
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    // Determine role
+    let userRole = 'user';
+    if (role === 'admin') {
+      console.log('Admin registration attempt. Secret:', adminSecret);
+      console.log('Expected admin secret:', process.env.ADMIN_SECRET);
+      if (adminSecret !== process.env.ADMIN_SECRET) {
+        console.log('Invalid admin secret provided');
+        return res.status(403).json({ message: 'Invalid admin secret' });
+      }
+      userRole = 'admin';
+      console.log('Admin role set successfully');
+    }
+
     const hashedPassword = await bcrypt.hash(password, 12);
-    const user = new User({ username, email, password: hashedPassword });
+    const user = new User({ 
+      username, 
+      email, 
+      password: hashedPassword,
+      role: userRole
+    });
+    console.log('User object before save:', user);
     await user.save();
-    res.status(201).json({ message: 'User created successfully' });
+    console.log('User saved to database:', user);
+    res.status(201).json({ message: 'User created successfully', role: userRole });
   } catch (error) {
+    console.error('Registration error:', error);
     res.status(500).json({ message: 'Error creating user', error: error.message });
   }
 });
 
 // Đăng nhập
 router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-  
-    try {
-      const user = await User.findOne({ email });
-  
-      if (!user) {
-        return res.status(400).json({ message: 'Tài khoản không tồn tại' });
-      }
-  
-      // Kiểm tra xem tài khoản cụ thể này có đang bị khóa không
-      if (user.lockUntil && user.lockUntil > Date.now()) {
-        const timeRemaining = Math.ceil((user.lockUntil - Date.now()) / 1000 / 60);
-        return res.status(403).json({
-          message: `Tài khoản này đã bị khóa. Vui lòng thử lại sau ${timeRemaining} phút.`
-        });
-      }
-  
-      const isMatch = await bcrypt.compare(password, user.password);
-  
-      if (!isMatch) {
-        // Tăng số lần đăng nhập thất bại cho tài khoản cụ thể này
-        user.loginAttempts += 1;
-        
-        if (user.loginAttempts >= 5) {
-          user.lockUntil = Date.now() + 2 * 60 * 60 * 1000; // Khóa trong 2 giờ
-          await user.save();
-          return res.status(403).json({
-            message: 'Tài khoản này đã bị khóa do nhập sai mật khẩu quá 5 lần. Vui lòng thử lại sau 2 giờ.'
-          });
-        }
-  
-        await user.save();
-        return res.status(400).json({
-          message: `Mật khẩu không đúng. Còn ${5 - user.loginAttempts} lần thử cho tài khoản này.`
-        });
-      }
-  
-      // Đăng nhập thành công, reset số lần thử và mở khóa tài khoản
-      user.loginAttempts = 0;
-      user.lockUntil = null;
-      await user.save();
-  
-      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-        expiresIn: '1h'
-      });
-  
-      res.json({ token, message: 'Đăng nhập thành công' });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Lỗi server' });
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: 'Tài khoản không tồn tại' });
     }
-  });
+
+    if (user.isLocked) {
+      const timeRemaining = Math.ceil((user.lockUntil - Date.now()) / 1000 / 60);
+      return res.status(403).json({ message: `Tài khoản này đã bị khóa. Vui lòng thử lại sau ${timeRemaining} phút.` });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      await user.incrementLoginAttempts();
+      if (user.isLocked) {
+        return res.status(403).json({ message: 'Tài khoản này đã bị khóa do nhập sai mật khẩu quá 5 lần. Vui lòng thử lại sau 2 giờ.' });
+      }
+      return res.status(400).json({ message: `Mật khẩu không đúng. Còn ${5 - user.loginAttempts} lần thử cho tài khoản này.` });
+    }
+
+    // Reset login attempts nếu đăng nhập thành công
+    user.loginAttempts = 0;
+    user.lockUntil = undefined;
+    await user.save();
+
+    const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    res.json({ token, role: user.role, message: 'Đăng nhập thành công' });
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server' });
+  }
+});
 
 // Quên mật khẩu
 router.post('/forgot-password', async (req, res) => {
