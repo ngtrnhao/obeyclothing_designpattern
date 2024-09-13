@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { register } from '../services/api';
 import styles from './style.component/Register.module.css';
 
@@ -9,17 +10,21 @@ const Register = () => {
   const [role, setRole] = useState('user');
   const [adminSecret, setAdminSecret] = useState('');
   const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('Bắt đầu đăng ký...'); // Log để kiểm tra form submit
     try {
+      console.log('Gọi API đăng ký...');
       const response = await register(username, email, password, role, adminSecret);
-      setMessage(response.data.message || 'Đăng ký thành công');
-      setError('');
+      console.log('Đăng ký thành công:', response);
+      console.log('Chuẩn bị chuyển hướng...');
+      navigate('/login');
+      console.log('Đã chuyển hướng');
     } catch (error) {
+      console.error('Lỗi đăng ký:', error);
       setError(error.response?.data?.message || 'Đăng ký thất bại');
-      setMessage('');
     }
   };
 
@@ -27,7 +32,6 @@ const Register = () => {
     <div className={styles.registerContainer}>
       <h2 className={styles.registerTitle}>Đăng ký</h2>
       {error && <p className={styles.errorMessage}>{error}</p>}
-      {message && <p className={styles.successMessage}>{message}</p>}
       <form onSubmit={handleSubmit}>
         <div className={styles.formGroup}>
           <label className={styles.label}>Tên người dùng:</label>

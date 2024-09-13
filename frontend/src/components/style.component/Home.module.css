@@ -1,7 +1,7 @@
 .homeContainer {
   text-align: center;
   padding: 2rem;
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -16,6 +16,65 @@
   color: #666;
   line-height: 1.6;
   margin-bottom: 2rem;
+}
+
+.featuredCategories {
+  margin-bottom: 3rem;
+}
+
+.categoryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.categoryCard {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.categoryCard:hover {
+  transform: translateY(-5px);
+}
+
+.categoryImage {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.categoryName {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.callToAction {
+  margin-top: 3rem;
+}
+
+.ctaButton {
+  display: inline-block;
+  background-color: #3498db;
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 1.1rem;
+  transition: background-color 0.3s ease;
+}
+
+.ctaButton:hover {
+  background-color: #2980b9;
 }
 
 .userInfo {

@@ -1,9 +1,9 @@
 const adminMiddleware = (req, res, next) => {
-    if (req.user && req.user.role === 'admin') {
-      next();
-    } else {
-      res.status(403).json({ message: 'Chỉ admin mới được phép truy cập' });
+    console.log('User role:', req.user.role);
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Chỉ admin mới có quyền truy cập' });
     }
-  };
+    next();
+};
   
-  module.exports = adminMiddleware;
+module.exports = adminMiddleware;

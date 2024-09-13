@@ -1,26 +1,32 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import Login from './components/Login';
-import Register from './components/Register';
-import ForgotPassword from './components/ForgotPassword';
-import ResetPassword from './components/ResetPassword';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 import MainLayout from './layouts/MainLayout';
-import styles from './App.module.css';
+import HomePage from './pages/HomePage';
+import AuthPage from './pages/AuthPage';
+import ProductList from './components/ProductList';
+import ProductDetail from './components/ProductDetail';
+import Cart from './components/Cart';
+import CreateProduct from './components/CreateProduct';
+import ResetPassword from './components/ResetPassword';
 
 function App() {
   return (
-    <Router>
-      <div className={styles.app}>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<MainLayout><Login /></MainLayout>} />
-          <Route path="/register" element={<MainLayout><Register /></MainLayout>} />
-          <Route path="/forgot-password" element={<MainLayout><ForgotPassword /></MainLayout>} />
-          <Route path="/reset-password/:resetToken" element={<MainLayout><ResetPassword /></MainLayout>} />
-        </Routes>
-      </div>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <MainLayout>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/products" element={<ProductList />} />
+            <Route path="/products/:id" element={<ProductDetail />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/create-product" element={<CreateProduct />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
+          </Routes>
+        </MainLayout>
+      </Router>
+    </AuthProvider>
   );
 }
 

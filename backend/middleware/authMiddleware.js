@@ -1,21 +1,22 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
 
-const authMiddleware = async (req, res, next) => {
+const authMiddleware = (req, res, next) => {
+  console.log('JWT_SECRET in auth middleware:', process.env.JWT_SECRET);
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  console.log('Received token:', token);
+  
+  if (!token) {
+    return res.status(401).json({ message: 'Không có token, quyền truy cập bị từ chối' });
+  }
+
   try {
-    const token = req.header('Authorization').replace('Bearer ', '');
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findOne({ _id: decoded._id, 'tokens.token': token });
-
-    if (!user) {
-      throw new Error();
-    }
-
-    req.token = token;
-    req.user = user;
+    console.log('Decoded token:', decoded);
+    req.user = decoded;
     next();
   } catch (error) {
-    res.status(401).json({ message: 'Không được phép truy cập' });
+    console.error('Token verification error:', error);
+    res.status(401).json({ message: 'Token không hợp lệ' });
   }
 };
 

@@ -1,0 +1,42 @@
+.authPage {
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .tabContainer {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+  .tabButton {
+    flex: 1;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .tabButton i {
+    margin-right: 5px;
+  }
+  
+  .tabButton.active {
+    background-color: #3498db;
+    color: white;
+  }
+  
+  .authContent {
+    background-color: white;
+    padding: 20px;
+    border-radius: 4px;
+  }

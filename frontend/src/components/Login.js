@@ -1,27 +1,27 @@
 import React, { useState } from 'react';
-import { login, setAuthToken } from '../services/api';
+import { useNavigate } from 'react-router-dom';
+import { login as apiLogin } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import styles from './style.component/Login.module.css';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
-  const [role, setRole] = useState('');
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await login(email, password);
-      setAuthToken(response.data.token);
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('userRole', response.data.role);
-      setRole(response.data.role);
-      setMessage(`Đăng nhập thành công với vai trò: ${response.data.role}`);
-      setError('');
-    } catch (error) {
-      setError(error.response?.data?.message || 'Đăng nhập thất bại');
-      setMessage('');
+      const response = await apiLogin(email, password);
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        login({ email, name: response.data.name }); // Assuming the API returns the user's name
+        navigate('/');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Đăng nhập thất bại');
     }
   };
 
@@ -29,7 +29,6 @@ const Login = () => {
     <div className={styles.loginContainer}>
       <h2 className={styles.loginTitle}>Đăng nhập</h2>
       {error && <p className={styles.errorMessage}>{error}</p>}
-      {message && <p className={styles.successMessage}>{message}</p>}
       <form onSubmit={handleSubmit}>
         <div className={styles.formGroup}>
           <label className={styles.label}>Email:</label>
@@ -53,9 +52,9 @@ const Login = () => {
         </div>
         <button className={styles.button} type="submit">Đăng nhập</button>
       </form>
-      {role && <p className={styles.roleMessage}>Vai trò hiện tại: {role}</p>}
     </div>
   );
 };
 
 export default Login;
+
