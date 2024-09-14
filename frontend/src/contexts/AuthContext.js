@@ -1,35 +1,39 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { getUserProfile, setAuthToken } from '../services/api';
 
-const AuthContext = createContext(null);
+const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error('Error parsing stored user data:', error);
-        localStorage.removeItem('user'); // Remove invalid data
-      }
+    const token = localStorage.getItem('token');
+    if (token) {
+      setAuthToken(token); // Thêm dòng này
+      getUserProfile().then(response => {
+        setUser(response.data);
+        localStorage.setItem('userRole', response.data.role);
+      }).catch(error => {
+        console.error('Error fetching user profile:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('userRole');
+        setUser(null);
+      });
     }
   }, []);
 
   const login = (userData) => {
     setUser(userData);
-    try {
-      localStorage.setItem('user', JSON.stringify(userData));
-    } catch (error) {
-      console.error('Error storing user data:', error);
+    if (userData.token) {
+      localStorage.setItem('token', userData.token);
+      setAuthToken(userData.token);
     }
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('user');
     localStorage.removeItem('token');
+    localStorage.removeItem('userRole');
   };
 
   return (

@@ -7,15 +7,41 @@ const router = express.Router();
 const checkRole = require('../middleware/checkRole');
 const authMiddleware = require('../middleware/authMiddleware');
 const adminMiddleware = require('../middleware/adminMiddleware');
+const crypto = require('crypto');
 
 // Nodemailer transporter
 let transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false, // use TLS
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
+  },
+  tls: {
+    rejectUnauthorized: false
   }
 });
+
+// Thêm hàm gửi email
+const sendResetPasswordEmail = async (email, resetUrl) => {
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: 'Đặt lại mật khẩu',
+    html: `<p>Bạn đã yêu cầu đặt lại mật khẩu. Vui lòng click vào link sau để đặt lại mật khẩu: <a href="${resetUrl}">${resetUrl}</a></p>`
+  };
+
+  try {
+    console.log('Attempting to send email...');
+    console.log('Email options:', JSON.stringify(mailOptions, null, 2));
+    await transporter.sendMail(mailOptions);
+    console.log('Email sent successfully');
+  } catch (error) {
+    console.error('Error sending email:', error);
+    throw new Error('Không thể gửi email đặt lại mật khẩu');
+  }
+};
 
 // Đăng ký
 router.post('/register', async (req, res) => {
@@ -71,11 +97,19 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign(
       { userId: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: '1d' }
+      { expiresIn: '24h' }
     );
     console.log('Generated token:', token);
     console.log('Login successful for user:', user.email);
-    res.json({ token, role: user.role, message: 'Đăng nhập thành công' });
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role // Đảm bảo gửi thông tin này
+      }
+    });
   } catch (error) {
     console.error('Server error during login:', error);
     res.status(500).json({ message: 'Lỗi server' });
@@ -91,31 +125,15 @@ router.post('/forgot-password', async (req, res) => {
       return res.status(404).json({ message: 'Không tìm thấy người dùng với email này' });
     }
     
-    const resetToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    
-    user.resetToken = resetToken;
-    user.resetTokenExpiration = Date.now() + 3600000; // 1 hour
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
     await user.save();
 
-    console.log('Reset token created:', resetToken);
-    console.log('Reset token expiration:', user.resetTokenExpiration);
-
     const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
-    let mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: user.email,
-      subject: 'Đặt lại mật khẩu',
-      text: `Để đặt lại mật khẩu, vui lòng nhấp vào liên kết sau: ${resetUrl}. Liên kết này sẽ hết hạn sau 1 giờ.`
-    };
+    await sendResetPasswordEmail(email, resetUrl);
 
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.log('Error sending email:', error);
-        return res.status(500).json({ message: 'Lỗi khi gửi email' });
-      }
-      console.log('Email sent:', info.response);
-      res.json({ message: 'Liên kết đặt lại mật khẩu đã được gửi đến email của bạn' });
-    });
+    res.json({ message: 'Liên kết đặt lại mật khẩu đã được gửi đến email của bạn' });
   } catch (error) {
     console.error('Forgot password error:', error);
     res.status(500).json({ message: 'Lỗi xử lý yêu cầu', error: error.message });
@@ -123,45 +141,33 @@ router.post('/forgot-password', async (req, res) => {
 });
 
 // Đặt lại mật khẩu
-router.post('/reset-password', async (req, res) => {
+router.post('/reset-password/:token', async (req, res) => {
   try {
-    const { token, newPassword } = req.body;
+    const { token } = req.params;
+    const { password } = req.body;
+    
     console.log('Received token:', token);
-    console.log('Received new password:', newPassword);
+    console.log('Received password:', password);
 
-    if (!token || !newPassword) {
-      return res.status(400).json({ message: 'Token và mật khẩu mới là bắt buộc' });
-    }
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
 
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log('Decoded token:', decoded);
-    } catch (error) {
-      console.log('Token verification error:', error);
+    console.log('Found user:', user);
+
+    if (!user) {
       return res.status(400).json({ message: 'Token không hợp lệ hoặc đã hết hạn' });
     }
 
-    const user = await User.findOne({ 
-      _id: decoded.userId,
-      resetToken: token,
-      resetTokenExpiration: { $gt: Date.now() } 
-    });
-
-    if (!user) {
-      console.log('User not found or token expired');
-      return res.status(400).json({ message: 'Người dùng không tồn tại hoặc token đã hết hạn' });
-    }
-
-    console.log('User found:', user);
-
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    const hashedPassword = await bcrypt.hash(password, 12);
     user.password = hashedPassword;
-    user.resetToken = undefined;
-    user.resetTokenExpiration = undefined;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
     await user.save();
 
     console.log('Password reset successful');
+
     res.json({ message: 'Mật khẩu đã được đặt lại thành công' });
   } catch (error) {
     console.error('Error resetting password:', error);

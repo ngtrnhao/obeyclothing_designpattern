@@ -1,11 +1,11 @@
 ﻿/* eslint-disable unicode-bom */
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5001/api';
+const API_URL = 'http://localhost:5001/api'; // Đảm bảo port này khớp với port của backend
 
 // Tạo một instance của axios với cấu hình mặc định
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: `${process.env.REACT_APP_API_URL}/api`,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -15,8 +15,10 @@ const api = axios.create({
 export const setAuthToken = (token) => {
   if (token) {
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    localStorage.setItem('token', token);
   } else {
     delete api.defaults.headers.common['Authorization'];
+    localStorage.removeItem('token');
   }
 };
 
@@ -26,7 +28,6 @@ api.interceptors.request.use(
     const token = localStorage.getItem('token');
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
-      console.log('Sending token:', token);
     }
     return config;
   },
@@ -37,10 +38,12 @@ api.interceptors.request.use(
 
 // Authentication
 export const login = async (email, password) => {
-  console.log('API login called with:', { email, password: '******' });
   try {
     const response = await api.post('/auth/login', { email, password });
-    console.log('API login response:', JSON.stringify(response, null, 2));
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+      setAuthToken(response.data.token);
+    }
     return response;
   } catch (error) {
     console.error('API login error:', error.response?.data || error.message);
@@ -60,26 +63,21 @@ export const register = async (username, email, password, role, adminSecret) => 
   }
 };
 export const forgotPassword = (email) => api.post('/auth/forgot-password', { email });
-export const resetPassword = async (token, newPassword) => {
-  try {
-    console.log('Sending token:', token);
-    console.log('Sending new password:', newPassword);
-    const response = await api.post('/auth/reset-password', { token, newPassword });
-    console.log('Reset password response:', response);
-    return response;
-  } catch (error) {
-    console.error('Reset password error:', error.response?.data || error.message);
-    throw error;
-  }
+export const resetPassword = (token, newPassword) => {
+  console.log('Resetting password with token:', token);
+  return api.post(`/auth/reset-password/${token}`, { password: newPassword });
 };
 
 // Products
 export const getProducts = () => api.get('/products');
 export const getProductById = (id) => api.get(`/products/${id}`);
 export const createProduct = (productData) => {
+  const token = localStorage.getItem('token');
+  console.log('Creating product with token:', token);
   return api.post('/products', productData, {
     headers: {
-      'Content-Type': 'multipart/form-data'
+      'Content-Type': 'multipart/form-data',
+      'Authorization': `Bearer ${token}`
     }
   });
 };
@@ -87,18 +85,56 @@ export const updateProduct = (id, productData) => api.put(`/products/${id}`, pro
 export const deleteProduct = (id) => api.delete(`/products/${id}`);
 
 // Cart
-export const getCart = () => api.get('/cart');
-export const addToCart = (productId, quantity) => api.post('/cart/add', { productId, quantity });
-export const updateCartItem = (itemId, quantity) => api.put(`/cart/${itemId}`, { quantity });
-export const removeCartItem = (itemId) => api.delete(`/cart/${itemId}`);
+export const getCart = async () => {
+  const response = await api.get('/cart');
+  return response.data;
+};
+
+export const addToCart = async (productId, quantity) => {
+  const token = localStorage.getItem('token');
+  console.log('Adding to cart with token:', token); // Thêm dòng này
+  try {
+    const response = await api.post('/cart/add', { productId, quantity }, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error adding to cart:', error);
+    throw error;
+  }
+};
+
+export const updateCartItem = async (productId, quantity) => {
+  const response = await api.put('/cart/update', { productId, quantity });
+  return response.data;
+};
+
+export const removeCartItem = async (productId) => {
+  const response = await api.delete(`/cart/remove/${productId}`);
+  return response.data;
+};
 
 // User profile
-export const getUserProfile = () => api.get('/user/profile');
+export const getUserProfile = () => {
+  const token = localStorage.getItem('token');
+  console.log('Getting user profile with token:', token);
+  return api.get('/user/profile', {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+};
+
 export const updateUserProfile = (userData) => api.put('/user/profile', userData);
 
 // Orders
 export const createOrder = (orderData) => api.post('/orders', orderData);
 export const getOrders = () => api.get('/orders');
 export const getOrderById = (id) => api.get(`/orders/${id}`);
+
+// Thêm hàm updateOrderStatus
+export const updateOrderStatus = (orderId, status) => api.put(`/orders/${orderId}/status`, { status });
 
 export default api;

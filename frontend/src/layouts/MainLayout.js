@@ -1,11 +1,8 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import styles from './MainLayout.module.css';
 
 const MainLayout = ({ children }) => {
-  const location = useLocation();
-
   return (
     <div className={styles.layout}>
       <Header />
@@ -28,7 +25,11 @@ const MainLayout = ({ children }) => {
             </div>
             <div className={styles.footerSection}>
               <h3>Theo dõi chúng tôi</h3>
-              {/* Thêm các liên kết mạng xã hội ở đây */}
+              <div className={styles.socialLinks}>
+                <a href="https://facebook.com/fashionstore" target="_blank" rel="noopener noreferrer">Facebook</a>
+                <a href="https://instagram.com/fashionstore" target="_blank" rel="noopener noreferrer">Instagram</a>
+                <a href="https://twitter.com/fashionstore" target="_blank" rel="noopener noreferrer">Twitter</a>
+              </div>
             </div>
           </div>
           <div className={styles.copyright}>

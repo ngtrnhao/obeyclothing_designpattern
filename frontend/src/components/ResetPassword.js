@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { resetPassword } from '../services/api';
 import styles from './style.component/ResetPassword.module.css';
@@ -11,10 +11,6 @@ const ResetPassword = () => {
   const { token } = useParams();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    console.log('Token from URL:', token);
-  }, [token]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
@@ -22,7 +18,7 @@ const ResetPassword = () => {
       return;
     }
     try {
-      console.log('Submitting reset password with token:', token);
+      console.log('Sending reset password request with token:', token);
       const response = await resetPassword(token, password);
       console.log('Reset password response:', response);
       setMessage(response.data.message);
@@ -30,14 +26,7 @@ const ResetPassword = () => {
       setTimeout(() => navigate('/auth'), 3000);
     } catch (error) {
       console.error('Reset password error:', error);
-      if (error.response) {
-        setError(error.response.data.message || 'Đã xảy ra lỗi khi đặt lại mật khẩu');
-      } else if (error.request) {
-        setError('Không thể kết nối đến server. Vui lòng thử lại sau.');
-      } else {
-        setError('Đã xảy ra lỗi. Vui lòng thử lại.');
-      }
-      setMessage('');
+      setError(error.response?.data?.message || 'Đã xảy ra lỗi khi đặt lại mật khẩu');
     }
   };
 
@@ -60,7 +49,7 @@ const ResetPassword = () => {
         <div className={styles.formGroup}>
           <label className={styles.label}>Xác nhận mật khẩu:</label>
           <input
-            className={styles.input}
+            className={styles.input}  
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}

@@ -17,8 +17,13 @@ const Login = () => {
       const response = await apiLogin(email, password);
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
-        login({ email, name: response.data.name }); // Assuming the API returns the user's name
-        navigate('/');
+        //setAuthToken(response.data.token); // Thêm dòng này
+        login(response.data.user);
+        if (response.data.user.role === 'admin') {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/user/dashboard');
+        }
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Đăng nhập thất bại');

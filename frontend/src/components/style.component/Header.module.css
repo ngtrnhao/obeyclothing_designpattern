@@ -1,46 +1,72 @@
 .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    background-color: #f8f9fa;
-  }
-  
-  .logo {
-    font-size: 1.5rem;
-    font-weight: bold;
-  }
-  
-  .nav ul {
-    display: flex;
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-  }
-  
-  .nav li {
-    margin-right: 1rem;
-  }
-  
-  .nav a {
-    text-decoration: none;
-    color: #333;
-  }
-  
-  .auth {
-    display: flex;
-    align-items: center;
-  }
-  
-  .auth span {
-    margin-right: 1rem;
-  }
-  
-  .auth button {
-    padding: 0.5rem 1rem;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: #343a40;
+  color: white;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.nav ul {
+  display: flex;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav li {
+  margin-right: 1rem;
+}
+
+.nav a {
+  text-decoration: none;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.nav a:hover {
+  background-color: #495057;
+}
+
+.auth {
+  display: flex;
+  align-items: center;
+}
+
+.auth span {
+  margin-right: 1rem;
+}
+
+.auth button {
+  padding: 0.5rem 1rem;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.auth button:hover {
+  background-color: #c82333;
+}
+
+.auth a {
+  text-decoration: none;
+  color: white;
+  padding: 0.5rem 1rem;
+  background-color: #28a745;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.auth a:hover {
+  background-color: #218838;
+}

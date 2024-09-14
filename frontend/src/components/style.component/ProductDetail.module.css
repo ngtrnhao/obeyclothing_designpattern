@@ -1,57 +1,104 @@
 .productDetail {
-    max-width: 1000px;
-    margin: 2rem auto;
     display: flex;
-    gap: 2rem;
-    padding: 2rem;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .productImage {
+    flex-direction: column;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.productMain {
+    display: flex;
+    margin-bottom: 40px;
+}
+
+.productImage {
     width: 50%;
-    max-height: 500px;
+    max-width: 500px;
+    aspect-ratio: 1 / 1; /* Tạo khung hình vuông */
     object-fit: cover;
-    border-radius: 8px;
-  }
-  
-  .productInfo {
+}
+
+.productInfo {
     width: 50%;
-  }
-  
-  .productName {
-    font-size: 2rem;
-    color: #333;
-    margin-bottom: 1rem;
-  }
-  
-  .productPrice {
-    font-size: 1.5rem;
-    color: #e67e22;
-    font-weight: bold;
-    margin-bottom: 1rem;
-  }
-  
-  .productDescription {
-    font-size: 1rem;
-    color: #666;
-    line-height: 1.6;
-    margin-bottom: 2rem;
-  }
-  
-  .addToCartButton {
-    display: inline-block;
-    padding: 1rem 2rem;
-    background-color: #3498db;
+    padding-left: 20px;
+}
+
+.productName {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.price {
+    font-size: 20px;
+    color: #e53935;
+    margin-bottom: 10px;
+}
+
+.description {
+    margin-bottom: 20px;
+}
+
+.addToCart {
+    display: flex;
+    align-items: center;
+}
+
+.addToCart input {
+    width: 60px;
+    margin-right: 10px;
+}
+
+.addToCart button {
+    padding: 10px 20px;
+    background-color: #4caf50;
     color: white;
     border: none;
-    border-radius: 4px;
-    font-size: 1rem;
     cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .addToCartButton:hover {
-    background-color: #2980b9;
-  }
+}
+
+.relatedProducts {
+    margin-top: 40px;
+}
+
+.relatedProducts h3 {
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+.productGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.relatedProductCard {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.relatedProductCard img {
+    width: 100%;
+    aspect-ratio: 1 / 1; /* Tạo khung hình vuông */
+    object-fit: cover;
+}
+
+.relatedProductCard h4 {
+    font-size: 16px;
+    margin: 10px;
+}
+
+.relatedProductCard p {
+    font-size: 14px;
+    color: #e53935;
+    margin: 0 10px 10px;
+}
+
+.relatedProductCard a {
+    display: block;
+    text-align: center;
+    background-color: #4caf50;
+    color: white;
+    padding: 8px 0;
+    text-decoration: none;
+}

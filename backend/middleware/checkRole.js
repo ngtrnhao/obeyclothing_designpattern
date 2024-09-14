@@ -1,11 +1,14 @@
-const checkRole = (role) => {
+const checkRole = (roles) => {
     return (req, res, next) => {
-      if (req.user && req.user.role === role) {
+      if (!req.user) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+      if (roles.includes(req.user.role)) {
         next();
       } else {
-        res.status(403).json({ message: 'Không có quyền truy cập' });
+        res.status(403).json({ message: 'Forbidden' });
       }
-    }
+    };
   };
-  
-  module.exports = checkRole;
+
+module.exports = checkRole;

@@ -5,11 +5,12 @@ const authMiddleware = require('../middleware/authMiddleware');
 const adminMiddleware = require('../middleware/adminMiddleware');
 const multer = require('multer');
 const path = require('path');
+const checkRole = require('../middleware/checkRole');
 
 // Cấu hình multer để xử lý upload file
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../uploads/'))
+    cb(null, path.join(__dirname, '..', 'uploads'))
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + path.extname(file.originalname))
@@ -29,6 +30,9 @@ const upload = multer({
     fileSize: 5 * 1024 * 1024 // giới hạn 5MB
   }
 });
+
+// Thêm dòng này ở đầu file, sau khi import các module
+// router.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Get all products
 router.get('/', async (req, res) => {
@@ -53,26 +57,24 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Create a new product (admin only)
-router.post('/', authMiddleware, adminMiddleware, upload.single('image'), async (req, res) => {
+// Tạo sản phẩm mới (chỉ admin)
+router.post('/', authMiddleware, checkRole(['admin']), upload.single('image'), async (req, res) => {
+  console.log('Received product creation request:', req.body);
   try {
     const { name, description, price, category, stock } = req.body;
-    const imagePath = req.file ? `/uploads/${req.file.filename}` : '';
-    
-    const newProduct = new Product({
+    const product = new Product({
       name,
       description,
-      price,
+      price: Number(price),
       category,
-      stock,
-      image: imagePath // Lưu đường dẫn tương đối
+      stock: Number(stock),
+      image: req.file ? `/uploads/${req.file.filename}` : null
     });
-
-    const savedProduct = await newProduct.save();
-    res.status(201).json(savedProduct);
+    await product.save();
+    res.status(201).json(product);
   } catch (error) {
     console.error('Error creating product:', error);
-    res.status(500).json({ message: 'Lỗi khi tạo sản phẩm', error: error.message });
+    res.status(400).json({ message: error.message });
   }
 });
 
