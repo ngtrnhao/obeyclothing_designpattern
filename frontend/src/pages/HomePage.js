@@ -5,7 +5,7 @@ import styles from './HomePage.module.css';
 
 const HomePage = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState({});
 
   useEffect(() => {
     fetchFeaturedProducts();
@@ -23,8 +23,15 @@ const HomePage = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await getProducts({ groupByCategory: true });
-      setCategories(response.data);
+      const response = await getProducts();
+      const groupedProducts = response.data.reduce((acc, product) => {
+        if (!acc[product.category]) {
+          acc[product.category] = [];
+        }
+        acc[product.category].push(product);
+        return acc;
+      }, {});
+      setCategories(groupedProducts);
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
@@ -42,10 +49,21 @@ const HomePage = () => {
         <div className={styles.productGrid}>
           {featuredProducts.map(product => (
             <div key={product._id} className={styles.productCard}>
-              <img src={product.image} alt={product.name} />
-              <h3>{product.name}</h3>
-              <p>{product.price.toLocaleString('vi-VN')} đ</p>
-              <Link to={`/products/${product._id}`}>Xem chi tiết</Link>
+              <img 
+                className={styles.productImage}
+                src={`${process.env.REACT_APP_API_URL}${product.image}`} 
+                alt={product.name}
+                onError={(e) => {
+                  console.error("Error loading image:", e.target.src);
+                  e.target.onerror = null;
+                  e.target.src = '/placeholder-image.jpg';
+                }}
+              />
+              <div className={styles.productInfo}>
+                <h3 className={styles.productName}>{product.name}</h3>
+                <p className={styles.productPrice}>{product.price.toLocaleString('vi-VN')} đ</p>
+                <Link to={`/products/${product._id}`} className={styles.viewDetailLink}>Xem chi tiết</Link>
+              </div>
             </div>
           ))}
         </div>
@@ -53,20 +71,35 @@ const HomePage = () => {
 
       <section className={styles.categories}>
         <h2>Danh mục sản phẩm</h2>
-        <div className={styles.categoryGrid}>
-          {categories.map(category => (
-            <Link key={category._id} to={`/products?category=${category.name}`} className={styles.categoryCard}>
-              <h3>{category.name}</h3>
-              <p>{category.count} sản phẩm</p>
-            </Link>
-          ))}
-        </div>
+        {Object.entries(categories).map(([category, products]) => (
+          <div key={category} className={styles.categorySection}>
+            <h3>{category}</h3>
+            <div className={styles.productGrid}>
+              {products.map(product => (
+                <div key={product._id} className={styles.productCard}>
+                  <img 
+                    className={styles.productImage}
+                    src={`${process.env.REACT_APP_API_URL}${product.image}`} 
+                    alt={product.name}
+                    onError={(e) => {
+                      console.error("Error loading image:", e.target.src);
+                      e.target.onerror = null;
+                      e.target.src = '/placeholder-image.jpg';
+                    }}
+                  />
+                  <div className={styles.productInfo}>
+                    <h4 className={styles.productName}>{product.name}</h4>
+                    <p className={styles.productPrice}>{product.price.toLocaleString('vi-VN')} đ</p>
+                    <Link to={`/products/${product._id}`} className={styles.viewDetailLink}>Xem chi tiết</Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </section>
 
-      <section className={styles.about}>
-        <h2>Về chúng tôi</h2>
-        <p>Fashion Store là điểm đến lý tưởng cho những người yêu thời trang. Chúng tôi cung cấp các sản phẩm chất lượng cao với giá cả hợp lý, đảm bảo bạn luôn cập nhật xu hướng mới nhất.</p>
-      </section>
+     
     </div>
   );
 };

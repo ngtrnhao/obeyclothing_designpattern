@@ -86,13 +86,22 @@ export const deleteProduct = (id) => api.delete(`/products/${id}`);
 
 // Cart
 export const getCart = async () => {
-  const response = await api.get('/cart');
-  return response.data;
+  const token = localStorage.getItem('token');
+  try {
+    const response = await api.get('/cart', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching cart:', error);
+    throw error;
+  }
 };
 
 export const addToCart = async (productId, quantity) => {
   const token = localStorage.getItem('token');
-  console.log('Adding to cart with token:', token); // Thêm dòng này
   try {
     const response = await api.post('/cart/add', { productId, quantity }, {
       headers: {
@@ -136,5 +145,32 @@ export const getOrderById = (id) => api.get(`/orders/${id}`);
 
 // Thêm hàm updateOrderStatus
 export const updateOrderStatus = (orderId, status) => api.put(`/orders/${orderId}/status`, { status });
+
+// Thêm hàm getCategories
+export const getCategories = async () => {
+  try {
+    const response = await api.get('/categories');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    throw error;
+  }
+};
+
+export const deleteCategory = async (category) => {
+  try {
+    const token = localStorage.getItem('token');
+    const encodedCategory = encodeURIComponent(category);
+    const response = await api.delete(`/categories/${encodedCategory}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting category:', error);
+    throw error;
+  }
+};
 
 export default api;

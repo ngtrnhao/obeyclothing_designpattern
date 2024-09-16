@@ -70,3 +70,32 @@
       padding: 1rem;
     }
   }
+  
+  .categoryList {
+    margin-top: 20px;
+  }
+
+  .categoryList ul {
+    list-style-type: none;
+    padding: 0;
+  }
+
+  .categoryList li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+  }
+
+  .categoryList button {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+
+  .categoryList button:hover {
+    background-color: #ff3333;
+  }

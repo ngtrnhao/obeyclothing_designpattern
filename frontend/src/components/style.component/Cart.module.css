@@ -6,8 +6,9 @@
 
 .cartItem {
   display: flex;
-  border-bottom: 1px solid #eee;
-  padding: 20px 0;
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 1px solid #ddd;
 }
 
 .cartItem img {
@@ -56,4 +57,15 @@
   margin-top: 10px;
   color: #4caf50;
   text-align: center;
+}
+
+.productImage {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  margin-right: 20px;
+}
+
+.productInfo {
+  flex: 1;
 }

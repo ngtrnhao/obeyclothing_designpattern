@@ -9,7 +9,6 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      setAuthToken(token); // Thêm dòng này
       getUserProfile().then(response => {
         setUser(response.data);
         localStorage.setItem('userRole', response.data.role);

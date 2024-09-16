@@ -44,7 +44,8 @@ mongoose.connect(process.env.MONGODB_URI, {
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const cartRoutes = require('./routes/cart');
-//nconst userRoutes = require('./routes/user');
+//const userRoutes = require('./routes/user');
+const categoryRoutes = require('./routes/categories');
 
 // Serve static files from the 'uploads' directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -57,6 +58,8 @@ app.use('/api/cart', cartRoutes);
 //Admin routes
 // const adminRoutes = require('./routes/adminRoutes');
 // app.use('/api/admin', adminRoutes);
+
+app.use('/api/categories', categoryRoutes);
 
 const PORT = process.env.PORT || 5000;
 

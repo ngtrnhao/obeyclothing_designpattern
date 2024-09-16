@@ -1,7 +1,8 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getProductById, getProducts, addToCart } from '../services/api';
+import { getProductById, getProducts, addToCart, getCart } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { CartContext } from '../contexts/CartContext';
 import styles from './style.component/ProductDetail.module.css';
 
 const ProductDetail = () => {
@@ -11,6 +12,7 @@ const ProductDetail = () => {
   const [error, setError] = useState('');
   const { id } = useParams();
   const { user } = useAuth();
+  const { setCartItems } = useContext(CartContext); // Thêm dòng này
 
   useEffect(() => {
     const fetchProductAndRelated = async () => {
@@ -40,6 +42,9 @@ const ProductDetail = () => {
     try {
       await addToCart(id, quantity);
       alert('Đã thêm sản phẩm vào giỏ hàng');
+      // Cập nhật giỏ hàng
+      const updatedCart = await getCart();
+      setCartItems(updatedCart.items);
     } catch (err) {
       setError('Không thể thêm sản phẩm vào giỏ hàng');
     }

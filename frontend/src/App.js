@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { CartProvider } from './contexts/CartContext'; // Thêm dòng này
 import MainLayout from './layouts/MainLayout';
 import HomePage from './pages/HomePage';
 import AuthPage from './pages/AuthPage';
@@ -62,11 +63,13 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <MainLayout>
-          <AppRoutes />
-        </MainLayout>
-      </Router>
+      <CartProvider> {/* Thêm CartProvider ở đây */}
+        <Router>
+          <MainLayout>
+            <AppRoutes />
+          </MainLayout>
+        </Router>
+      </CartProvider>
     </AuthProvider>
   );
 }

@@ -45,3 +45,56 @@
 .authIcon:hover {
   background-color: #2980b9;
 }
+
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.productCard {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+}
+
+.productCard:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.productImage {
+  width: 100%;
+  height: 250px; /* Điều chỉnh chiều cao này theo nhu cầu */
+  object-fit: cover; /* Đảm bảo hình ảnh lấp đầy không gian mà không bị biến dạng */
+}
+
+.productInfo {
+  padding: 15px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.productName {
+  font-size: 1.1em;
+  margin-bottom: 10px;
+}
+
+.productPrice {
+  font-weight: bold;
+  color: #e53935;
+  margin-bottom: 10px;
+}
+
+.viewDetailLink {
+  margin-top: auto;
+  text-align: center;
+  background-color: #4caf50;
+  color: white;
+  padding: 8px 0;
+  text-decoration: none;
+  border-radius: 4px;
+}
