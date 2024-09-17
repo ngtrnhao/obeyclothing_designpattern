@@ -37,18 +37,17 @@ function AppRoutes() {
       <Route path="/products/:id" element={<ProductDetail />} />
       <Route path="/cart" element={<Cart />} />
       <Route 
-        path="/user/dashboard" 
+        path="/user/*" 
         element={
           <ProtectedRoute allowedRoles={['user']}>
             <UserDashboard />
-        
           </ProtectedRoute>
-        } >
-         <Route path="profile" element={<UserProfile />} />
+        } 
+      >
+        <Route index element={<Navigate to="profile" replace />} />
+        <Route path="profile" element={<UserProfile />} />
         <Route path="orders" element={<UserOrders />} />
-
-        </Route>
-      
+      </Route>
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
 

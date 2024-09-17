@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { getUserProfile, updateUserProfile } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import styles from './style.component/UserProfile.module.css';
 
 const UserProfile = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user, login } = useAuth();
 
   useEffect(() => {
     fetchUserProfile();
@@ -26,7 +28,8 @@ const UserProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await updateUserProfile(profile);
+      const response = await updateUserProfile(profile);
+      login(response.data); // Update the user in AuthContext
       alert('Cập nhật thông tin thành công!');
     } catch (error) {
       console.error('Error updating user profile:', error);
@@ -48,7 +51,6 @@ const UserProfile = () => {
             type="text"
             id="username"
             value={profile.username}
-            onChange={(e) => setProfile({...profile, username: e.target.value})}
             disabled
           />
         </div>

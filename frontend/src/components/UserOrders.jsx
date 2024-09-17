@@ -25,34 +25,31 @@ const UserOrders = () => {
 
   if (loading) return <div>Đang tải...</div>;
   if (error) return <div>{error}</div>;
+  if (orders.length === 0) return <div>Bạn chưa có đơn hàng nào.</div>;
 
   return (
     <div className={styles.userOrders}>
       <h2>Đơn hàng của tôi</h2>
-      {orders.length === 0 ? (
-        <p>Bạn chưa có đơn hàng nào.</p>
-      ) : (
-        <table className={styles.orderTable}>
-          <thead>
-            <tr>
-              <th>Mã đơn hàng</th>
-              <th>Ngày đặt</th>
-              <th>Tổng tiền</th>
-              <th>Trạng thái</th>
+      <table>
+        <thead>
+          <tr>
+            <th>Mã đơn hàng</th>
+            <th>Ngày đặt</th>
+            <th>Tổng tiền</th>
+            <th>Trạng thái</th>
+          </tr>
+        </thead>
+        <tbody>
+          {orders.map(order => (
+            <tr key={order._id}>
+              <td>{order._id}</td>
+              <td>{new Date(order.createdAt).toLocaleDateString()}</td>
+              <td>{order.totalAmount.toLocaleString('vi-VN')} đ</td>
+              <td>{order.status}</td>
             </tr>
-          </thead>
-          <tbody>
-            {orders.map(order => (
-              <tr key={order._id}>
-                <td>{order._id}</td>
-                <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-                <td>{order.totalAmount.toLocaleString('vi-VN')} đ</td>
-                <td>{order.status}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
