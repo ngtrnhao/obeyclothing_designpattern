@@ -3,6 +3,7 @@ const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const Cart = require('../models/Cart');
 const Product = require('../models/Product'); // Thêm dòng này
+const Order = require('../models/Order'); // Thêm dòng này
 
 // Áp dụng authMiddleware cho tất cả các route của giỏ hàng
 router.use(authMiddleware);
@@ -106,7 +107,7 @@ router.post('/checkout', async (req, res) => {
         quantity: item.quantity,
         price: item.product.price
       })),
-      total: cart.items.reduce((total, item) => total + item.quantity * item.product.price, 0)
+      totalAmount: cart.items.reduce((total, item) => total + item.quantity * item.product.price, 0)
     });
 
     // Cập nhật số lượng tồn kho
@@ -122,6 +123,7 @@ router.post('/checkout', async (req, res) => {
 
     res.json({ message: 'Đặt hàng thành công', orderId: order._id });
   } catch (error) {
+    console.error('Error during checkout:', error);
     res.status(500).json({ message: 'Lỗi khi xử lý đơn hàng', error: error.message });
   }
 });

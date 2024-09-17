@@ -16,10 +16,12 @@ const Login = () => {
     try {
       const response = await apiLogin(email, password);
       if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        //setAuthToken(response.data.token); // Thêm dòng này
-        login(response.data.user);
-        if (response.data.user.role === 'admin') {
+        const userData = {
+          ...response.data.user,
+          token: response.data.token
+        };
+        login(userData);
+        if (userData.role === 'admin') {
           navigate('/admin/dashboard');
         } else {
           navigate('/user/dashboard');

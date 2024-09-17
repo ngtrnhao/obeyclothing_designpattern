@@ -1,7 +1,7 @@
 ﻿// eslint-disable-next-line unicode-bom
 import React, { useContext, useEffect, useState } from 'react';
 import { updateCartItem, removeCartItem, createOrder } from '../services/api';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { CartContext } from '../contexts/CartContext';
 import styles from './style.component/Cart.module.css';
 
@@ -13,9 +13,7 @@ const Cart = () => {
 
   useEffect(() => {
     console.log('Cart Items:', cartItems);
-    if (cartItems.length > 0) {
-      setLoading(false);
-    }
+    setLoading(false);
   }, [cartItems]);
 
   const handleUpdateQuantity = async (productId, newQuantity) => {
@@ -42,18 +40,28 @@ const Cart = () => {
 
   const handleCheckout = async () => {
     try {
-      await createOrder();
+      const response = await createOrder();
       setCartItems([]);
       alert('Đặt hàng thành công!');
       navigate('/orders');
     } catch (error) {
+      console.error('Error during checkout:', error);
       setError('Không thể hoàn tất đơn hàng. Vui lòng thử lại.');
     }
   };
 
   if (loading) return <div>Đang tải giỏ hàng...</div>;
   if (error) return <div>{error}</div>;
-  if (!cartItems || cartItems.length === 0) return <div>Giỏ hàng trống</div>;
+
+  if (!cartItems || cartItems.length === 0) {
+    return (
+      <div className={styles.emptyCart}>
+        <h2>Giỏ hàng trống</h2>
+        <p>Bạn chưa có sản phẩm nào trong giỏ hàng.</p>
+        <Link to="/products" className={styles.continueShopping}>Tiếp tục mua sắm</Link>
+      </div>
+    );
+  }
 
   const total = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 

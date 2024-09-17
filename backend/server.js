@@ -46,6 +46,7 @@ const productRoutes = require('./routes/products');
 const cartRoutes = require('./routes/cart');
 //const userRoutes = require('./routes/user');
 const categoryRoutes = require('./routes/categories');
+const orderRoutes = require('./routes/orderRoutes');
 
 // Serve static files from the 'uploads' directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -56,10 +57,11 @@ app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 //app.use('/api/user', userRoutes);
 //Admin routes
-// const adminRoutes = require('./routes/adminRoutes');
-// app.use('/api/admin', adminRoutes);
+ const adminRoutes = require('./routes/adminRoutes');
+ app.use('/api/admin', adminRoutes);
 
 app.use('/api/categories', categoryRoutes);
+app.use('/api/orders', orderRoutes);
 
 const PORT = process.env.PORT || 5000;
 

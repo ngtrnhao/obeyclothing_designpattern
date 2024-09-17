@@ -8,14 +8,19 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (token) {
+    const storedUser = localStorage.getItem('user');
+    if (token && storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+      setAuthToken(token);
+    } else if (token) {
       getUserProfile().then(response => {
         setUser(response.data);
-        localStorage.setItem('userRole', response.data.role);
+        localStorage.setItem('user', JSON.stringify(response.data));
       }).catch(error => {
         console.error('Error fetching user profile:', error);
         localStorage.removeItem('token');
-        localStorage.removeItem('userRole');
+        localStorage.removeItem('user');
         setUser(null);
       });
     }
@@ -25,6 +30,7 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
     if (userData.token) {
       localStorage.setItem('token', userData.token);
+      localStorage.setItem('user', JSON.stringify(userData));
       setAuthToken(userData.token);
     }
   };
@@ -32,7 +38,8 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('token');
-    localStorage.removeItem('userRole');
+    localStorage.removeItem('user');
+    setAuthToken(null);
   };
 
   return (
@@ -41,5 +48,4 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
 export const useAuth = () => useContext(AuthContext);

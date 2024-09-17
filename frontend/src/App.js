@@ -13,6 +13,12 @@ import ResetPassword from './components/ResetPassword';
 import ForgotPassword from './components/ForgotPassword';
 import UserDashboard from './components/UserDashboard';
 import AdminDashboard from './components/AdminDashboard';
+import ProductManagement from './components/ProductManagement';
+import OrderManagement from './components/OrderManagement';
+import UserManagement from './components/UserManagement';
+import Statistics from './components/Statistics';
+import UserProfile from './components/UserProfile';
+import UserOrders from './components/UserOrders';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user } = useAuth();
@@ -33,29 +39,33 @@ function AppRoutes() {
       <Route 
         path="/user/dashboard" 
         element={
-          <ProtectedRoute allowedRoles={['user', 'admin']}>
+          <ProtectedRoute allowedRoles={['user']}>
             <UserDashboard />
+        
           </ProtectedRoute>
-        } 
-      />
+        } >
+         <Route path="profile" element={<UserProfile />} />
+        <Route path="orders" element={<UserOrders />} />
+
+        </Route>
+      
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
+
       <Route 
-        path="/admin/dashboard" 
+        path="/admin/*" 
         element={
           <ProtectedRoute allowedRoles={['admin']}>
             <AdminDashboard />
           </ProtectedRoute>
         } 
-      />
-      <Route 
-        path="/admin/create-product" 
-        element={
-          <ProtectedRoute allowedRoles={['admin']}>
-            <CreateProduct />
-          </ProtectedRoute>
-        } 
-      />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password/:token" element={<ResetPassword />} />
+      >
+        <Route path="products" element={<ProductManagement />} />
+        <Route path="orders" element={<OrderManagement />} />
+        <Route path="users" element={<UserManagement />} />
+        <Route path="create-product" element={<CreateProduct />} />
+        <Route path="statistics" element={<Statistics />} />
+      </Route>
     </Routes>
   );
 }

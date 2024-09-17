@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 import styles from './style.component/AdminDashboard.module.css';
 
 const AdminDashboard = () => {
@@ -15,6 +15,9 @@ const AdminDashboard = () => {
           <li><Link to="/admin/statistics">Thống kê</Link></li>
         </ul>
       </nav>
+      <div className={styles.content}>
+        <Outlet />
+      </div>
     </div>
   );
 };

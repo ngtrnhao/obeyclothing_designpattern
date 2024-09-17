@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
   resetPasswordExpires: Date,
   loginAttempts: { type: Number, required: true, default: 0 },
   lockUntil: { type: Number },
+  isActive: { type: Boolean, default: true },
 });
 
 userSchema.pre('save', function(next) {

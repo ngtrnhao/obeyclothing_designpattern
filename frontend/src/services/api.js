@@ -9,6 +9,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true
 });
 
 // Hàm để set token vào header của mọi request
@@ -42,6 +43,7 @@ export const login = async (email, password) => {
     const response = await api.post('/auth/login', { email, password });
     if (response.data.token) {
       localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
       setAuthToken(response.data.token);
     }
     return response;
@@ -126,20 +128,26 @@ export const removeCartItem = async (productId) => {
 };
 
 // User profile
-export const getUserProfile = () => {
-  const token = localStorage.getItem('token');
-  console.log('Getting user profile with token:', token);
-  return api.get('/user/profile', {
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
-  });
-};
-
-export const updateUserProfile = (userData) => api.put('/user/profile', userData);
+export const getUserProfile = () => api.get('/user/profile');
+export const updateUserProfile = (profileData) => api.put('/user/profile', profileData);
+export const getUserOrders = () => api.get('/user/orders');
 
 // Orders
-export const createOrder = (orderData) => api.post('/orders', orderData);
+export const createOrder = async () => {
+  const token = localStorage.getItem('token');
+  try {
+    const response = await api.post('/cart/checkout', {}, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating order:', error);
+    throw error;
+  }
+};
+
 export const getOrders = () => api.get('/orders');
 export const getOrderById = (id) => api.get(`/orders/${id}`);
 
@@ -172,5 +180,60 @@ export const deleteCategory = async (category) => {
     throw error;
   }
 };
+
+// Admin Dashboard APIs
+export const getAdminProducts = () => api.get('/admin/products');
+
+export const updateAdminProduct = (id, productData) => {
+  const token = localStorage.getItem('token');
+  return api.put(`/admin/products/${id}`, productData, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+};
+
+export const deleteAdminProduct = (id) => {
+  const token = localStorage.getItem('token');
+  return api.delete(`/admin/products/${id}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+};
+
+export const getAdminOrders = () => {
+  const token = localStorage.getItem('token');
+  return api.get('/admin/orders', {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+};
+
+export const updateAdminOrderStatus = (orderId, status) => api.put(`/admin/orders/${orderId}`, { status });
+
+export const getAdminUsers = () => {
+  const token = localStorage.getItem('token');
+  return api.get('/admin/users', {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+};
+
+export const toggleAdminUserStatus = (userId, isActive) => {
+  const token = localStorage.getItem('token');
+  return api.put(`/admin/users/${userId}`, { isActive }, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+};
+
+export const getAdminStatistics = () => api.get('/admin/statistics');
+
+// ... existing functions ...
 
 export default api;
