@@ -1,29 +1,30 @@
-﻿// eslint-disable-next-line unicode-bom
-import React, { useContext, useEffect, useState } from 'react';
-import { updateCartItem, removeCartItem, createOrder } from '../services/api';
-import { useNavigate, Link } from 'react-router-dom';
+﻿import React, { useContext, useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { CartContext } from '../contexts/CartContext';
+import { updateCartItem, removeCartItem, createOrder } from '../services/api';
+import PayPalCheckout from './PayPalCheckout1';
 import styles from './style.component/Cart.module.css';
 
 const Cart = () => {
-  const { cartItems, setCartItems } = useContext(CartContext);
+  const { cartItems, setCartItems, total, fetchCart } = useContext(CartContext);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('Cart Items:', cartItems);
-    setLoading(false);
-  }, [cartItems]);
+    fetchCart().then(() => setLoading(false)).catch(err => {
+      console.error('Error fetching cart:', err);
+      setError('Không thể tải giỏ hàng. Vui lòng thử lại.');
+      setLoading(false);
+    });
+  }, [fetchCart]);
 
   const handleUpdateQuantity = async (productId, newQuantity) => {
     try {
       await updateCartItem(productId, newQuantity);
-      const updatedCartItems = cartItems.map(item => 
-        item.product._id === productId ? { ...item, quantity: newQuantity } : item
-      );
-      setCartItems(updatedCartItems);
+      await fetchCart();
     } catch (error) {
+      console.error('Error updating quantity:', error);
       setError('Không thể cập nhật số lượng. Vui lòng thử lại.');
     }
   };
@@ -31,16 +32,16 @@ const Cart = () => {
   const handleRemoveItem = async (productId) => {
     try {
       await removeCartItem(productId);
-      const updatedCartItems = cartItems.filter(item => item.product._id !== productId);
-      setCartItems(updatedCartItems);
+      await fetchCart();
     } catch (error) {
+      console.error('Error removing item:', error);
       setError('Không thể xóa sản phẩm. Vui lòng thử lại.');
     }
   };
 
   const handleCheckout = async () => {
     try {
-      const response = await createOrder();
+      await createOrder();
       setCartItems([]);
       alert('Đặt hàng thành công!');
       navigate('/orders');
@@ -62,8 +63,6 @@ const Cart = () => {
       </div>
     );
   }
-
-  const total = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 
   return (
     <div className={styles.cart}>
@@ -90,6 +89,7 @@ const Cart = () => {
       <div className={styles.cartSummary}>
         <h3>Tổng cộng: {total.toLocaleString('vi-VN')} đ</h3>
         <button onClick={handleCheckout} className={styles.checkoutButton}>Thanh toán</button>
+        <PayPalCheckout />
       </div>
     </div>
   );

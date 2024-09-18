@@ -133,10 +133,10 @@ export const updateUserProfile = (profileData) => api.put('/user/profile', profi
 export const getUserOrders = () => api.get('/user/orders');
 
 // Orders
-export const createOrder = async () => {
-  const token = localStorage.getItem('token');
+export const createOrder = async (paypalOrder) => {
   try {
-    const response = await api.post('/cart/checkout', {}, {
+    const token = localStorage.getItem('token');
+    const response = await api.post('/orders', { paypalOrder }, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -152,7 +152,15 @@ export const getOrders = () => api.get('/orders');
 export const getOrderById = (id) => api.get(`/orders/${id}`);
 
 // Thêm hàm updateOrderStatus
-export const updateOrderStatus = (orderId, status) => api.put(`/orders/${orderId}/status`, { status });
+export const updateOrderStatus = async (orderId, status) => {
+  try {
+    const response = await api.put(`/admin/orders/${orderId}`, { status });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    throw error;
+  }
+};
 
 // Thêm hàm getCategories
 export const getCategories = async () => {

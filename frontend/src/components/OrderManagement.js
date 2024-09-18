@@ -26,6 +26,7 @@ const OrderManagement = () => {
   const handleStatusChange = async (orderId, newStatus) => {
     try {
       await updateOrderStatus(orderId, newStatus);
+      // Cập nhật lại danh sách đơn hàng sau khi thay đổi trạng thái
       fetchOrders();
     } catch (error) {
       console.error('Error updating order status:', error);
@@ -46,6 +47,7 @@ const OrderManagement = () => {
             <th>Người đặt</th>
             <th>Tổng tiền</th>
             <th>Trạng thái</th>
+            <th>PayPal ID</th>
             <th>Hành động</th>
           </tr>
         </thead>
@@ -56,6 +58,7 @@ const OrderManagement = () => {
               <td>{order.user ? order.user.username || order.user.email : 'Không có thông tin'}</td>
               <td>{order.totalAmount?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) || 'N/A'}</td>
               <td>{order.status || 'N/A'}</td>
+              <td>{order.paypalOrderId || 'N/A'}</td>
               <td>
                 <select
                   value={order.status || ''}
