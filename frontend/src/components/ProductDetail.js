@@ -1,9 +1,10 @@
 ﻿import React, { useState, useEffect, useContext } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom'; // Thêm useNavigate vào đây
 import { getProductById, getProducts, addToCart, getCart } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { CartContext } from '../contexts/CartContext';
 import styles from './style.component/ProductDetail.module.css';
+import ProductReviews from './ProductReviews'; // Thêm dòng này
 
 const ProductDetail = () => {
   const [product, setProduct] = useState(null);
@@ -12,7 +13,8 @@ const ProductDetail = () => {
   const [error, setError] = useState('');
   const { id } = useParams();
   const { user } = useAuth();
-  const { setCartItems } = useContext(CartContext); // Thêm dòng này
+  const { setCartItems } = useContext(CartContext);
+  const navigate = useNavigate(); // Thêm dòng này
 
   useEffect(() => {
     const fetchProductAndRelated = async () => {
@@ -39,12 +41,16 @@ const ProductDetail = () => {
       setError('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng');
       return;
     }
+    if (product.stock === 0) {
+      setError('Sản phẩm đã hết hàng');
+      return;
+    }
     try {
       await addToCart(id, quantity);
-      alert('Đã thêm sản phẩm vào giỏ hàng');
-      // Cập nhật giỏ hàng
       const updatedCart = await getCart();
       setCartItems(updatedCart.items);
+      // Thay thế alert bằng chuyển hướng
+      navigate('/cart'); // Chuyển hướng đến trang giỏ hàng
     } catch (err) {
       setError('Không thể thêm sản phẩm vào giỏ hàng');
     }
@@ -62,18 +68,29 @@ const ProductDetail = () => {
           <p className={styles.description}>{product.description}</p>
           <p className={styles.price}>Giá: {product.price.toLocaleString('vi-VN')} đ</p>
           <p>Danh mục: {product.category}</p>
-          <p>Còn lại: {product.stock}</p>
+          {product.stock > 0 ? (
+            <p className={styles.inStock}>Còn lại: {product.stock}</p>
+          ) : (
+            <p className={styles.outOfStock}>Hết hàng</p>
+          )}
           <div className={styles.addToCart}>
             <input 
               type="number" 
               value={quantity} 
-              onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value)))}
+              onChange={(e) => setQuantity(Math.max(1, Math.min(parseInt(e.target.value), product.stock)))}
               min="1"
+              max={product.stock}
+              disabled={product.stock === 0}
             />
-            <button onClick={handleAddToCart}>Thêm vào giỏ hàng</button>
+            <button onClick={handleAddToCart} disabled={product.stock === 0}>
+              {product.stock > 0 ? 'Thêm vào giỏ hàng' : 'Hết hàng'}
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Thêm component ProductReviews ở đây */}
+      <ProductReviews productId={id} />
 
       <div className={styles.relatedProducts}>
         <h3>Sản phẩm liên quan</h3>

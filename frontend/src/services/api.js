@@ -244,4 +244,22 @@ export const getAdminStatistics = () => api.get('/admin/statistics');
 
 // ... existing functions ...
 
+export const getProductReviews = async (productId) => {
+  try {
+    const response = await api.get(`/products/${productId}/reviews`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const addProductReview = async (productId, reviewData) => {
+  try {
+    const response = await api.post(`/products/${productId}/reviews`, reviewData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export default api;

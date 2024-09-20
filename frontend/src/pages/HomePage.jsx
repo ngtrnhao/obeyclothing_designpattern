@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { getProducts } from '../services/api';
 import styles from './HomePage.module.css';
-import banner1 from '../assets/banner1.png';
-import banner2 from '../assets/banner.jpg';
+
 
 const HomePage = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -47,32 +46,26 @@ const HomePage = () => {
 
   return (
     <div className={styles.homePage}>
-      <motion.div 
-        className={`${styles.background} ${styles.background1}`}
-        style={{ opacity: background1Opacity }}
-      >
-        <img src={banner1} alt="Banner 1" />
-      </motion.div>
-      <motion.div 
-        className={`${styles.background} ${styles.background2}`}
-        style={{ opacity: background2Opacity }}
-      >
-        <img src={banner2} alt="Banner 2" />
-      </motion.div>
-      <motion.div 
-        className={`${styles.background} ${styles.background3}`}
-        style={{ opacity: background3Opacity }}
-      />
-
+      <motion.div className={styles.background1} style={{ opacity: background1Opacity }} />
+      <motion.div className={styles.background2} style={{ opacity: background2Opacity }} />
+      <motion.div className={styles.background3} style={{ opacity: background3Opacity }} />
+      
       <div className={styles.content}>
-        <header className={styles.hero}>
-          <div className={styles.heroContent}>
-            <h1>Chào mừng đến với Fashion Store</h1>
-            <p>Khám phá xu hướng thời trang mới nhất và độc đáo nhất</p>
-            <Link to="/products" className={styles.ctaButton}>Mua sắm ngay</Link>
-          </div>
-        </header>
+        {/* Hero section */}
+        <div className={styles.hero}>
+          <motion.div 
+            className={styles.heroContent}
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <h1>Khám phá phong cách của bạn</h1>
+            <p>Thời trang độc đáo, phản ánh cá tính riêng</p>
+            <Link to="/products" className={styles.ctaButton}>Khám phá bộ sưu tập</Link>
+          </motion.div>
+        </div>
 
+        {/* Featured Products section */}
         <section className={styles.featuredProducts}>
           <h2 className={styles.sectionTitle}>Sản phẩm nổi bật</h2>
           <div className={styles.productGrid}>
@@ -94,17 +87,20 @@ const HomePage = () => {
                       e.target.src = '/placeholder-image.jpg';
                     }}
                   />
+                  <div className={styles.productOverlay}>
+                    <Link to={`/products/${product._id}`} className={styles.viewDetailLink}>Xem chi tiết</Link>
+                  </div>
                 </div>
                 <div className={styles.productInfo}>
                   <h3 className={styles.productName}>{product.name}</h3>
                   <p className={styles.productPrice}>{product.price.toLocaleString('vi-VN')} đ</p>
-                  <Link to={`/products/${product._id}`} className={styles.viewDetailLink}>Xem chi tiết</Link>
                 </div>
               </motion.div>
             ))}
           </div>
         </section>
 
+        {/* Categories section */}
         <section className={styles.categories}>
           <h2 className={styles.sectionTitle}>Danh mục sản phẩm</h2>
           <div className={styles.categoryGrid}>
@@ -124,9 +120,10 @@ const HomePage = () => {
           </div>
         </section>
 
+        {/* Newsletter section */}
         <section className={styles.newsletter}>
           <h2>Đăng ký nhận thông tin</h2>
-          <p>Nhận thông tin về các ưu đãi và bộ sưu tập mới nhất</p>
+          <p>Cập nhật xu hướng mới nhất và ưu đãi đặc biệt</p>
           <form className={styles.newsletterForm}>
             <input type="email" placeholder="Nhập địa chỉ email của bạn" required />
             <button type="submit">Đăng ký</button>

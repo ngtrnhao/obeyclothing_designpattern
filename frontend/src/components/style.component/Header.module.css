@@ -2,16 +2,25 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  background-color: rgba(177, 177, 180, 0.7); /* Màu xám trong suốt */
-  backdrop-filter: blur(10px); /* Tăng độ mờ */
-  color: white;
+  padding: 1rem 2rem;
+  background-color: transparent;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
   transition: background-color 0.3s ease;
+}
+
+.headerScrolled {
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .logo {
   font-size: 1.5rem;
   font-weight: bold;
+  color: #007bff;
 }
 
 .nav ul {
@@ -27,14 +36,14 @@
 
 .nav a {
   text-decoration: none;
-  color: white;
+  color: #333;
   padding: 0.5rem 1rem;
   border-radius: 4px;
   transition: background-color 0.3s ease;
 }
 
 .nav a:hover {
-  background-color: #495057;
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 .auth {
@@ -46,45 +55,25 @@
   margin-right: 1rem;
 }
 
-.auth button {
+.loginButton, .logoutButton {
   padding: 0.5rem 1rem;
-  background-color: #909096;
-  color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-weight: bold;
   transition: background-color 0.3s ease;
 }
 
-.auth button:hover {
-  background-color: #c82333;
-}
-
-.auth a {
-  text-decoration: none;
+.loginButton {
+  background-color: #007bff;
   color: white;
-  padding: 0.5rem 1rem;
-  background-color: #b1b1b4;
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
 }
 
-.auth a:hover {
-  background-color: #218838;
+.logoutButton {
+  background-color: #dc3545;
+  color: white;
 }
 
-.navLink {
-  color: #ffffff; /* Màu chữ tối cho độ tương phản */
-  transition: color 0.3s ease;
-}
-
-.navLink:hover, .navLink.active {
-  color: #676768; /* Thay thế bằng màu chính từ background */
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-/* Thêm class mới cho header khi scroll */ 
-.headerScrolled {
-  background-color: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+.loginButton:hover, .logoutButton:hover {
+  opacity: 0.9;
 }

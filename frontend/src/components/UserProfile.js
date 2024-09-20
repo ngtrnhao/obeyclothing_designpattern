@@ -45,7 +45,7 @@ const UserProfile = () => {
     <div className={styles.userProfile}>
       <h2>Thông tin cá nhân</h2>
       <form onSubmit={handleSubmit}>
-        <div>
+      <div className={styles.formGroup}>
           <label htmlFor="username">Tên đăng nhập:</label>
           <input
             type="text"
@@ -54,7 +54,7 @@ const UserProfile = () => {
             disabled
           />
         </div>
-        <div>
+        <div className={styles.formGroup}>
           <label htmlFor="email">Email:</label>
           <input
             type="email"
@@ -63,7 +63,7 @@ const UserProfile = () => {
             onChange={(e) => setProfile({...profile, email: e.target.value})}
           />
         </div>
-        <div>
+        <div className={styles.formGroup}>
           <label htmlFor="fullName">Họ và tên:</label>
           <input
             type="text"
@@ -72,7 +72,7 @@ const UserProfile = () => {
             onChange={(e) => setProfile({...profile, fullName: e.target.value})}
           />
         </div>
-        <button type="submit">Cập nhật thông tin</button>
+        <button type="submit" className={styles.updateButton}>Cập nhật thông tin</button>
       </form>
     </div>
   );

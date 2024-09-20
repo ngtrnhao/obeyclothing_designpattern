@@ -1,49 +1,67 @@
 .homePage {
   position: relative;
-  min-height: 300vh; /* Đảm bảo có đủ không gian để cuộn */
+  min-height: 100vh;
 }
 
-.background {
+.background1,
+.background2,
+.background3 {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100vh;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
   z-index: -1;
 }
 
-.background img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.background1 {
+  background-image: url('../assets/banner2.jpg');
+}
+
+.background2 {
+  background-image: url('../assets/banner1.png');
 }
 
 .background3 {
-  background-color: rgba(0, 0, 0, 0.5); /* Màu overlay cho background thứ 3 */
+  background-image: url('../assets/banner1.png');
 }
 
 .content {
   position: relative;
   z-index: 1;
-  padding: 2rem;
 }
-
-/* Các style khác giữ nguyên */
 
 .hero {
   height: 100vh;
+  background-image: url('../assets/backgroundF.svgz');
+  background-size: cover;
+  background-position: center;
   display: flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
+  color: white;
 }
 
-.featuredProducts,
-.categories,
-.newsletter {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+.heroContent {
+  max-width: 800px;
+  padding: 2rem;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+}
+
+.hero h1 {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.hero p {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
 
 .ctaButton {
@@ -65,43 +83,42 @@
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
 
-.sectionTitle {
-  font-size: 2.5rem;
-  text-align: center;
-  margin-bottom: 2rem;
-  color: #333;
-}
-
 .featuredProducts,
 .categories,
 .newsletter {
-  padding: 4rem 20px;
-  background-color: rgba(255, 255, 255, 0.9);
+  padding: 6rem 2rem;
+  background-color: white;
 }
 
-.productGrid,
-.categoryGrid {
+.sectionTitle {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 3rem;
+  color: #333;
+}
+
+.productGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 2rem;
 }
 
-.productCard,
-.categoryCard {
+.productCard {
   background-color: white;
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
 }
 
-.productCard:hover,
-.categoryCard:hover {
+.productCard:hover {
   transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 .productImageContainer {
-  height: 250px;
+  position: relative;
+  height: 300px;
   overflow: hidden;
 }
 
@@ -116,13 +133,29 @@
   transform: scale(1.05);
 }
 
-.productInfo,
-.categoryCard {
+.productOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.productCard:hover .productOverlay {
+  opacity: 1;
+}
+
+.productInfo {
   padding: 1.5rem;
 }
 
-.productName,
-.categoryTitle {
+.productName {
   font-size: 1.2rem;
   margin-bottom: 0.5rem;
   color: #333;
@@ -131,64 +164,94 @@
 .productPrice {
   font-weight: bold;
   color: #ff4081;
-  margin-bottom: 1rem;
 }
 
-.viewDetailLink,
-.categoryLink {
+.viewDetailLink {
   display: inline-block;
   background-color: #ff4081;
   color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
+  padding: 0.8rem 1.5rem;
+  border-radius: 25px;
   text-decoration: none;
   transition: background-color 0.3s ease;
 }
 
-.viewDetailLink:hover,
-.categoryLink:hover {
+.viewDetailLink:hover {
   background-color: #f50057;
+}
+
+.categoryCard {
+  text-align: center;
+  padding: 2rem;
+}
+
+.categoryTitle {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #333;
 }
 
 .categoryCount {
   color: #666;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.categoryLink {
+  display: inline-block;
+  background-color: #ff4081;
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border-radius: 25px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.categoryLink:hover {
+  background-color: #f50057;
 }
 
 .newsletter {
   text-align: center;
+  background-color: #f8f8f8;
 }
 
 .newsletter h2 {
-  font-size: 2rem;
+  font-size: 2.5rem;
   margin-bottom: 1rem;
 }
 
 .newsletter p {
+  font-size: 1.2rem;
   margin-bottom: 2rem;
+  color: #666;
 }
 
 .newsletterForm {
   display: flex;
   justify-content: center;
   gap: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .newsletterForm input {
-  padding: 0.8rem;
+  flex: 1;
+  padding: 1rem;
   border: 1px solid #ddd;
-  border-radius: 20px;
-  width: 300px;
+  border-radius: 25px;
+  font-size: 1rem;
 }
 
 .newsletterForm button {
   background-color: #ff4081;
   color: white;
   border: none;
-  padding: 0.8rem 2rem;
-  border-radius: 20px;
+  padding: 1rem 2rem;
+  border-radius: 25px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  font-size: 1rem;
+  font-weight: bold;
 }
 
 .newsletterForm button:hover {
@@ -213,8 +276,7 @@
     font-size: 2rem;
   }
 
-  .productGrid,
-  .categoryGrid {
+  .productGrid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
 

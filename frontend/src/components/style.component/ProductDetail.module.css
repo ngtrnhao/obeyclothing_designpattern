@@ -102,3 +102,18 @@
     padding: 8px 0;
     text-decoration: none;
 }
+
+.inStock {
+    color: green;
+    font-weight: bold;
+}
+
+.outOfStock {
+    color: red;
+    font-weight: bold;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}

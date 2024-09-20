@@ -6,6 +6,7 @@ import { CartProvider } from './contexts/CartContext';
 import MainLayout from './layouts/MainLayout';
 import AppRoutes from './AppRoutes';
 
+
 const paypalOptions = {
   "client-id": process.env.REACT_APP_PAYPAL_CLIENT_ID,
   currency: "USD"

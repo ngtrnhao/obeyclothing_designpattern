@@ -11,15 +11,20 @@ const ProductList = () => {
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
-    const category = searchParams.get('category');
-    fetchProducts(category);
-  }, [location]);
+    const params = {
+      search: searchParams.get('search'),
+      category: searchParams.get('category'),
+      minPrice: searchParams.get('minPrice'),
+      maxPrice: searchParams.get('maxPrice'),
+    };
+    fetchProducts(params);
+  }, [location.search]);
 
-  const fetchProducts = async (category) => {
+  const fetchProducts = async (params) => {
     try {
       setLoading(true);
-      const response = await getProducts({ category });
-      setProducts(response.data);
+      const response = await getProducts(params);
+      setProducts(response.data || []); // Ensure we always set an array
     } catch (error) {
       console.error('Error fetching products:', error);
       setError('Không thể tải danh sách sản phẩm. Vui lòng thử lại sau.');
@@ -34,29 +39,38 @@ const ProductList = () => {
   return (
     <div className={styles.productList}>
       <h2>Danh sách sản phẩm</h2>
-      <div className={styles.productGrid}>
-        {products.map(product => (
-          <div key={product._id} className={styles.productCard}>
-            <img 
-              src={`${process.env.REACT_APP_API_URL}${product.image}`}
-              alt={product.name} 
-              className={styles.productImage}
-              onError={(e) => {
-                console.error("Error loading image:", e.target.src);
-                e.target.onerror = null; // Prevent infinite loop
-                e.target.src = '/path/to/placeholder-image.jpg'; // Đường dẫn đến hình ảnh placeholder
-              }}
-            />
-            <div className={styles.productInfo}>
-              <h3 className={styles.productName}>{product.name}</h3>
-              <p className={styles.productPrice}>{product.price.toLocaleString('vi-VN')} đ</p>
-              <Link to={`/products/${product._id}`} className={styles.viewProductButton}>
-                Xem chi tiết
-              </Link>
+      {products && products.length > 0 ? (
+        <div className={styles.productGrid}>
+          {products.map(product => (
+            <div key={product._id} className={styles.productCard}>
+              <img 
+                src={`${process.env.REACT_APP_API_URL}${product.image}`}
+                alt={product.name} 
+                className={styles.productImage}
+                onError={(e) => {
+                  console.error("Error loading image:", e.target.src);
+                  e.target.onerror = null; // Prevent infinite loop
+                  e.target.src = '/path/to/placeholder-image.jpg'; // Đường dẫn đến hình ảnh placeholder
+                }}
+              />
+              <div className={styles.productInfo}>
+                <h3 className={styles.productName}>{product.name}</h3>
+                <p className={styles.productPrice}>{product.price.toLocaleString('vi-VN')} đ</p>
+                {product.stock > 0 ? (
+                  <p className={styles.inStock}>Còn hàng: {product.stock}</p>
+                ) : (
+                  <p className={styles.outOfStock}>Hết hàng</p>
+                )}
+                <Link to={`/products/${product._id}`} className={styles.viewProductButton}>
+                  Xem chi tiết
+                </Link>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <p>Không tìm thấy sản phẩm nào phù hợp với tiêu chí tìm kiếm.</p>
+      )}
     </div>
   );
 };

@@ -77,18 +77,31 @@ const Cart = () => {
           <div className={styles.productInfo}>
             <h3>{item.product.name}</h3>
             <p>Giá: {item.product.price.toLocaleString('vi-VN')} đ</p>
-            <div className={styles.quantityControl}>
-              <button onClick={() => handleUpdateQuantity(item.product._id, item.quantity - 1)} disabled={item.quantity === 1}>-</button>
-              <span>{item.quantity}</span>
-              <button onClick={() => handleUpdateQuantity(item.product._id, item.quantity + 1)}>+</button>
-            </div>
+            {item.product.stock > 0 ? (
+              <div className={styles.quantityControl}>
+                <button 
+                  onClick={() => handleUpdateQuantity(item.product._id, item.quantity - 1)} 
+                  disabled={item.quantity === 1}
+                >
+                  -
+                </button>
+                <span>{item.quantity}</span>
+                <button 
+                  onClick={() => handleUpdateQuantity(item.product._id, item.quantity + 1)}
+                  disabled={item.quantity >= item.product.stock}
+                >
+                  +
+                </button>
+              </div>
+            ) : (
+              <p className={styles.outOfStock}>Hết hàng</p>
+            )}
             <button onClick={() => handleRemoveItem(item.product._id)} className={styles.removeButton}>Xóa</button>
           </div>
         </div>
       ))}
       <div className={styles.cartSummary}>
-        <h3>Tổng cộng: {total.toLocaleString('vi-VN')} đ</h3>
-        <button onClick={handleCheckout} className={styles.checkoutButton}>Thanh toán</button>
+        <h3>Tổng cộng: {total.toLocaleString('vi-VN')} VNĐ</h3>
         <PayPalCheckout />
       </div>
     </div>
