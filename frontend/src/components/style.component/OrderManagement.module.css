@@ -1,27 +1,102 @@
 .orderManagement {
-    padding: 20px;
-  }
-  
-  .orderItem {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 20px;
-  }
-  
-  .orderItem h3 {
-    margin-top: 0;
-  }
-  
-  .orderItem select {
-    margin-top: 10px;
-  }
-  
-  .orderItem ul {
-    list-style-type: none;
-    padding-left: 0;
-  }
-  
-  .orderItem li {
-    margin-bottom: 5px;
-  }
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.orderManagement h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.searchBar input {
+  flex-grow: 1;
+  border: none;
+  margin-left: 10px;
+  font-size: 16px;
+}
+
+.orderTable {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.orderTable th, .orderTable td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.orderTable th {
+  background-color: #f1f3f5;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.orderTable th:hover {
+  background-color: #e9ecef;
+}
+
+.status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.pending { background-color: #ffeeba; color: #856404; }
+.processing { background-color: #b8daff; color: #004085; }
+.shipped { background-color: #c3e6cb; color: #155724; }
+.delivered { background-color: #d4edda; color: #155724; }
+.cancelled { background-color: #f8d7da; color: #721c24; }
+
+.statusSelect {
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pagination button {
+  margin: 0 5px;
+  padding: 5px 10px;
+  border: none;
+  background-color: #007bff;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.pagination button.active {
+  background-color: #0056b3;
+}
+
+.loading, .error {
+  text-align: center;
+  padding: 20px;
+  font-size: 18px;
+}
+
+.error {
+  color: #721c24;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+}

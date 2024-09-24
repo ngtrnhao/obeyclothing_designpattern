@@ -2,15 +2,20 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .userDashboard h1 {
-  font-size: 24px;
+  font-size: 28px;
   margin-bottom: 20px;
+  color: #333;
 }
 
 .dashboardContent {
-  display: flex;
+  display: grid;
+  grid-template-columns: 250px 1fr;
   gap: 20px;
 }
 
@@ -18,27 +23,26 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  width: 200px;
 }
 
 .navButton {
-  padding: 10px 15px;
+  padding: 12px 20px;
   background-color: #007bff;
   color: white;
   text-decoration: none;
   border-radius: 5px;
   text-align: center;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, transform 0.3s;
 }
 
 .navButton:hover, .navButton.active {
   background-color: #0056b3;
+  transform: translateY(-2px);
 }
 
 .dashboardOutlet {
-  flex: 1;
-  background-color: #f8f9fa;
+  background-color: #fff;
   padding: 20px;
-  border-radius: 5px;
+  border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }

@@ -20,7 +20,7 @@ const Login = () => {
           ...response.data.user,
           token: response.data.token
         };
-        login(userData);
+        await login(userData); // Use await here
         if (userData.role === 'admin') {
           navigate('/admin/dashboard');
         } else {

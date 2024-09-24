@@ -23,14 +23,14 @@ const UserOrders = () => {
     }
   };
 
-  if (loading) return <div>Đang tải...</div>;
-  if (error) return <div>{error}</div>;
-  if (orders.length === 0) return <div>Bạn chưa có đơn hàng nào.</div>;
+  if (loading) return <div className={styles.loading}>Đang tải...</div>;
+  if (error) return <div className={styles.error}>{error}</div>;
+  if (orders.length === 0) return <div className={styles.noOrders}>Bạn chưa có đơn hàng nào.</div>;
 
   return (
     <div className={styles.userOrders}>
       <h2>Đơn hàng của tôi</h2>
-      <table>
+      <table className={styles.ordersTable}>
         <thead>
           <tr>
             <th>Mã đơn hàng</th>

@@ -4,10 +4,16 @@
   min-height: 100vh;
 }
 
+.main {
+  flex: 1;
+  padding-top: 80px; /* Adjust this value based on your header height */
+  background-color: transparent;
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 2rem 20px;
 }
 
 .header {
@@ -48,12 +54,6 @@
 .navLink:hover, .navLink.active {
   background-color: #f0f0f0;
   color: #3498db;
-}
-
-.main {
-  flex: 1;
-  padding: 2rem 0;
-  background-color: transparent;
 }
 
 .footer {

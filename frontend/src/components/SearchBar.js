@@ -1,19 +1,22 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate,useLocation } from 'react-router-dom';
 import { getProducts } from '../services/api';
 import styles from './style.component/SearchBar.module.css';
 import { debounce } from 'lodash';
+import { FaSearch, FaTimes, FaFilter } from 'react-icons/fa';
 
-const SearchBar = () => {
+const SearchBar = ({ onClose }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [priceRange, setPriceRange] = useState({ min: '', max: '' });
   const navigate = useNavigate();
   const location = useLocation();
   const searchRef = useRef(null);
+  const filterRef = useRef(null);
 
   useEffect(() => {
     setSearchTerm('');
@@ -27,6 +30,19 @@ const SearchBar = () => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setShowFilters(false);
       }
     };
 
@@ -56,9 +72,6 @@ const SearchBar = () => {
         const params = {
           search: searchTerm,
           limit: 5,
-          category: selectedCategory,
-          minPrice: priceRange.min,
-          maxPrice: priceRange.max
         };
         const response = await getProducts(params);
         setSuggestions(response.data);
@@ -70,14 +83,27 @@ const SearchBar = () => {
       setSuggestions([]);
       setShowSuggestions(false);
     }
-  }, [searchTerm, selectedCategory, priceRange]);
+  }, [searchTerm]);
 
-  const debouncedFetchSuggestions = useCallback(debounce(fetchSuggestions, 300), [fetchSuggestions]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedFetchSuggestions = useCallback(debounce(() => fetchSuggestions(), 300), [fetchSuggestions]);
 
   useEffect(() => {
     debouncedFetchSuggestions();
     return debouncedFetchSuggestions.cancel;
-  }, [searchTerm, selectedCategory, priceRange, debouncedFetchSuggestions]);
+  }, [searchTerm, debouncedFetchSuggestions]);
+
+  const formatPrice = (value) => {
+    // Loại bỏ tất cả các ký tự không phải số
+    const numericValue = value.replace(/[^0-9]/g, '');
+    // Chuyển đổi thành số và định dạng với dấu phân cách hàng nghìn
+    return Number(numericValue).toLocaleString('vi-VN');
+  };
+
+  const handlePriceChange = (type, value) => {
+    const formattedValue = formatPrice(value);
+    setPriceRange(prev => ({ ...prev, [type]: formattedValue }));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -85,10 +111,11 @@ const SearchBar = () => {
       const searchParams = new URLSearchParams();
       if (searchTerm.trim()) searchParams.set('search', searchTerm);
       if (selectedCategory) searchParams.set('category', selectedCategory);
-      if (priceRange.min) searchParams.set('minPrice', priceRange.min);
-      if (priceRange.max) searchParams.set('maxPrice', priceRange.max);
+      if (priceRange.min) searchParams.set('minPrice', priceRange.min.replace(/\D/g, ''));
+      if (priceRange.max) searchParams.set('maxPrice', priceRange.max.replace(/\D/g, ''));
       navigate(`/products?${searchParams.toString()}`);
       setShowSuggestions(false);
+      setShowFilters(false);
     }
   };
 
@@ -98,41 +125,65 @@ const SearchBar = () => {
   };
 
   return (
-    <div className={styles.searchBarContainer} ref={searchRef}>
-      <form onSubmit={handleSubmit} className={styles.searchBar}>
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Tìm kiếm sản phẩm..."
-          className={styles.searchInput}
-        />
-        <select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          className={styles.categorySelect}
-        >
-          <option value="">Tất cả danh mục</option>
-          {categories.map((category) => (
-            <option key={category} value={category}>{category}</option>
-          ))}
-        </select>
-        <input
-          type="number"
-          value={priceRange.min}
-          onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })}
-          placeholder="Giá tối thiểu"
-          className={styles.priceInput}
-        />
-        <input
-          type="number"
-          value={priceRange.max}
-          onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })}
-          placeholder="Giá tối đa"
-          className={styles.priceInput}
-        />
-        <button type="submit" className={styles.searchButton}>Tìm kiếm</button>
+    <div className={styles.searchBar}>
+      <form onSubmit={handleSubmit}>
+        <div className={styles.searchInputWrapper}>
+          <FaSearch className={styles.searchIcon} />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Tìm kiếm sản phẩm..."
+            className={styles.searchInput}
+            // Remove the autoFocus attribute if it exists
+          />
+          {searchTerm && (
+            <button type="button" className={styles.clearButton} onClick={() => setSearchTerm('')}>
+              <FaTimes />
+            </button>
+          )}
+        </div>
+        <div className={styles.filterContainer} ref={filterRef}>
+          <button 
+            type="button" 
+            className={styles.filterButton} 
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <FaFilter />
+          </button>
+          {showFilters && (
+            <div className={styles.filters}>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className={styles.categorySelect}
+              >
+                <option value="">Tất cả danh mục</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+              <input
+                type="text"
+                value={priceRange.min}
+                onChange={(e) => handlePriceChange('min', e.target.value)}
+                placeholder="Giá tối thiểu"
+                className={styles.priceInput}
+              />
+              <input
+                type="text"
+                value={priceRange.max}
+                onChange={(e) => handlePriceChange('max', e.target.value)}
+                placeholder="Giá tối đa"
+                className={styles.priceInput}
+              />
+            </div>
+          )}
+        </div>
       </form>
+      <button className={styles.closeButton} onClick={onClose}>
+        <FaTimes />
+      </button>
       {showSuggestions && suggestions.length > 0 && (
         <ul className={styles.suggestions}>
           {suggestions.map((product) => (

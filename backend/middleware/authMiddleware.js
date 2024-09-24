@@ -25,5 +25,4 @@ const authMiddleware = async (req, res, next) => {
     res.status(401).json({ message: 'Token không hợp lệ' });
   }
 };
-
 module.exports = authMiddleware;

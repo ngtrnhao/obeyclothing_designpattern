@@ -1,0 +1,122 @@
+.productManagement {
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.productManagement h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.searchBar input {
+  flex-grow: 1;
+  border: none;
+  margin-left: 10px;
+  font-size: 16px;
+}
+
+.productTable {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.productTable th, .productTable td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.productTable th {
+  background-color: #f1f3f5;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.productTable th:hover {
+  background-color: #e9ecef;
+}
+
+.productTable input {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+
+.editButton, .deleteButton, .saveButton, .cancelButton {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-right: 5px;
+}
+
+.editButton {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.deleteButton {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.saveButton {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.cancelButton {
+  background-color: #6c757d;
+  color: #fff;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pagination button {
+  margin: 0 5px;
+  padding: 5px 10px;
+  border: none;
+  background-color: #007bff;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.pagination button.active {
+  background-color: #0056b3;
+}
+
+.loading, .error {
+  text-align: center;
+  padding: 20px;
+  font-size: 18px;
+}
+
+.error {
+  color: #721c24;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+}

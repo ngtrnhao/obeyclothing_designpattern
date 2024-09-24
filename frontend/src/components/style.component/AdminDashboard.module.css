@@ -1,38 +1,70 @@
 .adminDashboard {
-    padding: 20px;
-    background-color: #f1f3f5;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .adminDashboard h1 {
-    color: #333;
-    margin-bottom: 20px;
-  }
-  
-  .adminDashboard nav ul {
-    list-style-type: none;
-    padding: 0;
     display: flex;
-    flex-wrap: wrap;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #11cdef;
+    color: white;
+    padding: 20px;
+}
+
+.dashboardTitle {
+    font-size: 24px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.dashboardNav {
+    display: flex;
+    flex-direction: column;
     gap: 10px;
-  }
-  
-  .adminDashboard nav ul li {
-    flex: 1 1 200px;
-  }
-  
-  .adminDashboard nav ul li a {
-    display: block;
-    padding: 15px;
-    background-color: #28a745;
+}
+
+.navButton {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
     color: white;
     text-decoration: none;
-    border-radius: 4px;
-    text-align: center;
-    transition: background-color 0.3s ease;
-  }
-  
-  .adminDashboard nav ul li a:hover {
-    background-color: #218838;
-  }
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.navButton:hover, .navButton.active {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navButton svg {
+    margin-right: 10px;
+}
+
+.mainContent {
+    flex: 1;
+    padding: 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header h2 {
+    font-size: 28px;
+    color: #333;
+}
+
+.userMenu {
+    /* Style for user menu */
+}
+
+.dashboardOutlet {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}

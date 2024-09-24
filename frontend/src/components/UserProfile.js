@@ -37,15 +37,15 @@ const UserProfile = () => {
     }
   };
 
-  if (loading) return <div>Đang tải...</div>;
-  if (error) return <div>{error}</div>;
-  if (!profile) return <div>Không tìm thấy thông tin người dùng</div>;
+  if (loading) return <div className={styles.loading}>Đang tải...</div>;
+  if (error) return <div className={styles.error}>{error}</div>;
+  if (!profile) return <div className={styles.error}>Không tìm thấy thông tin người dùng</div>;
 
   return (
     <div className={styles.userProfile}>
       <h2>Thông tin cá nhân</h2>
       <form onSubmit={handleSubmit}>
-      <div className={styles.formGroup}>
+        <div className={styles.formGroup}>
           <label htmlFor="username">Tên đăng nhập:</label>
           <input
             type="text"

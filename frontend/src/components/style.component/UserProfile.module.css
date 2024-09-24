@@ -1,61 +1,58 @@
 .userProfile {
-    max-width: 700px;
+    max-width: 600px;
     margin: 0 auto;
-    padding: 2.5rem;
-    background-color: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  .formGroup {
-    margin-bottom: 1.5rem;
-  }
-  
-  .formGroup label {
-    display: block;
-    margin-bottom: 0.7rem;
-    font-weight: bold;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.userProfile h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
     color: #333;
-  }
-  
-  .formGroup input,
-  .formGroup textarea {
-    width: 100%;
-    padding: 0.8rem;
-    font-size: 1rem;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
-    transition: border-color 0.3s ease;
-  }
-  
-  .formGroup input:focus,
-  .formGroup textarea:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-  }
-  
-  .formGroup textarea {
-    height: 120px;
-    resize: vertical;
-  }
-  
-  .updateButton {
+}
+
+.formGroup {
+    margin-bottom: 15px;
+}
+
+.formGroup label {
     display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.formGroup input {
     width: 100%;
-    padding: 1rem;
-    background-color: #007bff;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+}
+
+.updateButton {
+    padding: 10px 20px;
+    background-color: #28a745;
     color: white;
     border: none;
-    border-radius: 6px;
-    font-size: 1.1rem;
-    font-weight: bold;
+    border-radius: 4px;
     cursor: pointer;
-    transition: all 0.3s ease;
-  }
-  
-  .updateButton:hover {
-    background-color: #0056b3;
-    transform: translateY(-2px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  }
+    transition: background-color 0.3s;
+}
+
+.updateButton:hover {
+    background-color: #218838;
+}
+
+.loading, .error {
+    text-align: center;
+    padding: 20px;
+    font-size: 18px;
+}
+
+.error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+}

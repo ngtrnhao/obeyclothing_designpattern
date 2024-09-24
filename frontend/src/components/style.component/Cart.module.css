@@ -163,3 +163,8 @@
   color: red;
   font-weight: bold;
 }
+
+.cartContainer {
+  padding: 20px;
+  /* Các style khác */
+}

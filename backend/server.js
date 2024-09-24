@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
-
+const authMiddleware = require('./middleware/authMiddleware');
+const adminMiddleware = require('./middleware/adminMiddleware');
 
 dotenv.config();
 
@@ -60,7 +61,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 //app.use('/api/user', userRoutes);
 //Admin routes
-app.use('/api/admin', adminRoutes);
+app.use('/api/admin', authMiddleware, adminMiddleware, adminRoutes);
 app.use('/api/user', userRoutes);
 
 app.use('/api/categories', categoryRoutes);

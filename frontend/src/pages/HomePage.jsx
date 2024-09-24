@@ -4,7 +4,6 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { getProducts } from '../services/api';
 import styles from './HomePage.module.css';
 
-
 const HomePage = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [categories, setCategories] = useState({});
@@ -65,13 +64,13 @@ const HomePage = () => {
           </motion.div>
         </div>
 
-        {/* Featured Products section */}
+        {/* Featured products section */}
         <section className={styles.featuredProducts}>
           <h2 className={styles.sectionTitle}>Sản phẩm nổi bật</h2>
           <div className={styles.productGrid}>
             {featuredProducts.map((product, index) => (
-              <motion.div
-                key={product._id}
+              <motion.div 
+                key={product._id} 
                 className={styles.productCard}
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}

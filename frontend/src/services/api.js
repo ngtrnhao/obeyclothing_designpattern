@@ -240,7 +240,14 @@ export const toggleAdminUserStatus = (userId, isActive) => {
   });
 };
 
-export const getAdminStatistics = () => api.get('/admin/statistics');
+export const getAdminStatistics = () => {
+  const token = localStorage.getItem('token');
+  return api.get('/admin/statistics', {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+};
 
 // ... existing functions ...
 
