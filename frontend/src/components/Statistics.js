@@ -24,7 +24,21 @@ const Statistics = () => {
     try {
       setLoading(true);
       const response = await getAdminStatistics();
-      setStats(response.data);
+      console.log("Received statistics:", response);
+      console.log("Top Products:", response.topProducts); // Thêm dòng này
+      
+      // Kiểm tra và xử lý dữ liệu
+      if (response && typeof response === 'object') {
+        setStats({
+          totalRevenue: response.totalRevenue || 0,
+          totalOrders: response.totalOrders || 0,
+          totalUsers: response.totalUsers || 0,
+          topProducts: Array.isArray(response.topProducts) ? response.topProducts : [],
+          monthlySales: Array.isArray(response.monthlySales) ? response.monthlySales : []
+        });
+      } else {
+        throw new Error('Invalid data format received from server');
+      }
     } catch (error) {
       console.error('Error fetching statistics:', error);
       setError('Không thể tải thống kê. Vui lòng thử lại sau.');
@@ -43,6 +57,18 @@ const Statistics = () => {
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+  };
+
+  // Thêm hàm này để chuẩn bị dữ liệu cho biểu đồ tròn
+  const prepareTopProductsData = (products) => {
+    return products.map(product => ({
+      name: product.name,
+      value: product.soldQuantity
+    }));
+  };
+
   return (
     <div className={styles.statisticsContainer}>
       <h2 className={styles.title}>Thống kê</h2>
@@ -56,7 +82,7 @@ const Statistics = () => {
         >
           <FaChartLine className={styles.icon} />
           <h3>Tổng doanh thu</h3>
-          <p>{stats.totalRevenue.toLocaleString('vi-VN')} VND</p>
+          <p>{formatCurrency(stats.totalRevenue)}</p>
         </motion.div>
         <motion.div 
           className={styles.statCard}
@@ -82,55 +108,67 @@ const Statistics = () => {
         </motion.div>
       </div>
 
-      <motion.div 
-        className={styles.chartContainer}
-        variants={cardVariants}
-        initial="hidden"
-        animate="visible"
-        transition={{ duration: 0.5, delay: 0.4 }}
-      >
-        <h3>Doanh thu theo tháng</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={stats.monthlySales}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="revenue" fill="#8884d8" />
-          </BarChart>
-        </ResponsiveContainer>
-      </motion.div>
+      {stats.monthlySales && stats.monthlySales.length > 0 && (
+        <motion.div 
+          className={styles.chartContainer}
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <h3>Doanh thu theo tháng</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={stats.monthlySales}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis 
+                dataKey="month" 
+                scale="point" 
+                padding={{ left: 10, right: 10 }}
+                tick={{ fontSize: 12 }}
+              />
+              <YAxis
+                tickFormatter={(value) => `${value / 1000000}M`}
+                tick={{ fontSize: 12 }}
+              />
+              <Tooltip formatter={(value) => formatCurrency(value)} />
+              <Legend />
+              <Bar dataKey="revenue" fill="#8884d8" name="Doanh thu" />
+            </BarChart>
+          </ResponsiveContainer>
+        </motion.div>
+      )}
 
-      <motion.div 
-        className={styles.chartContainer}
-        variants={cardVariants}
-        initial="hidden"
-        animate="visible"
-        transition={{ duration: 0.5, delay: 0.5 }}
-      >
-        <h3>Top sản phẩm bán chạy</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie
-              data={stats.topProducts}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              outerRadius={80}
-              fill="#8884d8"
-              dataKey="soldQuantity"
-              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-            >
-              {stats.topProducts.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip />
-            <Legend />
-          </PieChart>
-        </ResponsiveContainer>
-      </motion.div>
+      {stats.topProducts && stats.topProducts.length > 0 && (
+        <motion.div 
+          className={styles.chartContainer}
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
+          <h3>Top sản phẩm bán chạy</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={prepareTopProductsData(stats.topProducts)}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+              >
+                {prepareTopProductsData(stats.topProducts).map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip formatter={(value, name) => [`${value} sản phẩm`, name]} />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </motion.div>
+      )}
     </div>
   );
 };

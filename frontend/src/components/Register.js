@@ -7,31 +7,56 @@ const Register = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [errors, setErrors] = useState({});
   const [role, setRole] = useState('user');
   const [adminSecret, setAdminSecret] = useState('');
-  const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  const validate = () => {
+    const newErrors = {};
+    if (!username) newErrors.username = 'Tên người dùng là bắt buộc';
+    if (!email) {
+      newErrors.email = 'Email là bắt buộc';
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = 'Email không hợp lệ';
+    }
+    if (!password) {
+      newErrors.password = 'Mật khẩu là bắt buộc';
+    } else if (password.length < 8) {
+      newErrors.password = 'Mật khẩu phải có ít nhất 8 ký tự';
+    }
+    if (password !== confirmPassword) newErrors.confirmPassword = 'Mật khẩu không khớp';
+    return newErrors;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Bắt đầu đăng ký...'); // Log để kiểm tra form submit
-    try {
-      console.log('Gọi API đăng ký...');
-      const response = await register(username, email, password, role, adminSecret);
-      console.log('Đăng ký thành công:', response);
-      console.log('Chuẩn bị chuyển hướng...');
-      navigate('/login');
-      console.log('Đã chuyển hướng');
-    } catch (error) {
-      console.error('Lỗi đăng ký:', error);
-      setError(error.response?.data?.message || 'Đăng ký thất bại');
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length === 0) {
+      try {
+        console.log('Gọi API đăng ký...');
+        const response = await register(username, email, password, role, adminSecret);
+        console.log('Đăng ký thành công:', response);
+        console.log('Chuẩn bị chuyển hướng...');
+        navigate('/');
+        console.log('Đã chuyển hướng');
+      } catch (error) {
+        console.error('Lỗi đăng ký:', error);
+        setErrors({ ...validationErrors, ...error.response?.data?.message || 'Đăng ký thất bại' });
+      }
+    } else {
+      setErrors(validationErrors);
     }
   };
 
   return (
     <div className={styles.registerContainer}>
       <h2 className={styles.registerTitle}>Đăng ký</h2>
-      {error && <p className={styles.errorMessage}>{error}</p>}
+      {errors.username && <p className={styles.errorMessage}>{errors.username}</p>}
+      {errors.email && <p className={styles.errorMessage}>{errors.email}</p>}
+      {errors.password && <p className={styles.errorMessage}>{errors.password}</p>}
+      {errors.confirmPassword && <p className={styles.errorMessage}>{errors.confirmPassword}</p>}
       <form onSubmit={handleSubmit}>
         <div className={styles.formGroup}>
           <label className={styles.label}>Tên người dùng:</label>
@@ -60,6 +85,16 @@ const Register = () => {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Xác nhận mật khẩu:</label>
+          <input
+            className={styles.input}
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             required
           />
         </div>

@@ -1,6 +1,7 @@
 .homePage {
-  position: relative;
-  min-height: 100vh;
+  font-family: 'Roboto', sans-serif;
+  color: #2C3E50;
+  background-color: #ECF0F1;
 }
 
 .background1,
@@ -34,10 +35,10 @@
 }
 
 .hero {
-  height: 100vh;
-  background-image: url('../assets/backgroundF.svgz');
+  background-image: url('../assets/banner1.png');
   background-size: cover;
   background-position: center;
+  height: 80vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -46,9 +47,8 @@
 }
 
 .heroContent {
-  max-width: 800px;
-  padding: 2rem;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
+  padding: 20px;
   border-radius: 10px;
 }
 
@@ -65,36 +65,35 @@
 }
 
 .ctaButton {
-  display: inline-block;
-  background-color: #ff4081;
+  background-color: #E74C3C;
   color: white;
-  padding: 1rem 2.5rem;
-  border-radius: 50px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
   text-decoration: none;
-  font-weight: bold;
-  font-size: 1.2rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.ctaButton:hover {
-  background-color: #f50057;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+.ctaButtonHover:hover {
+  background-color: #C0392B;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
 }
 
 .featuredProducts,
 .categories,
 .newsletter {
-  padding: 6rem 2rem;
+  padding: 40px 20px;
   background-color: white;
+  margin: 20px 0;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .sectionTitle {
-  font-size: 2.5rem;
+  font-size: 2em;
+  margin-bottom: 20px;
   text-align: center;
-  margin-bottom: 3rem;
-  color: #333;
 }
 
 .productGrid {
@@ -104,16 +103,16 @@
 }
 
 .productCard {
-  background-color: white;
+  background-color: #fff;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.productCard:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+.productCardHover:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .productImageContainer {
@@ -168,7 +167,7 @@
 
 .viewDetailLink {
   display: inline-block;
-  background-color: #ff4081;
+  background-color: #3498DB;
   color: white;
   padding: 0.8rem 1.5rem;
   border-radius: 25px;
@@ -243,7 +242,7 @@
 }
 
 .newsletterForm button {
-  background-color: #ff4081;
+  background-color: #E74C3C;
   color: white;
   border: none;
   padding: 1rem 2rem;
@@ -255,7 +254,7 @@
 }
 
 .newsletterForm button:hover {
-  background-color: #f50057;
+  background-color: #C0392B;
 }
 
 @media (max-width: 768px) {

@@ -36,13 +36,15 @@ const Header = () => {
     <>
       <header className={`${styles.header} ${isScrolled ? styles.headerScrolled : ''}`}>
         <div className={styles.leftSection}>
-          <Link to="/" className={styles.logo}>Fashion Store</Link>
           <nav className={styles.nav}>
             <ul>
               <li><NavLink to="/" end className={({ isActive }) => isActive ? styles.active : ''}>Trang chủ</NavLink></li>
               <li><NavLink to="/products" className={({ isActive }) => isActive ? styles.active : ''}>Sản phẩm</NavLink></li>
             </ul>
           </nav>
+        </div>
+        <div className={styles.centerSection}>
+         <a href="/" className={styles.logo}>Fashion Store</a>
         </div>
         <div className={styles.rightSection}>
           <button onClick={toggleSearch} className={styles.iconButton}>

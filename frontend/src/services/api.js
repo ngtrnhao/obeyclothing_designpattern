@@ -75,7 +75,6 @@ export const getProducts = () => api.get('/products');
 export const getProductById = (id) => api.get(`/products/${id}`);
 export const createProduct = (productData) => {
   const token = localStorage.getItem('token');
-  console.log('Creating product with token:', token);
   return api.post('/products', productData, {
     headers: {
       'Content-Type': 'multipart/form-data',
@@ -240,13 +239,19 @@ export const toggleAdminUserStatus = (userId, isActive) => {
   });
 };
 
-export const getAdminStatistics = () => {
+export const getAdminStatistics = async () => {
   const token = localStorage.getItem('token');
-  return api.get('/admin/statistics', {
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
-  });
+  try {
+    const response = await api.get('/admin/statistics', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return response.data; // Trả về response.data thay vì toàn bộ response
+  } catch (error) {
+    console.error('Error fetching admin statistics:', error.response?.data || error.message);
+    throw error;
+  }
 };
 
 // ... existing functions ...

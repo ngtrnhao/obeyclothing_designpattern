@@ -4,6 +4,9 @@ const adminController = require('../controllers/adminController');
 const authMiddleware = require('../middleware/authMiddleware');
 const adminMiddleware = require('../middleware/adminMiddleware');
 const upload = require('../middleware/uploadMiddleware');
+const Order = require('../models/Order');  // Thêm dòng này
+const User = require('../models/User');    // Thêm dòng này
+const Product = require('../models/Product'); // Thêm dòng này
 
 router.use(authMiddleware);
 router.use(adminMiddleware);

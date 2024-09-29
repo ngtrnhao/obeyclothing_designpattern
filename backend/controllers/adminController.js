@@ -108,30 +108,70 @@ exports.updateUserStatus = async (req, res) => {
 
 exports.getStatistics = async (req, res) => {
   try {
-    const totalRevenue = await Order.aggregate([
-      { $match: { status: 'delivered' } },
-      { $group: { _id: null, total: { $sum: '$totalAmount' } } }
-    ]);
-
+    const totalRevenue = await calculateTotalRevenue();
     const totalOrders = await Order.countDocuments();
     const totalUsers = await User.countDocuments();
-
-    const topProducts = await Order.aggregate([
-      { $unwind: '$items' },
-      { $group: { _id: '$items.product', soldQuantity: { $sum: '$items.quantity' } } },
-      { $sort: { soldQuantity: -1 } },
-      { $limit: 5 },
-      { $lookup: { from: 'products', localField: '_id', foreignField: '_id', as: 'productInfo' } },
-      { $project: { name: { $arrayElemAt: ['$productInfo.name', 0] }, soldQuantity: 1 } }
-    ]);
+    const topProducts = await getTopProducts();
+    const monthlySales = await getMonthlySales();
 
     res.json({
-      totalRevenue: totalRevenue[0]?.total || 0,
+      totalRevenue,
       totalOrders,
       totalUsers,
-      topProducts
+      topProducts,
+      monthlySales
     });
   } catch (error) {
-    res.status(500).json({ message: 'Lỗi khi lấy thống kê' });
+    console.error('Error in getStatistics:', error);
+    res.status(500).json({ message: 'Error fetching statistics', error: error.message });
   }
 };
+
+async function calculateTotalRevenue() {
+  const result = await Order.aggregate([
+    { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+  ]);
+  return result[0]?.total || 0;
+}
+
+async function getTopProducts(limit = 5) {
+  return await Product.aggregate([
+    { $sort: { soldQuantity: -1 } },
+    { $limit: limit },
+    { $project: { name: 1, soldQuantity: 1 } }
+  ]);
+}
+
+async function getMonthlySales() {
+  const currentYear = new Date().getFullYear();
+  const result = await Order.aggregate([
+    {
+      $match: {
+        createdAt: { $gte: new Date(`${currentYear}-01-01`), $lt: new Date(`${currentYear + 1}-01-01`) }
+      }
+    },
+    {
+      $group: {
+        _id: { $month: '$createdAt' },
+        revenue: { $sum: '$totalAmount' }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        month: '$_id',
+        revenue: 1
+      }
+    },
+    { $sort: { month: 1 } }
+  ]);
+
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return monthNames.map((name, index) => {
+    const monthData = result.find(item => item.month === index + 1);
+    return {
+      month: name,
+      revenue: monthData ? monthData.revenue : 0
+    };
+  });
+}

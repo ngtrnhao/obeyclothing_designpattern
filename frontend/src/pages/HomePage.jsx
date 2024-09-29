@@ -60,7 +60,7 @@ const HomePage = () => {
           >
             <h1>Khám phá phong cách của bạn</h1>
             <p>Thời trang độc đáo, phản ánh cá tính riêng</p>
-            <Link to="/products" className={styles.ctaButton}>Khám phá bộ sưu tập</Link>
+            <Link to="/products" className={`${styles.ctaButton} ${styles.ctaButtonHover}`}>Khám phá bộ sưu tập</Link>
           </motion.div>
         </div>
 
@@ -71,7 +71,7 @@ const HomePage = () => {
             {featuredProducts.map((product, index) => (
               <motion.div 
                 key={product._id} 
-                className={styles.productCard}
+                className={`${styles.productCard} ${styles.productCardHover}`}
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
@@ -106,7 +106,7 @@ const HomePage = () => {
             {Object.entries(categories).map(([category, products], index) => (
               <motion.div 
                 key={category} 
-                className={styles.categoryCard}
+                className={`${styles.categoryCard} ${styles.categoryCardHover}`}
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
@@ -125,7 +125,7 @@ const HomePage = () => {
           <p>Cập nhật xu hướng mới nhất và ưu đãi đặc biệt</p>
           <form className={styles.newsletterForm}>
             <input type="email" placeholder="Nhập địa chỉ email của bạn" required />
-            <button type="submit">Đăng ký</button>
+            <button type="submit" className={styles.newsletterButton}>Đăng ký</button>
           </form>
         </section>
       </div>
