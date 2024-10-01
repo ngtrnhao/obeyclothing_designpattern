@@ -99,3 +99,27 @@
   .categoryList button:hover {
     background-color: #ff3333;
   }
+
+  .categorySelect {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+
+  .categorySelect option:disabled {
+    color: #888;
+    font-weight: bold;
+  }
+
+  .categoryList ul {
+    list-style-type: none;
+    padding-left: 0;
+  }
+
+  .categoryList li {
+    margin-bottom: 5px;
+  }
+
+  .categoryList button {
+    margin-left: 10px;
+  }

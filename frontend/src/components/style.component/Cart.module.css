@@ -1,170 +1,283 @@
+/* Định nghĩa style cho container chính của giỏ hàng */
 .cart {
+  /* Giới hạn chiều rộng tối đa */
   max-width: 800px;
+  /* Căn giữa container */
   margin: 0 auto;
+  /* Thêm padding xung quanh */
   padding: 20px;
+  /* Màu nền xám nhạt */
   background-color: #f9f9f9;
+  /* Bo tròn góc */
   border-radius: 8px;
+  /* Thêm bóng đổ */
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
+/* Định nghĩa style cho tiêu đề giỏ hàng */
 .cartTitle {
+  /* Căn giữa text */
   text-align: center;
+  /* Màu chữ */
   color: #333;
+  /* Thêm margin dưới */
   margin-bottom: 20px;
+  /* Kích thước chữ */
   font-size: 24px;
 }
 
+/* Định nghĩa style cho mỗi item trong giỏ hàng */
 .cartItem {
+  /* Sử dụng flexbox */
   display: flex;
+  /* Căn giữa các phần tử con theo chiều dọc */
   align-items: center;
+  /* Màu nền trắng */
   background-color: #fff;
+  /* Thêm padding */
   padding: 15px;
+  /* Thêm margin dưới */
   margin-bottom: 15px;
+  /* Bo tròn góc */
   border-radius: 5px;
+  /* Thêm bóng đổ nhẹ */
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
+/* Định nghĩa style cho hình ảnh sản phẩm */
 .productImage {
+  /* Chiều rộng cố định */
   width: 80px;
+  /* Chiều cao cố định */
   height: 80px;
+  /* Đảm bảo hình ảnh lấp đầy khoảng trống và không bị méo */
   object-fit: cover;
+  /* Bo tròn góc */
   border-radius: 5px;
+  /* Thêm margin phải */
   margin-right: 15px;
 }
 
+/* Định nghĩa style cho phần thông tin sản phẩm */
 .productInfo {
+  /* Cho phép phần tử mở rộng để lấp đầy không gian còn lại */
   flex-grow: 1;
 }
 
+/* Định nghĩa style cho tiêu đề sản phẩm */
 .productInfo h3 {
+  /* Loại bỏ margin mặc định */
   margin: 0 0 5px 0;
+  /* Màu chữ */
   color: #333;
 }
 
+/* Định nghĩa style cho thông tin chi tiết sản phẩm */
 .productInfo p {
+  /* Loại bỏ margin mặc định */
   margin: 0 0 10px 0;
+  /* Màu chữ */
   color: #666;
 }
 
+/* Định nghĩa style cho phần điều khiển số lượng */
 .quantityControl {
+  /* Sử dụng flexbox */
   display: flex;
+  /* Căn giữa các phần tử con theo chiều dọc */
   align-items: center;
+  /* Thêm margin dưới */
   margin-bottom: 10px;
 }
 
+/* Định nghĩa style cho nút điều khiển số lượng */
 .quantityControl button {
+  /* Màu nền xám nhạt */
   background-color: #f0f0f0;
+  /* Loại bỏ viền */
   border: none;
+  /* Chiều rộng cố định */
   width: 30px;
+  /* Chiều cao cố định */
   height: 30px;
+  /* Kích thước chữ */
   font-size: 18px;
+  /* Thay đổi con trỏ khi di chuột qua */
   cursor: pointer;
+  /* Hiệu ứng chuyển đổi */
   transition: background-color 0.3s;
 }
 
+/* Hiệu ứng khi hover vào nút điều khiển số lượng */
 .quantityControl button:hover {
+  /* Thay đổi màu nền khi hover */
   background-color: #e0e0e0;
 }
 
+/* Style cho nút điều khiển số lượng khi bị vô hiệu hóa */
 .quantityControl button:disabled {
+  /* Giảm độ mờ */
   opacity: 0.5;
+  /* Thay đổi con trỏ */
   cursor: not-allowed;
 }
 
+/* Định nghĩa style cho số lượng hiện tại */
 .quantityControl span {
+  /* Thêm margin hai bên */
   margin: 0 10px;
+  /* Độ đậm cho chữ */
   font-weight: bold;
 }
 
+/* Định nghĩa style cho nút xóa sản phẩm */
 .removeButton {
+  /* Màu nền đỏ */
   background-color: #ff4d4d;
+  /* Màu chữ trắng */
   color: white;
+  /* Loại bỏ viền */
   border: none;
+  /* Thêm padding */
   padding: 5px 10px;
+  /* Bo tròn góc */
   border-radius: 3px;
+  /* Thay đổi con trỏ khi di chuột qua */
   cursor: pointer;
+  /* Hiệu ứng chuyển đổi */
   transition: background-color 0.3s;
 }
 
+/* Hiệu ứng khi hover vào nút xóa sản phẩm */
 .removeButton:hover {
+  /* Thay đổi màu nền khi hover */
   background-color: #ff3333;
 }
 
+/* Định nghĩa style cho phần tổng kết giỏ hàng */
 .cartSummary {
+  /* Thêm margin trên */
   margin-top: 20px;
+  /* Căn phải text */
   text-align: right;
+  /* Thêm padding trên */
   padding-top: 20px;
+  /* Thêm viền trên */
   border-top: 1px solid #e0e0e0;
 }
 
+/* Định nghĩa style cho tiêu đề tổng kết */
 .cartSummary h3 {
+  /* Màu chữ */
   color: #333;
+  /* Thêm margin dưới */
   margin-bottom: 15px;
 }
 
+/* Định nghĩa style cho trạng thái giỏ hàng trống */
 .emptyCart {
+  /* Căn giữa text */
   text-align: center;
+  /* Thêm padding */
   padding: 50px 20px;
+  /* Màu nền trắng */
   background-color: #fff;
+  /* Bo tròn góc */
   border-radius: 8px;
+  /* Thêm bóng đổ */
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
+/* Định nghĩa style cho tiêu đề giỏ hàng trống */
 .emptyCart h2 {
+  /* Màu chữ */
   color: #333;
+  /* Thêm margin dưới */
   margin-bottom: 10px;
 }
 
+/* Định nghĩa style cho đoạn văn giỏ hàng trống */
 .emptyCart p {
+  /* Màu chữ */
   color: #666;
+  /* Thêm margin dưới */
   margin-bottom: 20px;
 }
 
+/* Định nghĩa style cho nút tiếp tục mua sắm */
 .continueShopping {
+  /* Hiển thị dưới dạng block inline */
   display: inline-block;
+  /* Màu nền xanh lá */
   background-color: #4CAF50;
+  /* Màu chữ trắng */
   color: white;
+  /* Thêm padding */
   padding: 10px 20px;
+  /* Loại bỏ gạch chân cho link */
   text-decoration: none;
+  /* Bo tròn góc */
   border-radius: 5px;
+  /* Hiệu ứng chuyển đổi */
   transition: background-color 0.3s;
 }
 
+/* Hiệu ứng khi hover vào nút tiếp tục mua sắm */
 .continueShopping:hover {
+  /* Thay đổi màu nền khi hover */
   background-color: #45a049;
 }
 
+/* Định nghĩa style chung cho trạng thái loading và lỗi */
 .loading, .error {
+  /* Căn giữa text */
   text-align: center;
+  /* Thêm padding */
   padding: 20px;
+  /* Màu chữ */
   color: #666;
 }
 
-/* Responsive design */
+/* Media query cho màn hình nhỏ */
 @media (max-width: 600px) {
+  /* Điều chỉnh layout cho item trong giỏ hàng trên màn hình nhỏ */
   .cartItem {
+    /* Chuyển hướng flex thành dọc */
     flex-direction: column;
+    /* Căn các phần tử con về bên trái */
     align-items: flex-start;
   }
 
+  /* Điều chỉnh hình ảnh sản phẩm trên màn hình nhỏ */
   .productImage {
+    /* Chiều rộng 100% */
     width: 100%;
+    /* Chiều cao tự động */
     height: auto;
+    /* Loại bỏ margin phải */
     margin-right: 0;
+    /* Thêm margin dưới */
     margin-bottom: 15px;
   }
 
+  /* Điều chỉnh phần tổng kết giỏ hàng trên màn hình nhỏ */
   .cartSummary {
+    /* Căn giữa text */
     text-align: center;
   }
 }
 
+/* Định nghĩa style cho trạng thái hết hàng */
 .outOfStock {
+  /* Màu chữ đỏ */
   color: red;
+  /* Độ đậm cho chữ */
   font-weight: bold;
 }
 
+/* Định nghĩa style cho container giỏ hàng */
 .cartContainer {
+  /* Thêm padding */
   padding: 20px;
   /* Các style khác */
 }

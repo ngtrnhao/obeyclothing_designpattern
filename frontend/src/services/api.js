@@ -12,6 +12,7 @@ const api = axios.create({
   withCredentials: true
 });
 
+
 // Hàm để set token vào header của mọi request
 export const setAuthToken = (token) => {
   if (token) {
@@ -73,14 +74,18 @@ export const resetPassword = (token, newPassword) => {
 // Products
 export const getProducts = () => api.get('/products');
 export const getProductById = (id) => api.get(`/products/${id}`);
-export const createProduct = (productData) => {
-  const token = localStorage.getItem('token');
-  return api.post('/products', productData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-      'Authorization': `Bearer ${token}`
-    }
-  });
+export const createProduct = async (productData) => {
+  try {
+    const response = await api.post('/products', productData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating product:', error.response?.data || error.message);
+    throw error;
+  }
 };
 export const updateProduct = (id, productData) => api.put(`/products/${id}`, productData);
 export const deleteProduct = (id) => api.delete(`/products/${id}`);
@@ -270,6 +275,37 @@ export const addProductReview = async (productId, reviewData) => {
     const response = await api.post(`/products/${productId}/reviews`, reviewData);
     return response.data;
   } catch (error) {
+    throw error;
+  }
+};
+
+export const createCategory = async (categoryData) => {
+  try {
+    const response = await api.post('/categories', categoryData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating category:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
+
+export const getProductsByCategory = async (categoryId) => {
+  try {
+    const response = await api.get(`/products/category/${categoryId}`);
+    return response;
+  } catch (error) {
+    console.error('Error fetching products by category:', error);
+    throw error;
+  }
+};
+export const getCategoryPath = async (categoryId) => {
+  try {
+    const response = await api.get(`/categories/${categoryId}/path`);
+    return response;
+  } catch (error) {
+    console.error('Error getting category path:', error);
     throw error;
   }
 };

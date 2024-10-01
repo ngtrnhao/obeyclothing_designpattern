@@ -1,121 +1,210 @@
+/* Định nghĩa style cho layout chính */
 .layout {
-  display: flex;
-  flex-direction: column;
+  /* Đảm bảo layout có chiều cao tối thiểu bằng chiều cao của viewport */
   min-height: 100vh;
+  /* Sử dụng flexbox để tổ chức layout */
+  display: flex;
+  /* Sắp xếp các phần tử con theo chiều dọc */
+  flex-direction: column;
 }
 
+/* Định nghĩa style cho thanh phân cách */
+.divider {
+  /* Chiều cao của thanh phân cách */
+  height: 50px;
+  /* Màu nền của thanh phân cách */
+  background-color: #afacac;
+  /* Chiều rộng 100% của container cha */
+  width: 100%;
+}
+
+/* Định nghĩa style cho phần nội dung chính */
 .main {
+  /* Cho phép main content mở rộng để lấp đầy không gian còn lại */
   flex: 1;
-  padding-top: 80px; /* Adjust this value based on your header height */
-  background-color: transparent;
+  /* Sử dụng flexbox cho main content */
+  display: flex;
+  /* Sắp xếp nội dung theo chiều dọc */
+  flex-direction: column;
 }
 
+/* Định nghĩa style cho container chung */
 .container {
+  /* Giới hạn chiều rộng tối đa của container */
   max-width: 1200px;
+  /* Căn giữa container */
   margin: 0 auto;
+  /* Thêm padding cho container */
   padding: 2rem 20px;
 }
 
+/* Định nghĩa style cho header */
 .header {
+  /* Màu nền cho header */
   background-color: #ffffff;
+  /* Thêm padding trên dưới cho header */
   padding: 1rem 0;
+  /* Thêm bóng đổ cho header */
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+/* Định nghĩa style cho container trong header */
 .header .container {
+  /* Sử dụng flexbox cho container trong header */
   display: flex;
+  /* Căn các phần tử con ra hai bên */
   justify-content: space-between;
+  /* Căn giữa các phần tử con theo chiều dọc */
   align-items: center;
 }
 
+/* Định nghĩa style cho logo */
 .logo {
+  /* Màu chữ cho logo */
   color: #333;
+  /* Kích thước chữ cho logo */
   font-size: 1.8rem;
+  /* Độ đậm cho chữ logo */
   font-weight: bold;
+  /* Loại bỏ gạch chân cho link */
   text-decoration: none;
 }
 
+/* Định nghĩa style cho danh sách navigation */
 .navList {
+  /* Loại bỏ dấu chấm đầu dòng của danh sách */
   list-style-type: none;
+  /* Loại bỏ padding mặc định */
   padding: 0;
+  /* Loại bỏ margin mặc định */
   margin: 0;
+  /* Sử dụng flexbox cho danh sách navigation */
   display: flex;
 }
 
+/* Định nghĩa style cho các link trong navigation */
 .navLink {
+  /* Màu chữ cho các link navigation */
   color: #333;
+  /* Loại bỏ gạch chân cho link */
   text-decoration: none;
+  /* Thêm padding cho các link */
   padding: 0.5rem 1rem;
+  /* Thêm margin giữa các link */
   margin: 0 0.25rem;
+  /* Bo tròn góc cho các link */
   border-radius: 4px;
+  /* Hiệu ứng chuyển đổi khi hover */
   transition: background-color 0.3s, color 0.3s;
 }
 
+/* Định nghĩa style cho link khi hover hoặc active */
 .navLink:hover, .navLink.active {
+  /* Màu nền khi hover hoặc active */
   background-color: #f0f0f0;
+  /* Màu chữ khi hover hoặc active */
   color: #3498db;
 }
 
+/* Định nghĩa style cho footer */
 .footer {
+  /* Màu nền cho footer */
   background-color: #333;
+  /* Màu chữ cho footer */
   color: #fff;
+  /* Thêm padding trên dưới cho footer */
   padding: 2rem 0;
 }
 
+/* Định nghĩa style cho nội dung footer */
 .footerContent {
+  /* Sử dụng flexbox cho nội dung footer */
   display: flex;
+  /* Căn các phần tử con ra hai bên */
   justify-content: space-between;
+  /* Thêm margin dưới cho nội dung footer */
   margin-bottom: 1rem;
 }
 
+/* Định nghĩa style cho các phần trong footer */
 .footerSection {
+  /* Cho phép các phần mở rộng để lấp đầy không gian */
   flex: 1;
+  /* Thêm margin phải cho các phần */
   margin-right: 2rem;
 }
 
+/* Định nghĩa style cho tiêu đề trong footer */
 .footerSection h3 {
+  /* Kích thước chữ cho tiêu đề */
   font-size: 1.2rem;
+  /* Thêm margin dưới cho tiêu đề */
   margin-bottom: 1rem;
 }
 
+/* Định nghĩa style cho các link mạng xã hội */
 .socialLinks {
+  /* Sử dụng flexbox cho các link mạng xã hội */
   display: flex;
 }
 
+/* Định nghĩa style cho từng link mạng xã hội */
 .socialLink {
+  /* Màu chữ cho link */
   color: #fff;
+  /* Loại bỏ gạch chân cho link */
   text-decoration: none;
+  /* Thêm margin phải cho link */
   margin-right: 1rem;
+  /* Kích thước chữ cho icon */
   font-size: 1.5rem;
 }
 
+/* Định nghĩa style cho phần copyright */
 .copyright {
+  /* Căn giữa text */
   text-align: center;
+  /* Thêm margin trên cho phần copyright */
   margin-top: 1rem;
+  /* Kích thước chữ cho copyright */
   font-size: 0.9rem;
 }
 
+/* Media query cho màn hình nhỏ hơn 768px */
 @media (max-width: 768px) {
+  /* Điều chỉnh layout cho header trên màn hình nhỏ */
   .header .container {
+    /* Chuyển hướng flex thành dọc */
     flex-direction: column;
+    /* Căn các phần tử con về bên trái */
     align-items: flex-start;
   }
 
+  /* Điều chỉnh danh sách navigation trên màn hình nhỏ */
   .navList {
+    /* Thêm margin trên cho danh sách */
     margin-top: 1rem;
+    /* Cho phép các item wrap xuống dòng */
     flex-wrap: wrap;
   }
 
+  /* Điều chỉnh các link navigation trên màn hình nhỏ */
   .navLink {
+    /* Thêm margin trên dưới cho các link */
     margin: 0.25rem 0;
   }
 
+  /* Điều chỉnh nội dung footer trên màn hình nhỏ */
   .footerContent {
+    /* Chuyển hướng flex thành dọc */
     flex-direction: column;
   }
 
+  /* Điều chỉnh các phần trong footer trên màn hình nhỏ */
   .footerSection {
+    /* Loại bỏ margin phải */
     margin-right: 0;
+    /* Thêm margin dưới */
     margin-bottom: 1rem;
   }
 }

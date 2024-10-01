@@ -1,75 +1,88 @@
 ﻿import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { getProducts } from '../services/api';
+import { Link, useLocation, useParams } from 'react-router-dom';
+import { getProducts, getProductsByCategory, getCategoryPath } from '../services/api';
 import styles from './style.component/ProductList.module.css';
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [categoryPath, setCategoryPath] = useState('');
   const location = useLocation();
+  const { categoryId } = useParams();
 
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const params = {
-      search: searchParams.get('search'),
-      category: searchParams.get('category'),
-      minPrice: searchParams.get('minPrice'),
-      maxPrice: searchParams.get('maxPrice'),
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        let response;
+        if (categoryId) {
+          const [productsResponse, pathResponse] = await Promise.all([
+            getProductsByCategory(categoryId),
+            getCategoryPath(categoryId)
+          ]);
+          response = productsResponse;
+          setCategoryPath(pathResponse.data.path);
+        } else {
+          const searchParams = new URLSearchParams(location.search);
+          const params = {
+            search: searchParams.get('search'),
+            minPrice: searchParams.get('minPrice'),
+            maxPrice: searchParams.get('maxPrice'),
+          };
+          response = await getProducts(params);
+        }
+        setProducts(response.data);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setError('Không thể tải danh sách sản phẩm. Vui lòng thử lại sau.');
+      } finally {
+        setLoading(false);
+      }
     };
-    fetchProducts(params);
-  }, [location.search]);
 
-  const fetchProducts = async (params) => {
-    try {
-      setLoading(true);
-      const response = await getProducts(params);
-      setProducts(response.data || []); // Ensure we always set an array
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      setError('Không thể tải danh sách sản phẩm. Vui lòng thử lại sau.');
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchProducts();
+  }, [location.search, categoryId]);
 
   if (loading) return <div>Đang tải...</div>;
   if (error) return <div>{error}</div>;
 
   return (
     <div className={styles.productList}>
-      <h2>Danh sách sản phẩm</h2>
+      {categoryPath && (
+        <h2 className={styles.categoryPath}>
+          {categoryPath.map((cat, index) => (
+            <React.Fragment key={cat.id}>
+              {index > 0 && " > "}
+              <Link to={`/category/${cat.id}`}>{cat.name}</Link>
+            </React.Fragment>
+          ))}
+        </h2>
+      )}
+      <h2 className={styles.productListTitle}>Danh sách sản phẩm</h2>
       {products && products.length > 0 ? (
         <div className={styles.productGrid}>
           {products.map(product => (
-            <div key={product._id} className={styles.productCard}>
+            <Link to={`/products/${product._id}`} key={product._id} className={styles.productCard}>
               <img 
-                src={`${process.env.REACT_APP_API_URL}${product.image}`}
+                src={product.image ? `${process.env.REACT_APP_API_URL}/uploads/${product.image}` : '/placeholder-image.jpg'}
                 alt={product.name} 
                 className={styles.productImage}
                 onError={(e) => {
                   console.error("Error loading image:", e.target.src);
-                  e.target.onerror = null; // Prevent infinite loop
-                  e.target.src = '/path/to/placeholder-image.jpg'; // Đường dẫn đến hình ảnh placeholder
+                  e.target.onerror = null;
+                  e.target.src = '/placeholder-image.jpg';
                 }}
               />
               <div className={styles.productInfo}>
                 <h3 className={styles.productName}>{product.name}</h3>
                 <p className={styles.productPrice}>{product.price.toLocaleString('vi-VN')} đ</p>
-                {product.stock > 0 ? (
-                  <p className={styles.inStock}>Còn hàng: {product.stock}</p>
-                ) : (
-                  <p className={styles.outOfStock}>Hết hàng</p>
-                )}
-                <Link to={`/products/${product._id}`} className={styles.viewProductButton}>
-                  Xem chi tiết
-                </Link>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       ) : (
-        <p>Không tìm thấy sản phẩm nào phù hợp với tiêu chí tìm kiếm.</p>
+        <p>Không có sản phẩm nào.</p>
       )}
     </div>
   );

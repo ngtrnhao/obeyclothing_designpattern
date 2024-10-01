@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getAdminProducts, updateAdminProduct, deleteAdminProduct } from '../services/api';
+import { getAdminProducts, updateAdminProduct, deleteAdminProduct, getCategories } from '../services/api';
 import { FaSearch, FaSort, FaEdit, FaTrash, FaSave, FaTimes } from 'react-icons/fa';
 import styles from './style.component/ProductManagement.module.css';
 
@@ -12,9 +12,11 @@ const ProductManagement = () => {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(10);
+  const [categories, setCategories] = useState({});
 
   useEffect(() => {
     fetchProducts();
+    fetchCategories();
   }, []);
 
   const fetchProducts = async () => {
@@ -27,6 +29,19 @@ const ProductManagement = () => {
       console.error('Error fetching products:', error);
       setError('Không thể tải danh sách sản phẩm. Vui lòng thử lại sau.');
       setLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await getCategories();
+      const categoryMap = {};
+      response.forEach(cat => {
+        categoryMap[cat._id] = cat.name;
+      });
+      setCategories(categoryMap);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
     }
   };
 
@@ -133,12 +148,7 @@ const ProductManagement = () => {
                   onChange={(e) => setEditingProduct({...editingProduct, price: e.target.value})}
                 /> : `${product.price.toLocaleString('vi-VN')} đ`}
               </td>
-              <td>{editingProduct && editingProduct._id === product._id ? 
-                <input 
-                  value={editingProduct.category} 
-                  onChange={(e) => setEditingProduct({...editingProduct, category: e.target.value})}
-                /> : product.category}
-              </td>
+              <td>{categories[product.category] || 'N/A'}</td>
               <td>
                 {editingProduct && editingProduct._id === product._id ? (
                   <>

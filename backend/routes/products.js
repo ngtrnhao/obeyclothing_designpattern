@@ -4,10 +4,15 @@ const productController = require('../controllers/productController');
 const authMiddleware = require('../middleware/authMiddleware');
 const adminMiddleware = require('../middleware/adminMiddleware');
 const multer = require('multer');
-const upload = multer({ 
-  dest: 'uploads/',
-  limits: { fileSize: 5 * 1024 * 1024 } // Giới hạn kích thước file ( 5MB)
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/')
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname)
+  }
 });
+const upload = multer({ storage: storage });
 
 router.get('/', productController.getAllProducts);
 router.get('/search', productController.searchProducts);
@@ -26,5 +31,7 @@ router.put('/:id', authMiddleware, adminMiddleware, upload.fields([
 ]), productController.updateProduct);
 router.delete('/:id', adminMiddleware, productController.deleteProduct);
 router.post('/:id/reviews', productController.addProductReview);
+
+router.get('/category/:categoryId', productController.getProductsByCategory);
 
 module.exports = router;

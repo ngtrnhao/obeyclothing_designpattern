@@ -1,91 +1,155 @@
+/* Định nghĩa style cho container chính của trang chủ */
 .homeContainer {
+  /* Căn giữa nội dung */
   text-align: center;
+  /* Thêm padding xung quanh */
   padding: 2rem;
+  /* Giới hạn chiều rộng tối đa */
   max-width: 1200px;
+  /* Căn giữa container */
   margin: 0 auto;
 }
 
+/* Định nghĩa style cho tiêu đề trang chủ */
 .homeTitle {
+  /* Kích thước chữ cho tiêu đề */
   font-size: 2.5rem;
+  /* Màu chữ cho tiêu đề */
   color: #333;
+  /* Thêm margin dưới cho tiêu đề */
   margin-bottom: 1rem;
 }
 
+/* Định nghĩa style cho mô tả trang chủ */
 .homeDescription {
+  /* Kích thước chữ cho mô tả */
   font-size: 1.2rem;
+  /* Màu chữ cho mô tả */
   color: #666;
+  /* Khoảng cách giữa các dòng */
   line-height: 1.6;
+  /* Thêm margin dưới cho mô tả */
   margin-bottom: 2rem;
 }
 
+/* Định nghĩa style cho phần danh mục nổi bật */
 .featuredCategories {
+  /* Thêm margin dưới cho phần danh mục */
   margin-bottom: 3rem;
 }
 
+/* Định nghĩa style cho lưới danh mục */
 .categoryGrid {
+  /* Sử dụng CSS Grid */
   display: grid;
+  /* Tự động điều chỉnh số cột dựa trên kích thước màn hình */
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  /* Khoảng cách giữa các item */
   gap: 1rem;
+  /* Thêm margin trên cho lưới */
   margin-top: 1rem;
 }
 
+/* Định nghĩa style cho từng card danh mục */
 .categoryCard {
+  /* Đặt vị trí tương đối cho card */
   position: relative;
+  /* Ẩn phần nội dung tràn ra ngoài */
   overflow: hidden;
+  /* Bo tròn góc cho card */
   border-radius: 8px;
+  /* Thêm bóng đổ cho card */
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  /* Hiệu ứng chuyển đổi khi hover */
   transition: transform 0.3s ease;
 }
 
+/* Hiệu ứng khi hover vào card danh mục */
 .categoryCard:hover {
+  /* Di chuyển card lên trên một chút */
   transform: translateY(-5px);
 }
 
+/* Định nghĩa style cho hình ảnh danh mục */
 .categoryImage {
+  /* Chiều rộng 100% của container */
   width: 100%;
+  /* Chiều cao cố định */
   height: 200px;
+  /* Đảm bảo hình ảnh lấp đầy khoảng trống và không bị méo */
   object-fit: cover;
 }
 
+/* Định nghĩa style cho tên danh mục */
 .categoryName {
+  /* Đặt vị trí tuyệt đối so với card */
   position: absolute;
+  /* Đặt ở dưới cùng của card */
   bottom: 0;
+  /* Căn trái */
   left: 0;
+  /* Căn phải */
   right: 0;
+  /* Màu nền với độ trong suốt */
   background-color: rgba(0, 0, 0, 0.6);
+  /* Màu chữ trắng */
   color: white;
+  /* Thêm padding */
   padding: 0.5rem;
+  /* Kích thước chữ */
   font-size: 1.1rem;
 }
 
+/* Định nghĩa style cho phần call-to-action */
 .callToAction {
+  /* Thêm margin trên */
   margin-top: 3rem;
 }
 
+/* Định nghĩa style cho nút call-to-action */
 .ctaButton {
+  /* Hiển thị dưới dạng block inline */
   display: inline-block;
+  /* Màu nền cho nút */
   background-color: #3498db;
+  /* Màu chữ trắng */
   color: white;
+  /* Thêm padding */
   padding: 1rem 2rem;
+  /* Bo tròn góc */
   border-radius: 4px;
+  /* Loại bỏ gạch chân cho link */
   text-decoration: none;
+  /* Kích thước chữ */
   font-size: 1.1rem;
+  /* Hiệu ứng chuyển đổi khi hover */
   transition: background-color 0.3s ease;
 }
 
+/* Hiệu ứng khi hover vào nút call-to-action */
 .ctaButton:hover {
+  /* Thay đổi màu nền khi hover */
   background-color: #2980b9;
 }
 
+/* Định nghĩa style cho phần thông tin người dùng */
 .userInfo {
+  /* Màu nền xám nhạt */
   background-color: #f0f0f0;
+  /* Thêm padding */
   padding: 1rem;
+  /* Bo tròn góc */
   border-radius: 8px;
+  /* Thêm margin trên */
   margin-top: 2rem;
 }
 
+/* Định nghĩa style cho thông báo admin */
 .adminMessage {
+  /* Màu chữ đỏ */
   color: #e74c3c;
+  /* Độ đậm cho chữ */
   font-weight: bold;
+  /* Thêm margin trên */
   margin-top: 0.5rem;
 }

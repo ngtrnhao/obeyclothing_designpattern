@@ -1,6 +1,8 @@
 const Product = require('../models/Product');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
+const Category = require('../models/Category'); // Thêm dòng này ở đầu file
+
 exports.getAllProducts = async (req, res) => {
   try {
     const products = await Product.find();
@@ -24,31 +26,36 @@ exports.getProductById = async (req, res) => {
 };
 
 exports.createProduct = async (req, res) => {
-  console.log('Received product creation request:', req.body);
-  console.log('Received files:', req.files);
   try {
     const { name, description, price, category, stock, sizes, colors } = req.body;
-    if (!name || !description || !price || !category || !stock) {
-      return res.status(400).json({ message: 'Vui lòng điền đầy đủ thông tin sản phẩm' });
+    let image = '';
+    let detailImages = [];
+
+    if (req.files) {
+      if (req.files['image']) {
+        image = '/uploads/' + req.files['image'][0].filename;
+      }
+      if (req.files['detailImages']) {
+        detailImages = req.files['detailImages'].map(file => '/uploads/' + file.filename);
+      }
     }
-    const product = new Product({
+
+    const newProduct = new Product({
       name,
       description,
-      price: Number(price),
+      price,
       category,
-      stock: Number(stock),
+      stock,
+      image,
+      detailImages,
       sizes: sizes ? sizes.split(',').map(size => size.trim()) : [],
-      colors: colors ? colors.split(',').map(color => color.trim()) : [],
-      image: req.files.image ? `/uploads/${req.files.image[0].filename}` : '',
-      detailImages: req.files.detailImages 
-        ? req.files.detailImages.map(file => `/uploads/${file.filename}`)
-        : []
+      colors: colors ? colors.split(',').map(color => color.trim()) : []
     });
-    await product.save();
-    res.status(201).json(product);
+
+    await newProduct.save();
+    res.status(201).json(newProduct);
   } catch (error) {
-    console.error('Error creating product:', error);
-    res.status(500).json({ message: 'Lỗi server khi tạo sản phẩm', error: error.message });
+    res.status(400).json({ message: 'Lỗi khi tạo sản phẩm', error: error.message });
   }
 };
 
@@ -125,7 +132,12 @@ exports.searchProducts = async (req, res) => {
     }
 
     if (category) {
-      query.category = category;
+      const categoryObj = await Category.findById(category);
+      if (categoryObj) {
+        const childCategories = await Category.find({ parent: category });
+        const categoryIds = [category, ...childCategories.map(c => c._id)];
+        query.category = { $in: categoryIds };
+      }
     }
 
     if (minPrice || maxPrice) {
@@ -148,6 +160,27 @@ exports.searchProducts = async (req, res) => {
       .sort(sortOption)
       .limit(20);
 
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
+};
+
+exports.getProductsByCategory = async (req, res) => {
+  try {
+    const categoryId = req.params.categoryId;
+    const category = await Category.findById(categoryId);
+    if (!category) {
+      return res.status(404).json({ message: 'Không tìm thấy danh mục' });
+    }
+
+    let categoryIds = [categoryId];
+    if (category.children && category.children.length > 0) {
+      const childCategories = await Category.find({ parent: categoryId });
+      categoryIds = [...categoryIds, ...childCategories.map(c => c._id)];
+    }
+
+    const products = await Product.find({ category: { $in: categoryIds } });
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: 'Lỗi server', error: error.message });

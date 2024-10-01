@@ -1,11 +1,12 @@
 ﻿import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getProductById, addToCart, getCart, getProducts } from '../services/api';
+import { getProductById, addToCart, getCart, getProducts, getCategoryPath } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { CartContext } from '../contexts/CartContext';
 import styles from './style.component/ProductDetail.module.css';
 import ProductReviews from './ProductReviews';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'; // Thêm import cho biểu tượng mũi tên
+import placeholderImage from '../components/placeholder.png'
 
 const ProductDetail = () => {
   const [product, setProduct] = useState(null);
@@ -19,11 +20,13 @@ const ProductDetail = () => {
   const { user } = useAuth();
   const { setCartItems } = useContext(CartContext);
   const navigate = useNavigate();
+  const [categoryPath, setCategoryPath] = useState('');
 
   useEffect(() => {
     const fetchProductAndRelated = async () => {
       try {
         const productResponse = await getProductById(id);
+        console.log('Product data:', productResponse.data);
         setProduct(productResponse.data);
         setSelectedImage(0);
         if (productResponse.data.sizes.length > 0) {
@@ -47,6 +50,20 @@ const ProductDetail = () => {
     };
     fetchProductAndRelated();
   }, [id]);
+
+  useEffect(() => {
+    const fetchCategoryPath = async () => {
+      if (product && product.category) {
+        try {
+          const response = await getCategoryPath(product.category);
+          setCategoryPath(response.path);
+        } catch (error) {
+          console.error('Error fetching category path:', error);
+        }
+      }
+    };
+    fetchCategoryPath();
+  }, [product]);
 
   const handleAddToCart = async () => {
     if (!user) {
@@ -99,6 +116,11 @@ const ProductDetail = () => {
     }
   };
 
+  const imageUrl = (img) => {
+    if (!img) return placeholderImage;
+    if (img.startsWith('http')) return img;
+    return `${process.env.REACT_APP_API_URL}/uploads/${img.split('/').pop()}`;
+  };
   if (!product) return <div className={styles.loading}>Đang tải...</div>;
   if (error) return <div className={styles.error}>{error}</div>;
 
@@ -108,20 +130,34 @@ const ProductDetail = () => {
         <div className={styles.imageSection}>
           <div className={styles.thumbnails}>
             {[product.image, ...(product.detailImages || [])].map((img, index) => (
-              <img
-                key={index}
-                src={`${process.env.REACT_APP_API_URL}${img}`}
-                alt={`Thumbnail ${index + 1}`}
-                className={`${styles.thumbnail} ${selectedImage === index ? styles.selected : ''}`}
+              <div 
+                key={index} 
+                className={`${styles.thumbnailContainer} ${selectedImage === index ? styles.selected : ''}`}
                 onClick={() => setSelectedImage(index)}
-              />
+              >
+                <img
+                  src={imageUrl(img)}
+                  alt={`Thumbnail ${index + 1}`}
+                  className={styles.thumbnail}
+                  onError={(e) => {
+                    console.error("Error loading image:", e.target.src);
+                    e.target.onerror = null;
+                    e.target.src = placeholderImage;
+                  }}
+                />
+              </div>
             ))}
           </div>
           <div className={styles.mainImageContainer}>
             <img
               className={styles.mainImage}
-              src={`${process.env.REACT_APP_API_URL}${[product.image, ...(product.detailImages || [])][selectedImage]}`}
+              src={imageUrl([product.image, ...(product.detailImages || [])][selectedImage])}
               alt={product.name}
+              onError={(e) => {
+                console.error("Error loading image:", e.target.src);
+                e.target.onerror = null;
+                e.target.src = placeholderImage;
+              }}
             />
             <div className={styles.imageNavigation}>
               <button onClick={handlePrevImage} disabled={selectedImage === 0} className={styles.navButton}>
@@ -136,7 +172,7 @@ const ProductDetail = () => {
         <div className={styles.productInfo}>
           <h1 className={styles.productName}>{product.name}</h1>
           <p className={styles.price}>{product.price.toLocaleString('vi-VN')} đ</p>
-          <p className={styles.category}>Danh mục: {product.category}</p>
+          <p className={styles.category}>Danh mục: {categoryPath}</p>
           <p className={styles.description}>{product.description}</p>
           <div className={styles.colorSection}>
             <span className={styles.label}>Màu sắc:</span>

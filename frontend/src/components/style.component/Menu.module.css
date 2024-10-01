@@ -1,0 +1,68 @@
+.menuWrapper {
+    position: fixed;
+    top: 60px; /* Điều chỉnh theo chiều cao của header */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    overflow-y: auto;
+}
+
+.menuOverlay {
+    background-color: white;
+    width: 300px;
+    max-height: calc(100vh - 60px); /* Chiều cao tối đa là chiều cao viewport trừ đi chiều cao header */
+    overflow-y: auto;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+
+.closeButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.menuContent {
+    padding: 20px;
+}
+
+.categoryItem {
+    margin-bottom: 20px;
+}
+
+.categoryTitle {
+    font-size: 18px;
+    font-weight: 800; /* Tăng độ đậm cho danh mục cha */
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.subcategoryList {
+    padding-left: 10px;
+}
+
+.subcategoryLink {
+    display: block;
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+    padding: 5px 0;
+    transition: color 0.3s ease;
+}
+
+.subcategoryLink:hover {
+    color: #000;
+}
+
+/* Thêm style cho danh mục đặc biệt */
+.categoryTitle[data-category="SALE"] {
+    color: red;
+}

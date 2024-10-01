@@ -1,74 +1,127 @@
+/* Định nghĩa style cho container đăng nhập */
 .loginContainer {
-    max-width: 350px;
-    margin: 50px auto;
-    padding: 30px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-  }
-  
-  .loginTitle {
-    text-align: center;
-    color: #333;
-    font-size: 24px;
-    margin-bottom: 20px;
-  }
-  
-  .formGroup {
-    margin-bottom: 20px;
-  }
-  
-  .label {
-    display: block;
-    margin-bottom: 5px;
-    color: #555;
-    font-weight: bold;
-  }
-  
-  .input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 16px;
-  }
-  
-  .button {
-    width: 100%;
-    padding: 12px;
-    background-color: #3498db;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .button:hover {
-    background-color: #2980b9;
-  }
-  
-  .button:disabled {
-    background-color: #bdc3c7;
-    cursor: not-allowed;
-  }
-  
-  .errorMessage {
-    color: #e74c3c;
-    text-align: center;
-    margin-top: 10px;
-  }
-  
-  .successMessage {
-    color: #2ecc71;
-    text-align: center;
-    margin-top: 10px;
-  }
-  
-  .roleMessage {
-    text-align: center;
-    margin-top: 15px;
-    font-weight: bold;
-    color: #3498db;
-  }
+  /* Giới hạn chiều rộng tối đa */
+  max-width: 350px;
+  /* Căn giữa container và thêm margin trên dưới */
+  margin: 50px auto;
+  /* Thêm padding xung quanh */
+  padding: 30px;
+  /* Màu nền xám nhạt */
+  background-color: #f9f9f9;
+  /* Bo tròn góc */
+  border-radius: 8px;
+  /* Thêm bóng đổ */
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Định nghĩa style cho tiêu đề đăng nhập */
+.loginTitle {
+  /* Căn giữa text */
+  text-align: center;
+  /* Màu chữ */
+  color: #333;
+  /* Kích thước chữ */
+  font-size: 24px;
+  /* Thêm margin dưới */
+  margin-bottom: 20px;
+}
+
+/* Định nghĩa style cho nhóm form */
+.formGroup {
+  /* Thêm margin dưới */
+  margin-bottom: 20px;
+}
+
+/* Định nghĩa style cho label */
+.label {
+  /* Hiển thị dưới dạng block */
+  display: block;
+  /* Thêm margin dưới */
+  margin-bottom: 5px;
+  /* Màu chữ */
+  color: #555;
+  /* Độ đậm cho chữ */
+  font-weight: bold;
+}
+
+/* Định nghĩa style cho input */
+.input {
+  /* Chiều rộng 100% */
+  width: 100%;
+  /* Thêm padding */
+  padding: 10px;
+  /* Thêm viền */
+  border: 1px solid #ddd;
+  /* Bo tròn góc */
+  border-radius: 4px;
+  /* Kích thước chữ */
+  font-size: 16px;
+}
+
+/* Định nghĩa style cho nút */
+.button {
+  /* Chiều rộng 100% */
+  width: 100%;
+  /* Thêm padding */
+  padding: 12px;
+  /* Màu nền xanh dương */
+  background-color: #3498db;
+  /* Màu chữ trắng */
+  color: white;
+  /* Loại bỏ viền */
+  border: none;
+  /* Bo tròn góc */
+  border-radius: 4px;
+  /* Kích thước chữ */
+  font-size: 16px;
+  /* Thay đổi con trỏ khi di chuột qua */
+  cursor: pointer;
+  /* Hiệu ứng chuyển đổi */
+  transition: background-color 0.3s;
+}
+
+/* Hiệu ứng khi hover vào nút */
+.button:hover {
+  /* Thay đổi màu nền khi hover */
+  background-color: #2980b9;
+}
+
+/* Style cho nút khi bị vô hiệu hóa */
+.button:disabled {
+  /* Màu nền xám */
+  background-color: #bdc3c7;
+  /* Thay đổi con trỏ */
+  cursor: not-allowed;
+}
+
+/* Định nghĩa style cho thông báo lỗi */
+.errorMessage {
+  /* Màu chữ đỏ */
+  color: #e74c3c;
+  /* Căn giữa text */
+  text-align: center;
+  /* Thêm margin trên */
+  margin-top: 10px;
+}
+
+/* Định nghĩa style cho thông báo thành công */
+.successMessage {
+  /* Màu chữ xanh lá */
+  color: #2ecc71;
+  /* Căn giữa text */
+  text-align: center;
+  /* Thêm margin trên */
+  margin-top: 10px;
+}
+
+/* Định nghĩa style cho thông báo vai trò */
+.roleMessage {
+  /* Căn giữa text */
+  text-align: center;
+  /* Thêm margin trên */
+  margin-top: 15px;
+  /* Độ đậm cho chữ */
+  font-weight: bold;
+  /* Màu chữ xanh dương */
+  color: #3498db;
+}

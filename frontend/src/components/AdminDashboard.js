@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { FaChartLine, FaShoppingCart, FaUsers, FaBox, FaPlus } from 'react-icons/fa';
+import { FaChartLine, FaShoppingCart, FaUsers, FaBox, FaPlus, FaTags } from 'react-icons/fa';
 import styles from './style.component/AdminDashboard.module.css';
 
 const AdminDashboard = () => {
@@ -9,6 +9,7 @@ const AdminDashboard = () => {
   const navItems = [
     { path: '/admin/statistics', icon: <FaChartLine />, text: 'Thống kê' },
     { path: '/admin/products', icon: <FaBox />, text: 'Quản lý sản phẩm' },
+    { path: '/admin/categories', icon: <FaTags />, text: 'Quản lý danh mục' },
     { path: '/admin/orders', icon: <FaShoppingCart />, text: 'Quản lý đơn hàng' },
     { path: '/admin/users', icon: <FaUsers />, text: 'Quản lý người dùng' },
     { path: '/admin/create-product', icon: <FaPlus />, text: 'Tạo sản phẩm mới' },

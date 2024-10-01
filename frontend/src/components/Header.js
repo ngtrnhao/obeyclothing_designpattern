@@ -1,82 +1,64 @@
-import React, { useState, useEffect } from 'react';
-import { Link, NavLink } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import SearchBar from './SearchBar';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import styles from './style.component/Header.module.css';
-import { FaUserCircle, FaShoppingCart, FaSearch } from 'react-icons/fa';
+import Menu from './Menu';
 
 const Header = () => {
-  const { user, logout, loading } = useAuth();
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const getDashboardLink = () => {
-    if (!user) return null;
-    return user.role === 'admin' ? '/admin/dashboard' : '/user/dashboard';
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
   };
-
-  const toggleSearch = () => {
-    setShowSearch(!showSearch);
-  };
-
-  if (loading) {
-    return <div>Loading...</div>; // Or any loading indicator
-  }
 
   return (
     <>
-      <header className={`${styles.header} ${isScrolled ? styles.headerScrolled : ''}`}>
-        <div className={styles.leftSection}>
-          <nav className={styles.nav}>
-            <ul>
-              <li><NavLink to="/" end className={({ isActive }) => isActive ? styles.active : ''}>Trang chủ</NavLink></li>
-              <li><NavLink to="/products" className={({ isActive }) => isActive ? styles.active : ''}>Sản phẩm</NavLink></li>
-            </ul>
-          </nav>
-        </div>
-        <div className={styles.centerSection}>
-         <a href="/" className={styles.logo}>Fashion Store</a>
-        </div>
-        <div className={styles.rightSection}>
-          <button onClick={toggleSearch} className={styles.iconButton}>
-            <FaSearch />
-          </button>
-          <Link to="/cart" className={styles.iconLink}>
-            <FaShoppingCart />
-          </Link>
-          {user && (
-            <Link to={getDashboardLink()} className={styles.iconLink}>
-              <FaUserCircle />
-            </Link>
-          )}
-          <div className={styles.auth}>
-            {user ? (
-              <>
-                <span>Xin chào, {user?.username || user.email || 'Người dùng'}</span>
-                <button onClick={logout} className={styles.logoutButton}>Đăng xuất</button>
-              </>
-            ) : (
-              <Link to="/auth" className={styles.loginButton}>Đăng nhập</Link>
-            )}
+      <header className={styles.header}>
+        <div className={styles.headerWrapper}>
+          <div className={styles.leftSection}>
+            <button 
+              className={styles.menuButton}
+              onClick={toggleMenu}
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            >
+              {isMenuOpen ? (
+                <svg 
+                  className={styles.menuIcon} 
+                  viewBox="0 0 800 800" 
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <line x1="200" y1="200" x2="600" y2="600" strokeWidth="40"/>
+                  <line x1="200" y1="600" x2="600" y2="200" strokeWidth="40"/>
+                </svg>
+              ) : (
+                <svg 
+                  className={styles.menuIcon} 
+                  viewBox="0 0 800 800" 
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect x="150" y="220" width="500" height="40"/>
+                  <rect x="150" y="380" width="500" height="40"/>
+                  <rect x="150" y="540" width="500" height="40"/>
+                </svg>
+              )}
+            </button>
+          </div>
+          <div className={styles.centerSection}>
+            <Link to="/" className={styles.logo}>OBEY</Link>
+          </div>
+          <div className={styles.rightSection}>
+            <button className={styles.searchButton}>
+              🔍
+            </button>
+            <div className={styles.rightLinks}>
+              <Link to="/auth" className={styles.signInLink}>SIGN IN</Link>
+              <Link to="/cart" className={styles.bagLink}>
+                BAG <span className={styles.bagCount}></span>
+              </Link>
+            </div>
           </div>
         </div>
       </header>
-      {showSearch && (
-        <div className={styles.searchOverlay}>
-          <div className={styles.searchWrapper}>
-            <SearchBar onClose={toggleSearch} />
-          </div>
-        </div>
-      )}
+      <Menu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
     </>
   );
 };

@@ -18,6 +18,7 @@ import Statistics from './components/Statistics';
 import UserProfile from './components/UserProfile';
 import UserOrders from './components/UserOrders';
 import OrderSuccess from './components/OrderSuccess';
+import CategoryManagement from './components/CategoryManagement';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user } = useAuth();
@@ -37,6 +38,7 @@ const AppRoutes = () => {
       <Route path="/cart" element={<Cart />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
+      <Route path="/category/:categoryId" element={<ProductList />} /> {/* Sử dụng ProductList cho cả danh mục */}
       
       <Route 
         path="/user/*" 
@@ -64,6 +66,7 @@ const AppRoutes = () => {
         <Route path="users" element={<UserManagement />} />
         <Route path="create-product" element={<CreateProduct />} />
         <Route path="statistics" element={<Statistics />} />
+        <Route path="categories" element={<CategoryManagement />} /> {/* Thêm dòng này */}
       </Route>
       
       <Route path="/order-success" element={<OrderSuccess />} />
