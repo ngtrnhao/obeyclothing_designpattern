@@ -1,23 +1,25 @@
 .menuWrapper {
-    position: fixed;
-    top: 60px; /* Điều chỉnh theo chiều cao của header */
+    position: absolute;
+    top: 110px; /* 60px cho header + 50px cho divider */
     left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    width: 300px; /* Chiều rộng cố định cho menu */
+    max-height: calc(100vh - 110px); /* Chiều cao tối đa */
+    background-color: white;
     z-index: 1000;
-    display: flex;
-    justify-content: flex-start;
-    align-items: flex-start;
-    overflow-y: auto;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    transform: translateX(-100%); /* Ẩn menu ban đầu */
+    transition: transform 0.3s ease-in-out 0.1s; /* Giữ delay 0.1s */
+    overflow: hidden; /* Ẩn thanh cuộn */
+}
+
+.menuWrapper.open {
+    transform: translateX(0); /* Hiện menu khi mở */
 }
 
 .menuOverlay {
-    background-color: white;
-    width: 300px;
-    max-height: calc(100vh - 60px); /* Chiều cao tối đa là chiều cao viewport trừ đi chiều cao header */
-    overflow-y: auto;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    padding: 20px;
+    height: 100%; /* Đảm bảo overlay lấp đầy toàn bộ chiều cao của wrapper */
+    overflow-y: auto; /* Cho phép cuộn trong menu nếu nội dung dài */
 }
 
 .closeButton {
@@ -30,23 +32,31 @@
     cursor: pointer;
 }
 
-.menuContent {
-    padding: 20px;
-}
-
 .categoryItem {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
-.categoryTitle {
-    font-size: 18px;
-    font-weight: 800; /* Tăng độ đậm cho danh mục cha */
-    margin-bottom: 10px;
-    text-transform: uppercase;
+.categoryHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 5px 0;
+}
+
+.categoryLink {
+    color: #333;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.toggleIndicator {
+    font-size: 12px;
 }
 
 .subcategoryList {
-    padding-left: 10px;
+    padding-left: 20px;
+    margin-top: 5px;
 }
 
 .subcategoryLink {

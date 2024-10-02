@@ -49,15 +49,96 @@
     flex: 1;
   }
   
-z  .productName {
+  .productName {
     font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .productColor {
+    font-size: 18px;
+    color: #666;
     margin-bottom: 10px;
   }
   
   .price {
     font-size: 20px;
     font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .sizeSection {
+    margin-bottom: 20px;
+  }
+  
+  .sizeButtons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .sizeButton {
+    padding: 10px 20px;
+    border: 1px solid #ccc;
+    background-color: white;
+    cursor: pointer;
+  }
+  
+  .selectedSize {
+    background-color: #000;
+    color: white;
+  }
+  
+  .outOfStock {
+    margin-bottom: 20px;
+  }
+  
+  .input {
+    display: block;
+    width: 100%;
+    padding: 10px;
     margin-bottom: 10px;
+    border: 1px solid #ccc;
+  }
+  
+  .subscribeButton, .viewSizeGuide, .addToBasket {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #000;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .viewSizeGuide {
+    background-color: white;
+    color: #000;
+    border: 1px solid #000;
+  }
+  
+  .description {
+    margin-top: 30px;
+  }
+  
+  .description h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .description ul {
+    list-style-type: none;
+    padding-left: 0;
+  }
+  
+  .description li {
+    margin-bottom: 5px;
+  }
+  
+  .sku {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #666;
   }
   
   .category, .description {
@@ -205,4 +286,43 @@ z  .productName {
   .smallArrow {
     font-size: 0.8rem; /* Adjust the size as needed */
     padding: 0.5rem; /* Adjust padding for better click area */
+  }
+  
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modalContent {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+  }
+  
+  .modalButtons {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+  }
+  
+  .modalButtons button {
+    padding: 10px 20px;
+    background-color: #000;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .modalButtons button:hover {
+    background-color: #333;
   }

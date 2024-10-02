@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { getCategories } from '../services/api';
 import styles from './style.component/Menu.module.css';
 
@@ -7,37 +7,106 @@ const Menu = ({ isOpen, onClose }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [expandedCategories, setExpandedCategories] = useState({});
+  const menuRef = useRef(null);
+  const timeoutRef = useRef(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await getCategories();
+      setCategories(response);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      setError('Failed to load categories');
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setLoading(true);
-        const response = await getCategories();
-        setCategories(response);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-        setError('Failed to load categories');
-        setLoading(false);
+    fetchCategories();
+  }, [fetchCategories]);
+
+  useEffect(() => {
+    // Reset menu state when location changes
+    setExpandedCategories({});
+    fetchCategories();
+  }, [location, fetchCategories]);
+
+  const handleClose = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      onClose();
+    }, 50);
+  }, [onClose]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target) && !event.target.closest('.menuButton')) {
+        handleClose();
       }
     };
 
     if (isOpen) {
-      fetchCategories();
+      document.addEventListener('mousedown', handleClickOutside);
+      document.body.classList.add('menu-open');
+    } else {
+      document.body.classList.remove('menu-open');
     }
-  }, [isOpen]);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.body.classList.remove('menu-open');
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [isOpen, handleClose]);
+
+  const handleCategoryClick = (category, event) => {
+    event.preventDefault();
+    if (category.children && category.children.length > 0) {
+      setExpandedCategories(prev => ({
+        ...prev,
+        [category._id]: !prev[category._id]
+      }));
+    } else {
+      navigate(`/category/${category._id}`);
+      handleClose();
+    }
+  };
+
+  const handleCategoryLinkClick = (category, event) => {
+    event.stopPropagation();
+    navigate(`/category/${category._id}`);
+    handleClose();
+  };
 
   const renderCategories = (categories) => {
     return categories.map((category) => (
       <div key={category._id} className={styles.categoryItem}>
-        <Link 
-          to={`/category/${category._id}`} 
-          className={styles.categoryLink}
-          onClick={onClose}
+        <div 
+          className={styles.categoryHeader}
+          onClick={(e) => handleCategoryClick(category, e)}
         >
-          {category.name}
-        </Link>
-        {category.children && category.children.length > 0 && (
+          <span 
+            className={styles.categoryLink}
+            onClick={(e) => handleCategoryLinkClick(category, e)}
+          >
+            {category.name}
+          </span>
+          {category.children && category.children.length > 0 && (
+            <span className={styles.toggleIndicator}>
+              {expandedCategories[category._id] ? '▼' : '▶'}
+            </span>
+          )}
+        </div>
+        {category.children && category.children.length > 0 && expandedCategories[category._id] && (
           <div className={styles.subcategoryList}>
             {renderCategories(category.children)}
           </div>
@@ -46,12 +115,9 @@ const Menu = ({ isOpen, onClose }) => {
     ));
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className={styles.menuWrapper}>
+    <div className={`${styles.menuWrapper} ${isOpen ? styles.open : ''}`} ref={menuRef}>
       <div className={styles.menuOverlay}>
-        <button className={styles.closeButton} onClick={onClose}>&times;</button>
         <div className={styles.menuContent}>
           {loading && <p>Loading categories...</p>}
           {error && <p>{error}</p>}

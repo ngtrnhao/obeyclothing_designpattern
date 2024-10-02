@@ -21,6 +21,7 @@ const ProductDetail = () => {
   const { setCartItems } = useContext(CartContext);
   const navigate = useNavigate();
   const [categoryPath, setCategoryPath] = useState('');
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const fetchProductAndRelated = async () => {
@@ -78,7 +79,7 @@ const ProductDetail = () => {
       await addToCart(id, quantity, selectedSize, selectedColor);
       const updatedCart = await getCart();
       setCartItems(updatedCart.items);
-      navigate('/cart');
+      setShowModal(true); // Show the modal after successfully adding to cart
     } catch (err) {
       console.error('Error adding to cart:', err);
       setError('Không thể thêm sản phẩm vào giỏ hàng');
@@ -171,58 +172,71 @@ const ProductDetail = () => {
         </div>
         <div className={styles.productInfo}>
           <h1 className={styles.productName}>{product.name}</h1>
-          <p className={styles.price}>{product.price.toLocaleString('vi-VN')} đ</p>
-          <p className={styles.category}>Danh mục: {categoryPath}</p>
-          <p className={styles.description}>{product.description}</p>
-          <div className={styles.colorSection}>
-            <span className={styles.label}>Màu sắc:</span>
-            <select
-              value={selectedColor}
-              onChange={(e) => setSelectedColor(e.target.value)}
-              className={styles.colorSelect}
-            >
-              {product.colors.map((color, index) => (
-                <option key={index} value={color}>{color}</option>
-              ))}
-            </select>
-          </div>
+          <p className={styles.productColor}>{product.colors[0]}</p>
+          <p className={styles.price}>£{product.price.toFixed(2)}</p>
+          
           <div className={styles.sizeSection}>
-            <span className={styles.label}>Kích thước:</span>
-            <select
-              value={selectedSize}
-              onChange={(e) => setSelectedSize(e.target.value)}
-              className={styles.sizeSelect}
-            >
-              {product.sizes.map((size, index) => (
-                <option key={index} value={size}>{size}</option>
+            <p>SIZE</p>
+            <div className={styles.sizeButtons}>
+              {product.sizes.map((size) => (
+                <button
+                  key={size}
+                  className={`${styles.sizeButton} ${selectedSize === size ? styles.selectedSize : ''}`}
+                  onClick={() => setSelectedSize(size)}
+                >
+                  {size}
+                </button>
               ))}
-            </select>
-          </div>
-          <div className={styles.quantitySection}>
-            <span className={styles.label}>Số lượng:</span>
-            <div className={styles.quantityControl}>
-              <button onClick={decrementQuantity} className={styles.quantityButton}>-</button>
-              <input
-                type="number"
-                value={quantity}
-                onChange={handleQuantityChange}
-                min="1"
-                max={product.stock}
-                className={styles.quantityInput}
-              />
-              <button onClick={incrementQuantity} className={styles.quantityButton}>+</button>
             </div>
           </div>
-          <p className={styles.stock}>
-            {product.stock > 0 ? `Còn hàng: ${product.stock}` : 'Hết hàng'}
-          </p>
-          <button 
-            className={styles.addToCartButton} 
-            onClick={handleAddToCart} 
-            disabled={product.stock === 0}
-          >
-            {product.stock > 0 ? 'Thêm vào giỏ hàng' : 'Hết hàng'}
-          </button>
+
+          <button className={styles.viewSizeGuide}>VIEW SIZE GUIDE</button>
+
+          {product.stock === 0 ? (
+            <div className={styles.outOfStock}>
+              <p>EMAIL WHEN STOCK AVAILABLE</p>
+              <input type="text" placeholder="Your Name" className={styles.input} />
+              <input type="email" placeholder="nguyentruongnhathao1922@gmail.com" className={styles.input} />
+              <button className={styles.subscribeButton}>SUBSCRIBE NOW</button>
+            </div>
+          ) : (
+            <>
+              <div className={styles.quantitySection}>
+                <span className={styles.label}>Số lượng:</span>
+                <div className={styles.quantityControl}>
+                  <button onClick={decrementQuantity} className={styles.quantityButton}>-</button>
+                  <input
+                    type="number"
+                    value={quantity}
+                    onChange={handleQuantityChange}
+                    min="1"
+                    max={product.stock}
+                    className={styles.quantityInput}
+                  />
+                  <button onClick={incrementQuantity} className={styles.quantityButton}>+</button>
+                </div>
+              </div>
+              <button 
+                className={styles.addToBasket} 
+                onClick={handleAddToCart}
+              >
+                ADD TO BASKET
+              </button>
+            </>
+          )}
+
+          <div className={styles.description}>
+            <h2>DESCRIPTION</h2>
+            <p>{product.description}</p>
+          </div>
+
+          <p className={styles.category}>Danh mục: {categoryPath}</p>
+          <p className={styles.sku}>SKU: {product._id}</p>
+
+          <div className={styles.additionalInfo}>
+            <p className={styles.deliveryReturns}>DELIVERY & RETURNS</p>
+            <p className={styles.questions}>QUESTIONS?</p>
+          </div>
         </div>
       </div>
 
@@ -240,6 +254,18 @@ const ProductDetail = () => {
                 <Link to={`/products/${relatedProduct._id}`}>Xem chi tiết</Link>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {showModal && (
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <h2>Bạn đã thêm sản phẩm vào giỏ hàng !!</h2>
+            <div className={styles.modalButtons}>
+              <button onClick={() => { setShowModal(false); navigate('/products'); }}>Tiếp tục mua hàng</button>
+              <button onClick={() => { setShowModal(false); navigate('/cart'); }}>Xem giỏ hàng</button>
+            </div>
           </div>
         </div>
       )}

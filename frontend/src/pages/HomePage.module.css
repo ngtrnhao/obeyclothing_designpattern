@@ -1,5 +1,4 @@
 .homePage {
-  flex: 1;
   display: flex;
   flex-direction: column;
 }
@@ -10,16 +9,71 @@
 }
 
 .heroSection {
-  flex: 1;
   display: flex;
-  overflow: hidden; /* Ngăn chặn scroll nếu ảnh quá lớn */
+  justify-content: space-between;
+}
+
+.heroImageContainer {
+  position: relative;
+  width: 49.5%;
 }
 
 .heroImage {
-  flex: 1;
-  object-fit: cover;
-  width: 50%; /* Mỗi ảnh chiếm 50% chiều rộng */
-  height: 100%; /* Đảm bảo ảnh lấp đầy chiều cao của heroSection */
+  width: 100%;
+  height: auto;
+}
+
+.heroText {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.additionalImages {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.imageWithText {
+  position: relative;
+  width: 49.5%;
+}
+
+.additionalImage {
+  width: 100%;
+  height: auto;
+}
+
+.imageText {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.fourImages {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.fourImages .imageWithText {
+  width: 24%;
+}
+
+.smallImage {
+  width: 100%;
+  height: auto;
+}
+
+.fourImages .imageText {
+  font-size: 16px;
 }
 
 .categoryLinks {
