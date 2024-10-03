@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import styles from './style.component/Header.module.css';
 import Menu from './Menu';
+import { useAuth } from '../contexts/AuthContext';
 
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const { user, logout } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -50,7 +52,23 @@ const Header = () => {
               🔍
             </button>
             <div className={styles.rightLinks}>
-              <Link to="/auth" className={styles.signInLink}>SIGN IN</Link>
+              {user ? (
+                <>
+                  <Link to={user.role === 'admin' ? "/admin/profile" : "/user/profile"} className={styles.navLink}>
+                    Profile
+                  </Link>
+                  {user.role === 'admin' && (
+                    <Link to="/admin" className={styles.navLink}>
+                      Admin Dashboard
+                    </Link>
+                  )}
+                  <button onClick={logout} className={styles.navLink}>
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <Link to="/auth" className={styles.navLink}>SIGN IN</Link>
+              )}
               <Link to="/cart" className={styles.bagLink}>
                 BAG <span className={styles.bagCount}></span>
               </Link>

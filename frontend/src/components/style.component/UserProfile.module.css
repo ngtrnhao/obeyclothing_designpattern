@@ -56,3 +56,69 @@
     border: 1px solid #f5c6cb;
     border-radius: 4px;
 }
+
+.profileContainer {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.title {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.loading, .error {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+}
+
+.formGroup {
+    margin-bottom: 15px;
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.formGroup input, .formGroup textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.submitButton, .cancelButton, .editButton {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.submitButton {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.cancelButton {
+    background-color: #f44336;
+    color: white;
+    margin-left: 10px;
+}
+
+.editButton {
+    background-color: #2196F3;
+    color: white;
+}
+
+.profileInfo p {
+    margin-bottom: 10px;
+}

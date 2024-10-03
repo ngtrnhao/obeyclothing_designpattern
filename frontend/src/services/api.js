@@ -13,6 +13,9 @@ const api = axios.create({
 });
 
 
+// Danh sách các endpoint không cần xác thực
+const publicEndpoints = ['/products', '/categories', '/products/category'];
+
 // Hàm để set token vào header của mọi request
 export const setAuthToken = (token) => {
   if (token) {
@@ -28,7 +31,8 @@ export const setAuthToken = (token) => {
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
-    if (token) {
+    // Chỉ thêm token nếu endpoint không nằm trong danh sách public
+    if (token && !publicEndpoints.some(endpoint => config.url.includes(endpoint))) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
     return config;
@@ -72,8 +76,26 @@ export const resetPassword = (token, newPassword) => {
 };
 
 // Products
-export const getProducts = () => api.get('/products');
-export const getProductById = (id) => api.get(`/products/${id}`);
+export const getProducts = async (params = {}) => {
+  try {
+    const response = await api.get('/products', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    throw error;
+  }
+};
+
+export const getProductById = async (id) => {
+  try {
+    const response = await api.get(`/products/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching product by id:', error);
+    throw error;
+  }
+};
+
 export const createProduct = async (productData) => {
   try {
     const response = await api.post('/products', productData, {
@@ -252,7 +274,7 @@ export const getAdminStatistics = async () => {
         'Authorization': `Bearer ${token}`
       }
     });
-    return response.data; // Trả về response.data thay vì toàn bộ response
+    return response.data; // Trả về response.data thay vì ton b response
   } catch (error) {
     console.error('Error fetching admin statistics:', error.response?.data || error.message);
     throw error;
@@ -281,7 +303,12 @@ export const addProductReview = async (productId, reviewData) => {
 
 export const createCategory = async (categoryData) => {
   try {
-    const response = await api.post('/categories', categoryData);
+    const token = localStorage.getItem('token');
+    const response = await api.post('/categories', categoryData, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
     return response.data;
   } catch (error) {
     console.error('Error creating category:', error.response?.data || error.message);
@@ -289,23 +316,73 @@ export const createCategory = async (categoryData) => {
   }
 };
 
-
-
 export const getProductsByCategory = async (categoryId) => {
   try {
     const response = await api.get(`/products/category/${categoryId}`);
-    return response;
+    return response.data;
   } catch (error) {
     console.error('Error fetching products by category:', error);
     throw error;
   }
 };
+
 export const getCategoryPath = async (categoryId) => {
   try {
     const response = await api.get(`/categories/${categoryId}/path`);
-    return response;
+    return response.data;
   } catch (error) {
     console.error('Error getting category path:', error);
+    throw error;
+  }
+};
+
+export const getSubcategories = async (categoryId) => {
+  try {
+    const response = await api.get(`/categories/${categoryId}/subcategories`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching subcategories:', error);
+    throw error;
+  }
+};
+
+export const getCategoryBySlugOrId = async (slugOrId) => {
+  try {
+    const response = await api.get(`/categories/find/${slugOrId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching category:', error);
+    throw error;
+  }
+};
+
+export const getProductsByCategorySlug = async (slug) => {
+  try {
+    const response = await api.get(`/categories/${slug}/products`);
+    console.log('API response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching products by category:', error);
+    throw error;
+  }
+};
+
+export const getAllProducts = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/products`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching all products:', error);
+    throw error;
+  }
+};
+
+export const getProductsByCategoryAndChildren = async (categoryId) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/categories/${categoryId}/products-recursive`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching products by category and children:', error);
     throw error;
   }
 };

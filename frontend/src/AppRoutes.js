@@ -19,6 +19,7 @@ import UserProfile from './components/UserProfile';
 import UserOrders from './components/UserOrders';
 import OrderSuccess from './components/OrderSuccess';
 import CategoryManagement from './components/CategoryManagement';
+import Checkout from './components/Checkout';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user } = useAuth();
@@ -34,12 +35,13 @@ const AppRoutes = () => {
       <Route path="/" element={<HomePage />} />
       <Route path="/auth" element={<AuthPage />} />
       <Route path="/products" element={<ProductList />} />
-      <Route path="/products/:id" element={<ProductDetail />} />
+      <Route path="/product/:id" element={<ProductDetail />} />
       <Route path="/cart" element={<Cart />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
-      <Route path="/category/:categoryId" element={<ProductList />} /> {/* Sử dụng ProductList cho cả danh mục */}
-      
+      <Route path="/category/:slug" element={<ProductList />} />
+      <Route path="/" exact component={ProductList} />
+      <Route path="/checkout" element={<Checkout />} />
       <Route 
         path="/user/*" 
         element={
@@ -60,7 +62,7 @@ const AppRoutes = () => {
             <AdminDashboard />
           </ProtectedRoute>
         } 
-      >
+      > <Route path='profile' element ={<UserProfile/>} />
         <Route path="products" element={<ProductManagement />} />
         <Route path="orders" element={<OrderManagement />} />
         <Route path="users" element={<UserManagement />} />
@@ -70,6 +72,7 @@ const AppRoutes = () => {
       </Route>
       
       <Route path="/order-success" element={<OrderSuccess />} />
+      
     </Routes>
   );
 };

@@ -5,8 +5,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { CartContext } from '../contexts/CartContext';
 import styles from './style.component/ProductDetail.module.css';
 import ProductReviews from './ProductReviews';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'; // Thêm import cho biểu tượng mũi tên
-import placeholderImage from '../components/placeholder.png'
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import placeholderImage from '../components/placeholder.png';
 
 const ProductDetail = () => {
   const [product, setProduct] = useState(null);
@@ -20,30 +20,33 @@ const ProductDetail = () => {
   const { user } = useAuth();
   const { setCartItems } = useContext(CartContext);
   const navigate = useNavigate();
-  const [categoryPath, setCategoryPath] = useState('');
+  const [categoryPath, setCategoryPath] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const fetchProductAndRelated = async () => {
       try {
-        const productResponse = await getProductById(id);
-        console.log('Product data:', productResponse.data);
-        setProduct(productResponse.data);
+        const productData = await getProductById(id);
+        setProduct(productData);
         setSelectedImage(0);
-        if (productResponse.data.sizes.length > 0) {
-          setSelectedSize(productResponse.data.sizes[0]);
+        if (productData.sizes && productData.sizes.length > 0) {
+          setSelectedSize(productData.sizes[0]);
         }
-        if (productResponse.data.colors.length > 0) {
-          setSelectedColor(productResponse.data.colors[0]);
+        if (productData.colors && productData.colors.length > 0) {
+          setSelectedColor(productData.colors[0]);
         }
 
-        // Fetch related products
-        const relatedResponse = await getProducts({ 
-          category: productResponse.data.category,
+        const relatedData = await getProducts({ 
+          category: productData.category,
           limit: 4,
           exclude: id
         });
-        setRelatedProducts(relatedResponse.data);
+        setRelatedProducts(relatedData);
+
+        if (productData.category) {
+          const pathData = await getCategoryPath(productData.category);
+          setCategoryPath(pathData);
+        }
       } catch (err) {
         console.error('Error fetching product:', err);
         setError('Không thể tải thông tin sản phẩm');
@@ -51,20 +54,6 @@ const ProductDetail = () => {
     };
     fetchProductAndRelated();
   }, [id]);
-
-  useEffect(() => {
-    const fetchCategoryPath = async () => {
-      if (product && product.category) {
-        try {
-          const response = await getCategoryPath(product.category);
-          setCategoryPath(response.path);
-        } catch (error) {
-          console.error('Error fetching category path:', error);
-        }
-      }
-    };
-    fetchCategoryPath();
-  }, [product]);
 
   const handleAddToCart = async () => {
     if (!user) {
@@ -79,7 +68,7 @@ const ProductDetail = () => {
       await addToCart(id, quantity, selectedSize, selectedColor);
       const updatedCart = await getCart();
       setCartItems(updatedCart.items);
-      setShowModal(true); // Show the modal after successfully adding to cart
+      setShowModal(true);
     } catch (err) {
       console.error('Error adding to cart:', err);
       setError('Không thể thêm sản phẩm vào giỏ hàng');
@@ -106,7 +95,7 @@ const ProductDetail = () => {
   };
 
   const handleNextImage = () => {
-    if (selectedImage < product.detailImages.length) {
+    if (selectedImage < (product.detailImages?.length || 0)) {
       setSelectedImage(prevImage => prevImage + 1);
     }
   };
@@ -122,6 +111,7 @@ const ProductDetail = () => {
     if (img.startsWith('http')) return img;
     return `${process.env.REACT_APP_API_URL}/uploads/${img.split('/').pop()}`;
   };
+
   if (!product) return <div className={styles.loading}>Đang tải...</div>;
   if (error) return <div className={styles.error}>{error}</div>;
 
@@ -164,7 +154,7 @@ const ProductDetail = () => {
               <button onClick={handlePrevImage} disabled={selectedImage === 0} className={styles.navButton}>
                 <FaChevronLeft />
               </button>
-              <button onClick={handleNextImage} disabled={selectedImage === product.detailImages.length} className={styles.navButton}>
+              <button onClick={handleNextImage} disabled={selectedImage === (product.detailImages?.length || 0)} className={styles.navButton}>
                 <FaChevronRight />
               </button>
             </div>
@@ -172,23 +162,27 @@ const ProductDetail = () => {
         </div>
         <div className={styles.productInfo}>
           <h1 className={styles.productName}>{product.name}</h1>
-          <p className={styles.productColor}>{product.colors[0]}</p>
+          {product.colors && product.colors.length > 0 && (
+            <p className={styles.productColor}>{product.colors[0]}</p>
+          )}
           <p className={styles.price}>£{product.price.toFixed(2)}</p>
           
-          <div className={styles.sizeSection}>
-            <p>SIZE</p>
-            <div className={styles.sizeButtons}>
-              {product.sizes.map((size) => (
-                <button
-                  key={size}
-                  className={`${styles.sizeButton} ${selectedSize === size ? styles.selectedSize : ''}`}
-                  onClick={() => setSelectedSize(size)}
-                >
-                  {size}
-                </button>
-              ))}
+          {product.sizes && product.sizes.length > 0 && (
+            <div className={styles.sizeSection}>
+              <p>SIZE</p>
+              <div className={styles.sizeButtons}>
+                {product.sizes.map((size) => (
+                  <button
+                    key={size}
+                    className={`${styles.sizeButton} ${selectedSize === size ? styles.selectedSize : ''}`}
+                    onClick={() => setSelectedSize(size)}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           <button className={styles.viewSizeGuide}>VIEW SIZE GUIDE</button>
 
@@ -230,7 +224,16 @@ const ProductDetail = () => {
             <p>{product.description}</p>
           </div>
 
-          <p className={styles.category}>Danh mục: {categoryPath}</p>
+          {categoryPath.length > 0 && (
+            <p className={styles.category}>
+              Danh mục: {categoryPath.map((cat, index) => (
+                <span key={cat.id}>
+                  {index > 0 && " > "}
+                  <Link to={`/category/${cat.slug}`}>{cat.name}</Link>
+                </span>
+              ))}
+            </p>
+          )}
           <p className={styles.sku}>SKU: {product._id}</p>
 
           <div className={styles.additionalInfo}>
@@ -248,7 +251,7 @@ const ProductDetail = () => {
           <div className={styles.productGrid}>
             {relatedProducts.map(relatedProduct => (
               <div key={relatedProduct._id} className={styles.relatedProductCard}>
-                <img src={`${process.env.REACT_APP_API_URL}${relatedProduct.image}`} alt={relatedProduct.name} />
+                <img src={imageUrl(relatedProduct.image)} alt={relatedProduct.name} />
                 <h4>{relatedProduct.name}</h4>
                 <p>{relatedProduct.price.toLocaleString('vi-VN')} đ</p>
                 <Link to={`/products/${relatedProduct._id}`}>Xem chi tiết</Link>

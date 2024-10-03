@@ -4,7 +4,7 @@ import styles from './style.component/CategoryManagement.module.css';
 
 const CategoryManagement = () => {
   const [categories, setCategories] = useState([]);
-  const [newCategory, setNewCategory] = useState({ name: '', parentId: '' });
+  const [newCategory, setNewCategory] = useState({ name: '', slug: '', parentId: '' });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -28,15 +28,23 @@ const CategoryManagement = () => {
 
   const handleCreateCategory = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
     try {
-      await createCategory(newCategory);
+      const categoryData = {
+        name: newCategory.name,
+        parentId: newCategory.parentId || null
+      };
+      if (newCategory.slug && newCategory.slug.trim() !== '') {
+        categoryData.slug = newCategory.slug.trim();
+      }
+      console.log('Sending category data:', categoryData);
+      const response = await createCategory(categoryData);
+      setCategories(prevCategories => [...prevCategories, response]);
+      setNewCategory({ name: '', slug: '', parentId: '' });
       setSuccess('Danh mục đã được tạo thành công');
-      setNewCategory({ name: '', parentId: '' });
       fetchCategories();
     } catch (error) {
-      setError(error.response?.data?.message || 'Có lỗi xảy ra khi tạo danh mục');
+      console.error('Error creating category:', error);
+      setError(error.response?.data?.message || 'Lỗi khi tạo danh mục');
     }
   };
 
@@ -47,45 +55,49 @@ const CategoryManagement = () => {
         setSuccess('Danh mục đã được xóa thành công');
         fetchCategories();
       } catch (error) {
-        setError('Có lỗi xảy ra khi xóa danh mục');
+        console.error('Error deleting category:', error);
+        setError(error.response?.data?.message || 'Có lỗi xảy ra khi xóa danh mục');
       }
     }
   };
 
   const renderCategories = (categories, level = 0) => {
-    return categories.map((category) => (
-      <li key={category._id} className={styles.categoryItem} style={{ marginLeft: `${level * 20}px` }}>
-        {category.name}
-        <button onClick={() => handleDeleteCategory(category._id)} className={styles.deleteButton}>Xóa</button>
-        {category.children && category.children.length > 0 && (
-          <ul className={styles.categoryList}>
-            {renderCategories(category.children, level + 1)}
-          </ul>
-        )}
-      </li>
+    return categories.map(category => (
+      <React.Fragment key={category._id}>
+        <div style={{ marginLeft: `${level * 20}px` }}>
+          {category.name} - {category.slug}
+          <button onClick={() => handleDeleteCategory(category._id)}>Xóa</button>
+        </div>
+        {category.children && category.children.length > 0 && renderCategories(category.children, level + 1)}
+      </React.Fragment>
     ));
   };
 
   return (
-    <div className={styles.categoryManagement}>
+    <div>
       <h2>Quản lý danh mục</h2>
       {error && <p className={styles.error}>{error}</p>}
       {success && <p className={styles.success}>{success}</p>}
-      <form onSubmit={handleCreateCategory} className={styles.categoryForm}>
+      <form onSubmit={handleCreateCategory}>
         <input
           type="text"
           name="name"
-          placeholder="Tên danh mục mới"
           value={newCategory.name}
           onChange={handleInputChange}
+          placeholder="Tên danh mục mới"
           required
-          className={styles.input}
+        />
+        <input
+          type="text"
+          name="slug"
+          value={newCategory.slug}
+          onChange={handleInputChange}
+          placeholder="Slug danh mục (tùy chọn)"
         />
         <select
           name="parentId"
           value={newCategory.parentId}
           onChange={handleInputChange}
-          className={styles.select}
         >
           <option value="">Không có danh mục cha</option>
           {categories.map((category) => (
@@ -98,9 +110,7 @@ const CategoryManagement = () => {
       </form>
       <div className={styles.categoryListContainer}>
         <h3>Danh sách danh mục:</h3>
-        <ul className={styles.categoryList}>
-          {renderCategories(categories)}
-        </ul>
+        {renderCategories(categories)}
       </div>
     </div>
   );

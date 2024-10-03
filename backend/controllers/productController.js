@@ -27,32 +27,44 @@ exports.getProductById = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   try {
-    const { name, description, price, category, stock, sizes, colors } = req.body;
+    const { name, description, price, categoryId, stock, sizes, colors } = req.body;
     let image = '';
     let detailImages = [];
 
     if (req.files) {
       if (req.files['image']) {
-        image = '/uploads/' + req.files['image'][0].filename;
+        image = req.files['image'][0].filename; // Chỉ lưu tên file
       }
       if (req.files['detailImages']) {
-        detailImages = req.files['detailImages'].map(file => '/uploads/' + file.filename);
+        detailImages = req.files['detailImages'].map(file => file.filename);
       }
+    }
+
+    const category = await Category.findById(categoryId);
+    if (!category) {
+      return res.status(404).json({ message: 'Danh mục không tồn tại' });
     }
 
     const newProduct = new Product({
       name,
       description,
       price,
-      category,
-      stock,
+      category: categoryId,
       image,
       detailImages,
+      stock,
       sizes: sizes ? sizes.split(',').map(size => size.trim()) : [],
       colors: colors ? colors.split(',').map(color => color.trim()) : []
     });
 
     await newProduct.save();
+
+    // Cập nhật số lượng sản phẩm trong danh mục
+    category.productCount = (category.productCount || 0) + 1;
+    await category.save();
+
+    console.log('New product created:', newProduct);
+
     res.status(201).json(newProduct);
   } catch (error) {
     res.status(400).json({ message: 'Lỗi khi tạo sản phẩm', error: error.message });
@@ -169,20 +181,23 @@ exports.searchProducts = async (req, res) => {
 exports.getProductsByCategory = async (req, res) => {
   try {
     const categoryId = req.params.categoryId;
-    const category = await Category.findById(categoryId);
-    if (!category) {
-      return res.status(404).json({ message: 'Không tìm thấy danh mục' });
-    }
+    console.log('Fetching products for category:', categoryId);
 
-    let categoryIds = [categoryId];
-    if (category.children && category.children.length > 0) {
-      const childCategories = await Category.find({ parent: categoryId });
-      categoryIds = [...categoryIds, ...childCategories.map(c => c._id)];
-    }
+    // Lấy tất cả danh mục con
+    const childCategories = await getAllChildCategories(categoryId);
+    const allCategoryIds = [categoryId, ...childCategories.map(c => c._id)];
 
-    const products = await Product.find({ category: { $in: categoryIds } });
+    const products = await Product.find({ category: { $in: allCategoryIds } });
+    console.log('Products found:', products.length);
+
     res.json(products);
   } catch (error) {
+    console.error('Error in getProductsByCategory:', error);
     res.status(500).json({ message: 'Lỗi server', error: error.message });
   }
+};
+
+// Đảm bảo rằng hàm getProductsByCategorySlug được export đúng cách
+exports.getProductsByCategorySlug = async (req, res) => {
+  // ... logic của hàm ...
 };

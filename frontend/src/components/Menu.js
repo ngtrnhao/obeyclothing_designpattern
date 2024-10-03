@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getCategories } from '../services/api';
 import styles from './style.component/Menu.module.css';
 
@@ -21,7 +21,7 @@ const Menu = ({ isOpen, onClose }) => {
       setLoading(false);
     } catch (error) {
       console.error('Error fetching categories:', error);
-      setError('Failed to load categories');
+      setError('Failed to load categories. Please try again later.');
       setLoading(false);
     }
   }, []);
@@ -83,7 +83,7 @@ const Menu = ({ isOpen, onClose }) => {
 
   const handleCategoryLinkClick = (category, event) => {
     event.stopPropagation();
-    navigate(`/category/${category._id}`);
+    navigate(`/category/${category.slug || category._id}`);
     handleClose();
   };
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { FaChartLine, FaShoppingCart, FaUsers, FaBox, FaPlus, FaTags } from 'react-icons/fa';
+import { FaChartLine, FaShoppingCart, FaUsers, FaBox, FaPlus, FaTags, FaUser } from 'react-icons/fa';
 import styles from './style.component/AdminDashboard.module.css';
 
 const AdminDashboard = () => {
@@ -13,6 +13,7 @@ const AdminDashboard = () => {
     { path: '/admin/orders', icon: <FaShoppingCart />, text: 'Quản lý đơn hàng' },
     { path: '/admin/users', icon: <FaUsers />, text: 'Quản lý người dùng' },
     { path: '/admin/create-product', icon: <FaPlus />, text: 'Tạo sản phẩm mới' },
+    { path: '/admin/profile', icon: <FaUser />, text: 'Thông tin cá nhân' }, // New item for admin profile
   ];
 
   return (
@@ -36,7 +37,7 @@ const AdminDashboard = () => {
         <header className={styles.header}>
           <h2>Welcome, Admin</h2>
           <div className={styles.userMenu}>
-            {/* Add user menu items here */}
+            {/* Add user menu items here if needed */}
           </div>
         </header>
         <div className={styles.dashboardOutlet}>

@@ -1,20 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useCart } from '../contexts/CartContext';
 import PayPalCheckout from './PayPalCheckout1';
 import styles from './style.component/Checkout.module.css';
 
 const Checkout = () => {
-  const { cart, total } = useCart();
-  const [isLoading, setIsLoading] = useState(true);
+  const { cartItems, total } = useCart();
 
-  useEffect(() => {
-    if (cart.length > 0) {
-      setIsLoading(false);
-    }
-  }, [cart]);
-
-  if (isLoading) {
-    return <div>Đang tải...</div>;
+  if (cartItems.length === 0) {
+    return <div>Giỏ hàng trống</div>;
   }
 
   const usdTotal = total / 23000; // Giả sử tỷ giá 1 USD = 23000 VND
@@ -24,8 +17,8 @@ const Checkout = () => {
       <h2>Thanh toán</h2>
       <div className={styles.orderSummary}>
         <h3>Tổng quan đơn hàng</h3>
-        {cart.map((item) => (
-          <div key={item._id} className={styles.cartItem}>
+        {cartItems.map((item) => (
+          <div key={item.product._id} className={styles.cartItem}>
             <span>{item.product.name}</span>
             <span>{item.quantity} x {item.product.price.toLocaleString('vi-VN')} đ</span>
           </div>

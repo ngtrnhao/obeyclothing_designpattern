@@ -13,7 +13,7 @@ console.log('ADMIN_SECRET:', process.env.ADMIN_SECRET);
 const app = express();
 
 const corsOptions = {
-  origin: 'http://localhost:3000', // URL của frontend
+  origin: 'http://localhost:3000', // Đảm bảo đây là URL của frontend
   credentials: true,
   optionsSuccessStatus: 200
 };
@@ -51,6 +51,7 @@ const categoryRoutes = require('./routes/categories');
 const orderRoutes = require('./routes/orderRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoutes');
+const categoriesRoutes = require('./routes/categories');
 
 // Serve static files from the 'uploads' directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -64,8 +65,15 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/admin', authMiddleware, adminMiddleware, adminRoutes);
 app.use('/api/user', userRoutes);
 
-app.use('/api/categories', categoryRoutes);
+/*app.use('/api/categories', categoryRoutes);*/
 app.use('/api/orders', orderRoutes);
+app.use('/api/categories', categoriesRoutes);
+
+const productController = require('./controllers/productController');
+console.log(productController); // Kiểm tra xem object này có chứa hàm getProductsByCategorySlug không
+
+// Add this line after other route definitions
+app.get('/api/categories/:slug/products', productController.getProductsByCategorySlug);
 
 const PORT = process.env.PORT || 5000;
 
