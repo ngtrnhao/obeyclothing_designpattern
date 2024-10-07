@@ -29,7 +29,6 @@ exports.getAllCategories = async (req, res) => {
       path: 'children',
       populate: { path: 'children' }
     });
-    console.log('Categories from database:', categories);
     res.json(categories);
   } catch (error) {
     console.error('Error in getAllCategories:', error);
@@ -144,7 +143,6 @@ exports.getSubcategories = async (req, res) => {
 exports.getCategoryBySlugOrId = async (req, res) => {
   try {
     const { slugOrId } = req.params;
-    console.log('Searching for category with slugOrId:', slugOrId);
     let category;
 
     if (mongoose.Types.ObjectId.isValid(slugOrId)) {
@@ -154,11 +152,9 @@ exports.getCategoryBySlugOrId = async (req, res) => {
     }
 
     if (!category) {
-      console.log('Category not found');
       return res.status(404).json({ message: 'Không tìm thấy danh mục' });
     }
 
-    console.log('Category found:', category);
     res.json(category);
   } catch (error) {
     console.error('Error in getCategoryBySlugOrId:', error);
@@ -169,16 +165,21 @@ exports.getCategoryBySlugOrId = async (req, res) => {
 exports.getProductsByCategorySlug = async (req, res) => {
   try {
     const { slug } = req.params;
-    console.log('Searching for category with slug:', slug);
-    const category = await Category.findOne({ slug });
-    if (!category) {
-      console.log('Category not found');
-      return res.status(404).json({ message: 'Không tìm thấy danh mục' });
-    }
-    console.log('Category found:', category);
+    let categoryIds;
 
-    const products = await Product.find({ category: category._id });
-    console.log(`Found ${products.length} products for category ${slug}`);
+    if (slug === 'all') {
+      const allCategories = await Category.find();
+      categoryIds = allCategories.map(cat => cat._id);
+    } else {
+      const category = await Category.findOne({ slug });
+      if (!category) {
+        return res.status(404).json({ message: 'Không tìm thấy danh mục' });
+      }
+      const subcategories = await getAllChildCategories(category._id);
+      categoryIds = [category._id, ...subcategories.map(sub => sub._id)];
+    }
+
+    const products = await Product.find({ category: { $in: categoryIds } });
     res.json(products);
   } catch (error) {
     console.error('Error in getProductsByCategorySlug:', error);
@@ -186,7 +187,7 @@ exports.getProductsByCategorySlug = async (req, res) => {
   }
 };
 
-// Hàm đệ quy để lấy tất cả danh mục con
+// Helper function to get all child categories
 async function getAllChildCategories(categoryId) {
   const children = await Category.find({ parent: categoryId });
   let allChildren = [...children];

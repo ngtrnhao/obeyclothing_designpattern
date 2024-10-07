@@ -6,6 +6,41 @@ const authMiddleware = require('../middleware/authMiddleware');
 router.use(authMiddleware);
 
 router.post('/create-paypal-order', orderController.createPaypalOrder);
-router.post('/complete-paypal-order', orderController.completePaypalOrder);
+router.post('/complete-paypal-order', authMiddleware, orderController.completePaypalOrder);
+
+router.post('/', async (req, res) => {
+  try {
+    const { items, shippingAddress, paymentMethod } = req.body;
+    
+    if (!shippingAddress || !shippingAddress.address || !shippingAddress.ward || !shippingAddress.district || !shippingAddress.province) {
+      return res.status(400).json({ message: 'Thông tin địa chỉ giao hàng không đầy đủ' });
+    }
+
+    const formattedAddress = `${shippingAddress.address}, ${shippingAddress.ward}, ${shippingAddress.district}, ${shippingAddress.province}`;
+
+    const newOrder = new Order({
+      user: req.user._id,
+      items,
+      shippingAddress: formattedAddress,
+      paymentMethod,
+      status: 'pending'
+    });
+    await newOrder.save();
+    
+    const newDelivery = new Delivery({
+      order: newOrder._id,
+      shippingAddress: formattedAddress,
+      status: 'pending'
+    });
+    await newDelivery.save();
+
+    // Clear the user's cart
+    await Cart.findOneAndUpdate({ user: req.user._id }, { $set: { items: [] } });
+
+    res.status(201).json(newOrder);
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
+});
 
 module.exports = router;

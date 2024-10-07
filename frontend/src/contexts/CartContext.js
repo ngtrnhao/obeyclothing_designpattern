@@ -1,104 +1,80 @@
-import React, { createContext, useState, useEffect, useCallback, useContext } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { getCart, addToCart as apiAddToCart, removeFromCart as apiRemoveFromCart } from '../services/api';
 import { useAuth } from './AuthContext';
+import api from '../services/api';
 
 export const CartContext = createContext();
-
-export const useCart = () => {
-  const context = useContext(CartContext);
-  if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
-  }
-  return context;
-};
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [total, setTotal] = useState(0);
   const { user } = useAuth();
 
-  const calculateTotal = useCallback(() => {
-    const newTotal = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-    setTotal(newTotal);
-  }, [cartItems]);
+  const fetchCart = useCallback(async () => {
+    if (user) {
+      try {
+        const cart = await getCart();
+        setCartItems(cart.items);
+        calculateTotal(cart.items);
+      } catch (error) {
+        console.error('Error fetching cart:', error);
+      }
+    } else {
+      setCartItems([]);
+      setTotal(0);
+    }
+  }, [user]); // Add user as a dependency
 
   useEffect(() => {
-    calculateTotal();
-  }, [calculateTotal]);
+    fetchCart();
+  }, [fetchCart]); // Now fetchCart is in the dependency array
 
-  const addToCart = (product, quantity) => {
-    setCartItems(prevItems => {
-      const existingItem = prevItems.find(item => item.product._id === product._id);
-      if (existingItem) {
-        return prevItems.map(item =>
-          item.product._id === product._id ? { ...item, quantity: item.quantity + quantity } : item
-        );
+  const calculateTotal = (items) => {
+    const newTotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+    setTotal(newTotal);
+  };
+
+  const addToCart = async (product, quantity, size, color) => {
+    try {
+      if (!user) {
+        throw new Error('User must be logged in to add items to cart');
       }
-      return [...prevItems, { product, quantity }];
-    });
-  };
-
-  const removeFromCart = (productId) => {
-    setCartItems(prevItems => prevItems.filter(item => item.product._id !== productId));
-  };
-
-  const updateQuantity = (productId, newQuantity) => {
-    if (newQuantity > 0) {
-      setCartItems(prevItems =>
-        prevItems.map(item =>
-          item.product._id === productId ? { ...item, quantity: newQuantity } : item
-        )
-      );
+      await apiAddToCart({
+        productId: product._id,
+        quantity,
+        size,
+        color
+      });
+      await fetchCart();
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      throw error;
     }
   };
 
-  const createPayPalOrder = async () => {
+  const removeFromCart = async (productId) => {
     try {
-      const response = await fetch('/api/create-paypal-order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ items: cartItems }),
-      });
-      const order = await response.json();
-      return order.id;
+      await apiRemoveFromCart(productId);
+      await fetchCart();
     } catch (error) {
-      console.error('Error creating PayPal order:', error);
+      console.error('Error removing from cart:', error);
     }
   };
 
-  const onPayPalApprove = async (data, actions) => {
+  const updateCartItem = async (itemId, updates) => {
     try {
-      const details = await actions.order.capture();
-      const response = await fetch('/api/complete-paypal-order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          orderID: data.orderID,
-          paypalDetails: details,
-        }),
-      });
-      const result = await response.json();
-      setCartItems([]);
-      return result;
+      await api.put(`/cart/update/${itemId}`, updates);
+      await fetchCart();
     } catch (error) {
-      console.error('Error completing PayPal order:', error);
+      console.error('Error updating cart item:', error);
     }
   };
 
   return (
-    <CartContext.Provider value={{
-      cartItems,
-      addToCart,
-      removeFromCart,
-      updateQuantity,
-      total,
-      createPayPalOrder,
-      onPayPalApprove
-    }}>
+    <CartContext.Provider value={{ cartItems, total, addToCart, removeFromCart, updateCartItem, fetchCart }}>
       {children}
     </CartContext.Provider>
   );
 };
+
+export const useCart = () => useContext(CartContext);

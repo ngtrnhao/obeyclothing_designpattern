@@ -114,13 +114,8 @@ export const deleteProduct = (id) => api.delete(`/products/${id}`);
 
 // Cart
 export const getCart = async () => {
-  const token = localStorage.getItem('token');
   try {
-    const response = await api.get('/cart', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
+    const response = await api.get('/cart');
     return response.data;
   } catch (error) {
     console.error('Error fetching cart:', error);
@@ -128,17 +123,23 @@ export const getCart = async () => {
   }
 };
 
-export const addToCart = async (productId, quantity) => {
-  const token = localStorage.getItem('token');
+export const addToCart = async (cartItem) => {
   try {
-    const response = await api.post('/cart/add', { productId, quantity }, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
+    const response = await api.post('/cart/add', cartItem);
     return response.data;
   } catch (error) {
-    console.error('Error adding to cart:', error);
+    throw error;
+  }
+};
+
+export const removeFromCart = (productId) => api.delete(`/cart/remove/${productId}`);
+
+export const updateCartItemQuantity = async (productId, quantity) => {
+  try {
+    const response = await api.put(`/cart/update/${productId}`, { quantity });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating cart item quantity:', error);
     throw error;
   }
 };
@@ -386,5 +387,72 @@ export const getProductsByCategoryAndChildren = async (categoryId) => {
     throw error;
   }
 };
+
+export const createPaypalOrder = async () => {
+  try {
+    const response = await api.post('/orders/create-paypal-order');
+    return response.data;
+  } catch (error) {
+    console.error('Error creating PayPal order:', error);
+    throw error;
+  }
+};
+
+export const completePaypalOrder = async (orderData) => {
+  try {
+    const response = await api.post('/orders/complete-paypal-order', orderData);
+    return response.data;
+  } catch (error) {
+    console.error('Error completing PayPal order:', error);
+    throw error;
+  }
+};
+
+export const getDeliveries = () => api.get('/deliveries');
+export const updateDeliveryStatus = (deliveryId, status) => api.put(`/deliveries/${deliveryId}`, { status });
+
+export const getProvinces = async () => {
+  try {
+    const response = await api.get('/address/provinces');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching provinces:', error);
+    throw error;
+  }
+};
+
+export const getDistricts = async (provinceId) => {
+  try {
+    const response = await api.get(`/address/districts/${provinceId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching districts:', error);
+    throw error;
+  }
+};
+
+export const getWards = async (districtId) => {
+  try {
+    const response = await api.get(`/address/wards/${districtId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching wards:', error);
+    throw error;
+  }
+};
+
+export const getUserInfo = async () => {
+  try {
+    const response = await api.get('/user/profile');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching user info:', error);
+    throw error;
+  }
+};
+
+export const updateUserInfo = (userInfo) => api.put('/user/profile', userInfo);
+
+export const fetchCart = () => api.get('/cart');
 
 export default api;

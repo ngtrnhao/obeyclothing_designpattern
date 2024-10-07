@@ -201,3 +201,25 @@ exports.getProductsByCategory = async (req, res) => {
 exports.getProductsByCategorySlug = async (req, res) => {
   // ... logic của hàm ...
 };
+
+exports.getProductsByParentCategory = async (req, res) => {
+  try {
+    const { categoryId } = req.params;
+    const category = await Category.findById(categoryId);
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+
+    let categoryIds = [categoryId];
+    if (category.children && category.children.length > 0) {
+      const subcategories = await Category.find({ parent: categoryId });
+      categoryIds = [...categoryIds, ...subcategories.map(sub => sub._id)];
+    }
+
+    const products = await Product.find({ category: { $in: categoryIds } });
+    res.json(products);
+  } catch (error) {
+    console.error('Error in getProductsByParentCategory:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};

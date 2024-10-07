@@ -3,6 +3,7 @@
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
   },
   "dependencies": {
+    "axios": "^1.7.7",
     "chart.js": "^4.4.4",
     "eslint-plugin-react-hooks": "^5.1.0-rc-e4953922-20240919",
     "framer-motion": "^11.5.4",

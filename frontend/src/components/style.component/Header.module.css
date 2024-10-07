@@ -45,6 +45,8 @@
 
 /* Định nghĩa style cho logo */
 .logo {
+  position :absolute;
+  top :20px;
   /* Kích thước chữ cho logo */
   font-size: 2rem;
   /* Độ đậm cho chữ logo */

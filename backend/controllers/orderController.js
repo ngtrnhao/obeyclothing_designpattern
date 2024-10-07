@@ -1,7 +1,9 @@
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
+const Delivery = require('../models/Delivery'); // Thêm dòng này
 const paypal = require('@paypal/checkout-server-sdk');
+const User = require('../models/User');
 
 let environment = new paypal.core.SandboxEnvironment(process.env.PAYPAL_CLIENT_ID, process.env.PAYPAL_CLIENT_SECRET);
 let client = new paypal.core.PayPalHttpClient(environment);
@@ -37,10 +39,24 @@ exports.createPaypalOrder = async (req, res) => {
 
 exports.completePaypalOrder = async (req, res) => {
   try {
-    const { orderId, paypalDetails } = req.body;
+    const { orderId, paypalDetails, alternativeShipping, shippingInfo } = req.body;
     const userId = req.user._id;
 
-    console.log('Received PayPal order completion request:', { orderId, paypalDetails, userId });
+    let finalShippingAddress;
+
+    if (alternativeShipping) {
+      finalShippingAddress = `${shippingInfo.address || ''}, ${shippingInfo.wardName || ''}, ${shippingInfo.districtName || ''}, ${shippingInfo.provinceName || ''}`.trim();
+    } else {
+      const user = await User.findById(userId);
+      if (!user || !user.shippingInfo) {
+        return res.status(400).json({ message: 'Thông tin giao hàng không đầy đủ' });
+      }
+      finalShippingAddress = `${user.shippingInfo.address || ''}, ${user.shippingInfo.wardName || ''}, ${user.shippingInfo.districtName || ''}, ${user.shippingInfo.provinceName || ''}`.trim();
+    }
+
+    if (!finalShippingAddress || finalShippingAddress === '') {
+      return res.status(400).json({ message: 'Địa chỉ giao hàng không hợp lệ' });
+    }
 
     const cart = await Cart.findOne({ user: userId }).populate('items.product');
     if (!cart) {
@@ -52,11 +68,14 @@ exports.completePaypalOrder = async (req, res) => {
       items: cart.items.map(item => ({
         product: item.product._id,
         quantity: item.quantity,
-        price: item.product.price
+        price: item.product.price,
+        size: item.size,
+        color: item.color
       })),
       totalAmount: cart.items.reduce((total, item) => total + item.quantity * item.product.price, 0),
       paypalOrderId: orderId,
       paypalDetails: paypalDetails,
+      shippingAddress: finalShippingAddress,
       status: 'paid'
     });
 
@@ -70,9 +89,16 @@ exports.completePaypalOrder = async (req, res) => {
 
     await Cart.findByIdAndDelete(cart._id);
 
+    const newDelivery = new Delivery({
+      order: newOrder._id,
+      shippingAddress: finalShippingAddress,
+      status: 'pending'
+    });
+    await newDelivery.save();
+
     res.status(200).json({ message: 'Đơn hàng đã được tạo và thanh toán thành công', order: newOrder });
   } catch (error) {
     console.error('Error completing PayPal order:', error);
-    res.status(500).json({ message: 'Lỗi khi xử lý đơn hàng', error: error.message });
+    res.status(500).json({ message: 'Lỗi khi xử lý đơn hàng PayPal', error: error.message });
   }
 };

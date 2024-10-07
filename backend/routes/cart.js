@@ -24,25 +24,31 @@ router.get('/', async (req, res) => {
 // Add item to cart
 router.post('/add', authMiddleware, async (req, res) => {
   try {
-    const { productId, quantity } = req.body;
-    const userId = req.user.id;
+    const { productId, quantity, size, color } = req.body;
+    const userId = req.user._id;
 
     let cart = await Cart.findOne({ user: userId });
+
     if (!cart) {
       cart = new Cart({ user: userId, items: [] });
     }
 
-    const productIndex = cart.items.findIndex(item => item.product.toString() === productId);
-    if (productIndex > -1) {
-      cart.items[productIndex].quantity += quantity;
+    const existingItemIndex = cart.items.findIndex(
+      item => item.product.toString() === productId && item.size === size && item.color === color
+    );
+
+    if (existingItemIndex > -1) {
+      cart.items[existingItemIndex].quantity += quantity;
     } else {
-      cart.items.push({ product: productId, quantity });
+      cart.items.push({ product: productId, quantity, size, color });
     }
 
     await cart.save();
-    res.status(200).json(cart);
+    await cart.populate('items.product');
+    res.status(200).json({ message: 'Sản phẩm đã được thêm vào giỏ hàng', items: cart.items });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error('Error adding to cart:', error);
+    res.status(500).json({ message: 'Lỗi khi thêm sản phẩm vào giỏ hàng', error: error.message });
   }
 });
 
@@ -125,6 +131,31 @@ router.post('/checkout', async (req, res) => {
   } catch (error) {
     console.error('Error during checkout:', error);
     res.status(500).json({ message: 'Lỗi khi xử lý đơn hàng', error: error.message });
+  }
+});
+
+// Update cart item
+router.put('/update/:itemId', async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    const { quantity, size, color } = req.body;
+    const cart = await Cart.findOne({ user: req.user._id });
+    
+    if (!cart) {
+      return res.status(404).json({ message: 'Không tìm thấy giỏ hàng' });
+    }
+
+    const itemIndex = cart.items.findIndex(item => item._id.toString() === itemId);
+    if (itemIndex > -1) {
+      if (quantity) cart.items[itemIndex].quantity = quantity;
+      if (size) cart.items[itemIndex].size = size;
+      if (color) cart.items[itemIndex].color = color;
+    }
+
+    await cart.save();
+    res.json(cart);
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
   }
 });
 

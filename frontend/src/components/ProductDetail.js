@@ -1,8 +1,8 @@
-﻿import React, { useState, useEffect, useContext } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getProductById, addToCart, getCart, getProducts, getCategoryPath } from '../services/api';
+import { getProductById, addToCart, getProducts, getCategoryPath } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
-import { CartContext } from '../contexts/CartContext';
+
 import styles from './style.component/ProductDetail.module.css';
 import ProductReviews from './ProductReviews';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
@@ -18,7 +18,6 @@ const ProductDetail = () => {
   const [error, setError] = useState('');
   const { id } = useParams();
   const { user } = useAuth();
-  const { setCartItems } = useContext(CartContext);
   const navigate = useNavigate();
   const [categoryPath, setCategoryPath] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -65,10 +64,14 @@ const ProductDetail = () => {
       return;
     }
     try {
-      await addToCart(id, quantity, selectedSize, selectedColor);
-      const updatedCart = await getCart();
-      setCartItems(updatedCart.items);
-      setShowModal(true);
+      const cartItem = {
+        productId: id,
+        quantity,
+        size: selectedSize,
+        color: selectedColor
+      };
+      await addToCart(cartItem);
+      navigate('/cart'); // Redirect to cart page
     } catch (err) {
       console.error('Error adding to cart:', err);
       setError('Không thể thêm sản phẩm vào giỏ hàng');
@@ -111,6 +114,7 @@ const ProductDetail = () => {
     if (img.startsWith('http')) return img;
     return `${process.env.REACT_APP_API_URL}/uploads/${img.split('/').pop()}`;
   };
+
 
   if (!product) return <div className={styles.loading}>Đang tải...</div>;
   if (error) return <div className={styles.error}>{error}</div>;
@@ -189,7 +193,7 @@ const ProductDetail = () => {
           {product.stock === 0 ? (
             <div className={styles.outOfStock}>
               <p>EMAIL WHEN STOCK AVAILABLE</p>
-              <input type="text" placeholder="Your Name" className={styles.input} />
+              <input type="text" placeholder="Nguyễn Trương Nhật Hào" className={styles.input} />
               <input type="email" placeholder="nguyentruongnhathao1922@gmail.com" className={styles.input} />
               <button className={styles.subscribeButton}>SUBSCRIBE NOW</button>
             </div>
@@ -247,14 +251,21 @@ const ProductDetail = () => {
 
       {relatedProducts.length > 0 && (
         <div className={styles.relatedProducts}>
-          <h3>Sản phẩm liên quan</h3>
-          <div className={styles.productGrid}>
-            {relatedProducts.map(relatedProduct => (
-              <div key={relatedProduct._id} className={styles.relatedProductCard}>
-                <img src={imageUrl(relatedProduct.image)} alt={relatedProduct.name} />
-                <h4>{relatedProduct.name}</h4>
-                <p>{relatedProduct.price.toLocaleString('vi-VN')} đ</p>
-                <Link to={`/products/${relatedProduct._id}`}>Xem chi tiết</Link>
+          <h2>Sản phẩm liên quan</h2>
+          <div className={styles.relatedProductsGrid}>
+            {relatedProducts.map((product) => (
+              <div key={product._id} className={styles.relatedProductCard}>
+                <img 
+                  src={imageUrl(product.image)} 
+                  alt={product.name} 
+                  className={styles.relatedProductImage}
+                />
+                <div className={styles.relatedProductInfo}>
+                  <h3 className={styles.relatedProductName}>{product.name}</h3>
+                  <p className={styles.relatedProductPrice}>
+                    {product.price.toLocaleString('vi-VN')} đ
+                  </p>
+                </div>
               </div>
             ))}
           </div>

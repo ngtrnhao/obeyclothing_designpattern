@@ -40,4 +40,7 @@ router.put('/:id', adminMiddleware, upload.fields([
 router.delete('/:id', adminMiddleware, productController.deleteProduct);
 router.post('/', authMiddleware, productController.createProduct);
 
+// New route to fetch products for parent categories
+router.get('/category/:categoryId/all', productController.getProductsByParentCategory);
+
 module.exports = router;

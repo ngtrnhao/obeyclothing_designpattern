@@ -5,14 +5,14 @@ const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  fullName: { type: String, required: true },
-  phoneNumber: { type: String, required: true },
+  fullName: { type: String, required: false },
+  phoneNumber: { type: String, required: false },
   address: {
-    street: { type: String, required: true },
-    city: { type: String, required: true },
-    state: { type: String, required: true },
-    zipCode: { type: String, required: true },
-    country: { type: String, required: true }
+    street: { type: String, required: false },
+    city: { type: String, required: false },
+    state: { type: String, required: false },
+    zipCode: { type: String, required: false },
+    country: { type: String, required: false }
   },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
   resetPasswordToken: String,
@@ -20,6 +20,15 @@ const userSchema = new mongoose.Schema({
   loginAttempts: { type: Number, required: true, default: 0 },
   lockUntil: { type: Number },
   isActive: { type: Boolean, default: true },
+  shippingInfo: {
+    fullName: String,
+    email: String,
+    phone: String,
+    address: String,
+    province: String,
+    district: String,
+    ward: String
+  }
 });
 
 userSchema.pre('save', function(next) {

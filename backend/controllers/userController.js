@@ -12,10 +12,10 @@ exports.getProfile = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
   try {
-    const { email, fullName } = req.body;
+    const { shippingInfo } = req.body;
     const user = await User.findByIdAndUpdate(
       req.user._id,
-      { email, fullName },
+      { shippingInfo },
       { new: true }
     ).select('-password');
     res.json(user);

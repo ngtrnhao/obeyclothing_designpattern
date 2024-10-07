@@ -52,6 +52,7 @@ const orderRoutes = require('./routes/orderRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoutes');
 const categoriesRoutes = require('./routes/categories');
+const addressRoutes = require('./routes/addressRoutes');
 
 // Serve static files from the 'uploads' directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -68,6 +69,7 @@ app.use('/api/user', userRoutes);
 /*app.use('/api/categories', categoryRoutes);*/
 app.use('/api/orders', orderRoutes);
 app.use('/api/categories', categoriesRoutes);
+app.use('/api/address', addressRoutes);
 
 const productController = require('./controllers/productController');
 console.log(productController); // Kiểm tra xem object này có chứa hàm getProductsByCategorySlug không
