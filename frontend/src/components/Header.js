@@ -45,7 +45,11 @@ const Header = () => {
             </button>
           </div>
           <div className={styles.centerSection}>
-            <Link to="/" className={styles.logo}>OBEY</Link>
+            <div className={styles.logoWrapper}>
+              <a href="/" className={styles.logo}>
+                <span className={styles.srOnly}>Home</span>
+              </a>
+            </div>
           </div>
           <div className={styles.rightSection}>
             <button className={styles.searchButton}>

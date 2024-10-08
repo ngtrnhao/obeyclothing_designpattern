@@ -1,12 +1,12 @@
 ﻿import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { getProductsByCategorySlug, getCategories, getAllProducts } from '../services/api';
+import { Link, useParams } from 'react-router-dom';
+import { getCategories, getProductsByCategorySlug, getAllProducts } from '../services/api';
 import styles from './style.component/ProductList.module.css';
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [currentCategory, setCurrentCategory] = useState(null); // Thêm state cho currentCategory
+  const [currentCategory, setCurrentCategory] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { slug } = useParams();
@@ -14,7 +14,6 @@ const ProductList = () => {
   const imageUrl = (img) => {
     if (!img) return '/images/placeholder-image.jpg';
     if (img.startsWith('http')) return img;
-    // Loại bỏ 'uploads\\' từ đầu đường dẫn nếu có
     const cleanedPath = img.replace(/^uploads\\/, '');
     return `${process.env.REACT_APP_API_URL}/uploads/${cleanedPath}`;
   };
@@ -24,17 +23,13 @@ const ProductList = () => {
       setLoading(true);
       setError(null);
 
-      console.log('Fetching data for slug:', slug);
-
       const categoriesData = await getCategories();
-      console.log('Categories:', categoriesData);
       setCategories(categoriesData);
 
       if (slug) {
         const category = categoriesData.find(cat => cat.slug === slug);
         setCurrentCategory(category || null);
         const productsData = await getProductsByCategorySlug(slug);
-        console.log('Products fetched:', productsData);
         setProducts(productsData);
       } else {
         setCurrentCategory(null);
@@ -52,13 +47,6 @@ const ProductList = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  useEffect(() => {
-    if (products.length > 0) {
-      console.log('Fetched products:', products);
-      console.log('First product image:', products[0].image);
-    }
-  }, [products]);
 
   const renderCategories = (categories, level = 0) => {
     return categories.map(category => (
@@ -98,7 +86,7 @@ const ProductList = () => {
               <div className={styles.productInfo}>
                 <h3>{product.name}</h3>
                 <p className={styles.productPrice}>{product.price.toLocaleString('vi-VN')} đ</p>
-                <Link to={`/product/${product._id}`} className={styles.viewProductButton}>
+                <Link to={`/product/${product.slug}`} className={styles.productLink}>
                   Xem chi tiết
                 </Link>
               </div>

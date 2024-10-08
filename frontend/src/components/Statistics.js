@@ -5,6 +5,14 @@ import { FaChartLine, FaShoppingCart, FaUsers } from 'react-icons/fa';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import styles from './style.component/Statistics.module.css';
 
+const getSoldQuantity = (product) => {
+  return product.soldQuantity || 0;
+};
+
+const sortProductsBySoldQuantity = (products) => {
+  return [...products].sort((a, b) => getSoldQuantity(b) - getSoldQuantity(a));
+};
+
 const Statistics = () => {
   const [stats, setStats] = useState({
     totalRevenue: 0,
@@ -61,11 +69,11 @@ const Statistics = () => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
   };
 
-  // Thêm hàm này để chuẩn bị dữ liệu cho biểu đồ tròn
   const prepareTopProductsData = (products) => {
-    return products.map(product => ({
+    const sortedProducts = sortProductsBySoldQuantity(products);
+    return sortedProducts.slice(0, 5).map(product => ({
       name: product.name,
-      value: product.soldQuantity
+      value: getSoldQuantity(product)
     }));
   };
 
@@ -146,7 +154,7 @@ const Statistics = () => {
           animate="visible"
           transition={{ duration: 0.5, delay: 0.5 }}
         >
-          <h3>Top sản phẩm bán chạy</h3>
+          <h3>Top 5 sản phẩm bán chạy</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -157,13 +165,13 @@ const Statistics = () => {
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                label={({ name, value }) => `${name}: ${value}`}
               >
                 {prepareTopProductsData(stats.topProducts).map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip formatter={(value, name) => [`${value} sản phẩm`, name]} />
+              <Tooltip formatter={(value, name) => [`Số lượng bán: ${value}`, name]} />
               <Legend />
             </PieChart>
           </ResponsiveContainer>

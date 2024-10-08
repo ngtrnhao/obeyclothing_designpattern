@@ -59,7 +59,10 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Use routes
 app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes);
+app.use('/api/products', (req, res, next) => {
+  console.log('Request to /api/products:', req.method, req.url);
+  next();
+}, productRoutes);
 app.use('/api/cart', cartRoutes);
 //app.use('/api/user', userRoutes);
 //Admin routes
@@ -76,6 +79,8 @@ console.log(productController); // Kiểm tra xem object này có chứa hàm ge
 
 // Add this line after other route definitions
 app.get('/api/categories/:slug/products', productController.getProductsByCategorySlug);
+
+app.get('/api/products/slug/:slug', productController.getProductBySlug);
 
 const PORT = process.env.PORT || 5000;
 

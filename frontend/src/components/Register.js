@@ -52,7 +52,7 @@ const Register = () => {
 
   return (
     <div className={styles.registerContainer}>
-      <h2 className={styles.registerTitle}>Đăng ký</h2>
+      <h2 className={styles.registerTitle}>Thông Tin Đăng ký</h2>
       {errors.username && <p className={styles.errorMessage}>{errors.username}</p>}
       {errors.email && <p className={styles.errorMessage}>{errors.email}</p>}
       {errors.password && <p className={styles.errorMessage}>{errors.password}</p>}

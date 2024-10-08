@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getProductById, addToCart, getProducts, getCategoryPath } from '../services/api';
+import { getProductById, addToCart, getProducts, getCategoryPath, getProductBySlug } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
 import styles from './style.component/ProductDetail.module.css';
@@ -16,7 +16,7 @@ const ProductDetail = () => {
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [error, setError] = useState('');
-  const { id } = useParams();
+  const { slug } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [categoryPath, setCategoryPath] = useState([]);
@@ -25,7 +25,7 @@ const ProductDetail = () => {
   useEffect(() => {
     const fetchProductAndRelated = async () => {
       try {
-        const productData = await getProductById(id);
+        const productData = await getProductBySlug(slug);
         setProduct(productData);
         setSelectedImage(0);
         if (productData.sizes && productData.sizes.length > 0) {
@@ -38,7 +38,7 @@ const ProductDetail = () => {
         const relatedData = await getProducts({ 
           category: productData.category,
           limit: 4,
-          exclude: id
+          exclude: productData._id
         });
         setRelatedProducts(relatedData);
 
@@ -52,7 +52,11 @@ const ProductDetail = () => {
       }
     };
     fetchProductAndRelated();
-  }, [id]);
+  }, [slug]);
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+  };
 
   const handleAddToCart = async () => {
     if (!user) {
@@ -65,7 +69,7 @@ const ProductDetail = () => {
     }
     try {
       const cartItem = {
-        productId: id,
+        productId: product._id,
         quantity,
         size: selectedSize,
         color: selectedColor
@@ -169,7 +173,7 @@ const ProductDetail = () => {
           {product.colors && product.colors.length > 0 && (
             <p className={styles.productColor}>{product.colors[0]}</p>
           )}
-          <p className={styles.price}>£{product.price.toFixed(2)}</p>
+          <p className={styles.price}>{formatPrice(product.price)}</p>
           
           {product.sizes && product.sizes.length > 0 && (
             <div className={styles.sizeSection}>
@@ -247,7 +251,7 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      <ProductReviews productId={id} />
+      <ProductReviews productId={product._id} />
 
       {relatedProducts.length > 0 && (
         <div className={styles.relatedProducts}>
@@ -263,7 +267,7 @@ const ProductDetail = () => {
                 <div className={styles.relatedProductInfo}>
                   <h3 className={styles.relatedProductName}>{product.name}</h3>
                   <p className={styles.relatedProductPrice}>
-                    {product.price.toLocaleString('vi-VN')} đ
+                    {formatPrice(product.price)}
                   </p>
                 </div>
               </div>

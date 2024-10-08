@@ -7,13 +7,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   fullName: { type: String, required: false },
   phoneNumber: { type: String, required: false },
-  address: {
-    street: { type: String, required: false },
-    city: { type: String, required: false },
-    state: { type: String, required: false },
-    zipCode: { type: String, required: false },
-    country: { type: String, required: false }
-  },
+  address: { type: String, required: false },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
   resetPasswordToken: String,
   resetPasswordExpires: Date,
@@ -28,7 +22,13 @@ const userSchema = new mongoose.Schema({
     province: String,
     district: String,
     ward: String
-  }
+  },
+  provinceId: { type: String },
+  districtId: { type: String },
+  wardId: { type: String },
+  provinceName: { type: String },
+  districtName: { type: String },
+  wardName: { type: String }
 });
 
 userSchema.pre('save', function(next) {

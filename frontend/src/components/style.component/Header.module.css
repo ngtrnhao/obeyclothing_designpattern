@@ -23,6 +23,7 @@
   height: 100%;
   /* Thêm padding hai bên */
   padding: 0 20px;
+  position: relative;
 }
 
 /* Định nghĩa style chung cho phần bên trái và phải của header */
@@ -37,26 +38,38 @@
 
 /* Định nghĩa style cho phần giữa của header */
 .centerSection {
-  /* Không cho phép phần giữa mở rộng */
-  flex: 1;
-  /* Căn giữa các phần tử con theo chiều dọc */
-  text-align: center;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 /* Định nghĩa style cho logo */
+.logoWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .logo {
-  position :absolute;
-  top :20px;
-  /* Kích thước chữ cho logo */
-  font-size: 2rem;
-  /* Độ đậm cho chữ logo */
-  font-weight: bold;
-  /* Màu chữ đen cho logo */
-  color: #000;
-  /* Loại bỏ gạch chân cho link */
-  text-decoration: none;
-  /* Chuyển chữ logo thành chữ in hoa */
-  text-transform: uppercase;
+  display: block;
+  width: 150px; /* Điều chỉnh kích thước phù hợp với logo của bạn */
+  height: 60px;
+  background-image: url('data:image/svg+xml,%3C%3Fxml version="1.0" encoding="UTF-8"%3F%3E%3C!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"%3E%3Csvg enable-background="new 0 0 276.5 79" version="1.1" viewBox="0 0 276.5 79" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="m83.067 39.757c0 22.041-17.028 35.246-37.976 35.246-20.937 0.01-37.976-13.194-37.976-35.235 0-21.579 17.114-35.599 37.965-35.609 20.862 0 37.978 14.018 37.987 35.598m-50.817 0.375c0 7.829 5.28 13.205 12.841 13.205 7.561-0.01 12.841-5.376 12.83-13.205 0-7.293-4.916-13.387-12.83-13.387-7.924 0-12.841 6.104-12.841 13.387" fill="%23181819"/%3E%3Cpath d="m86.877 5.251 29.056-0.011c13.29 0 26.859 3.18 26.87 19.031 0 6.008-3.01 11.93-9.018 13.837v0.546c7.464 2.645 12.198 8.107 12.198 16.3 0.011 14.115-13.109 18.945-25.125 18.945l-33.969 0.011-0.012-68.659zm25.415 26.399c3.642 0 7.744-0.365 7.744-5.109 0-5.098-4.648-4.722-8.29-4.722h-1.735l0.011 9.831h2.27zm-2.271 25.863h2.827c4.091 0 10.014-0.096 10.014-5.74 0-5.74-6.373-5.644-10.389-5.644h-2.452v11.384z" fill="%23181819"/%3E%3Cpolygon points="149.71 5.237 195.88 5.226 195.89 23.979 174.85 23.99 174.86 30.544 194.07 30.544 194.07 48.386 174.86 48.397 174.86 55.133 196.62 55.133 196.62 73.886 149.72 73.896" fill="%23181819"/%3E%3Cpath d="m227.75 5.22 7.646 17.939h0.738c0.729-2.185 1.36-4.37 2.271-6.468l4.916-11.471 28.049-0.01-23.486 39.069v29.601h-24.396l-0.011-29.591-23.959-39.069h28.232z" fill="%23181819"/%3E%3C/svg%3E');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 
 /* Định nghĩa style cho nút menu */

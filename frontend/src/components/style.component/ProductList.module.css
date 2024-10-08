@@ -51,11 +51,12 @@
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   overflow: hidden;
-  transition: box-shadow 0.3s ease;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 .productCard:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
 }
 
 .productImage {
@@ -70,16 +71,18 @@
 
 .productInfo h3 {
   margin: 0 0 0.5rem;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  color: #333;
 }
 
 .productPrice {
   font-weight: bold;
   color: #e53935;
   margin-bottom: 0.5rem;
+  font-size: 1.1rem;
 }
 
-.viewProductButton {
+.productLink {
   display: inline-block;
   padding: 0.5rem 1rem;
   background-color: #1976d2;
@@ -87,8 +90,20 @@
   text-decoration: none;
   border-radius: 4px;
   transition: background-color 0.3s ease;
+  font-size: 0.9rem;
 }
 
-.viewProductButton:hover {
+.productLink:hover {
   background-color: #1565c0;
+}
+
+.loading, .error {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.error {
+  color: #e53935;
 }

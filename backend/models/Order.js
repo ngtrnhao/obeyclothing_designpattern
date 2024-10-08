@@ -33,7 +33,19 @@ const orderSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
-  }
+  },
+  shippingInfo: {
+    fullName: String,
+    phone: String,
+    address: String,
+    provinceId: String,
+    provinceName: String,
+    districtId: String,
+    districtName: String,
+    wardId: String,
+    wardName: String
+  },
+  shippingAddress: String
 }, { timestamps: true });
 
 module.exports = mongoose.model('Order', orderSchema);

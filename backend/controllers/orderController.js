@@ -39,24 +39,18 @@ exports.createPaypalOrder = async (req, res) => {
 
 exports.completePaypalOrder = async (req, res) => {
   try {
-    const { orderId, paypalDetails, alternativeShipping, shippingInfo } = req.body;
-    const userId = req.user._id;
+    const { orderId, paypalDetails, shippingInfo } = req.body;
+    const userId = req.user._id; // Make sure you have this line
 
-    let finalShippingAddress;
+    console.log('Received shipping info in order completion:', shippingInfo);
 
-    if (alternativeShipping) {
-      finalShippingAddress = `${shippingInfo.address || ''}, ${shippingInfo.wardName || ''}, ${shippingInfo.districtName || ''}, ${shippingInfo.provinceName || ''}`.trim();
-    } else {
-      const user = await User.findById(userId);
-      if (!user || !user.shippingInfo) {
-        return res.status(400).json({ message: 'Thông tin giao hàng không đầy đủ' });
-      }
-      finalShippingAddress = `${user.shippingInfo.address || ''}, ${user.shippingInfo.wardName || ''}, ${user.shippingInfo.districtName || ''}, ${user.shippingInfo.provinceName || ''}`.trim();
+    if (!shippingInfo.address || !shippingInfo.wardName || !shippingInfo.districtName || !shippingInfo.provinceName) {
+      return res.status(400).json({ message: 'Thông tin địa chỉ giao hàng không đầy đủ' });
     }
 
-    if (!finalShippingAddress || finalShippingAddress === '') {
-      return res.status(400).json({ message: 'Địa chỉ giao hàng không hợp lệ' });
-    }
+    const finalShippingAddress = `${shippingInfo.address}, ${shippingInfo.wardName}, ${shippingInfo.districtName}, ${shippingInfo.provinceName}`.trim();
+
+    console.log("Final shipping address:", finalShippingAddress);
 
     const cart = await Cart.findOne({ user: userId }).populate('items.product');
     if (!cart) {
@@ -75,6 +69,7 @@ exports.completePaypalOrder = async (req, res) => {
       totalAmount: cart.items.reduce((total, item) => total + item.quantity * item.product.price, 0),
       paypalOrderId: orderId,
       paypalDetails: paypalDetails,
+      shippingInfo: shippingInfo,
       shippingAddress: finalShippingAddress,
       status: 'paid'
     });
@@ -100,5 +95,60 @@ exports.completePaypalOrder = async (req, res) => {
   } catch (error) {
     console.error('Error completing PayPal order:', error);
     res.status(500).json({ message: 'Lỗi khi xử lý đơn hàng PayPal', error: error.message });
+  }
+};
+
+exports.createOrder = async (req, res) => {
+  try {
+    console.log('Received order data:', req.body);
+    const { cartItems, shippingInfo, totalAmount } = req.body;
+    const userId = req.user._id;
+
+    console.log('Received shipping info:', shippingInfo);
+
+    // Kiểm tra và sử dụng tên địa chỉ từ shippingInfo
+    const shippingAddress = `${shippingInfo.address}, ${shippingInfo.wardName || ''}, ${shippingInfo.districtName || ''}, ${shippingInfo.provinceName || ''}`.trim();
+
+    if (!shippingInfo.provinceName || !shippingInfo.districtName || !shippingInfo.wardName) {
+      console.log('Missing address information:', shippingInfo);
+      return res.status(400).json({ message: 'Thông tin địa chỉ giao hàng không đầy đủ' });
+    }
+
+    const newOrder = new Order({
+      user: userId,
+      items: cartItems.map(item => ({
+        product: item.product,
+        quantity: item.quantity,
+        price: item.price,
+        size: item.size,
+        color: item.color
+      })),
+      totalAmount,
+      shippingInfo: {
+        fullName: shippingInfo.fullName,
+        phone: shippingInfo.phone,
+        address: shippingInfo.address,
+        provinceId: shippingInfo.provinceId,
+        districtId: shippingInfo.districtId,
+        wardId: shippingInfo.wardId,
+        provinceName: shippingInfo.provinceName,
+        districtName: shippingInfo.districtName,
+        wardName: shippingInfo.wardName
+      },
+      shippingAddress,
+      status: 'pending'
+    });
+
+    console.log('New order object:', newOrder);
+
+    await newOrder.save();
+
+    // Xóa giỏ hàng sau khi đặt hàng thành công
+    await Cart.findOneAndUpdate({ user: userId }, { $set: { items: [] } });
+
+    res.status(201).json(newOrder);
+  } catch (error) {
+    console.error('Error creating order:', error);
+    res.status(400).json({ message: 'Lỗi khi tạo đơn hàng', error: error.message });
   }
 };

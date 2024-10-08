@@ -45,9 +45,11 @@ const Checkout = () => {
 			const info = await getUserInfo();
 			setUserInfo(info);
 			setIsEditing(!isUserInfoComplete(info));
+			
 			if (info.provinceId) {
 				fetchDistricts(info.provinceId);
 			}
+			
 			if (info.districtId) {
 				fetchWards(info.districtId);
 			}
@@ -60,6 +62,7 @@ const Checkout = () => {
 	const fetchProvinces = async () => {
 		try {
 			const data = await getProvinces();
+			console.log('Fetched provinces:', data);
 			setProvinces(data);
 		} catch (error) {
 			console.error('Error fetching provinces:', error);
@@ -69,6 +72,7 @@ const Checkout = () => {
 	const fetchDistricts = async (provinceId) => {
 		try {
 			const data = await getDistricts(provinceId);
+			console.log('Fetched districts:', data);
 			setDistricts(data);
 		} catch (error) {
 			console.error('Error fetching districts:', error);
@@ -78,6 +82,7 @@ const Checkout = () => {
 	const fetchWards = async (districtId) => {
 		try {
 			const data = await getWards(districtId);
+			console.log('Fetched wards:', data);
 			setWards(data);
 		} catch (error) {
 			console.error('Error fetching wards:', error);
@@ -94,17 +99,21 @@ const Checkout = () => {
 		updateFunction(prev => {
 			const updated = { ...prev, [name]: value };
 			if (name === 'provinceId') {
+				const selectedProvince = provinces.find(p => p.code.toString() === value);
 				updated.districtId = '';
 				updated.wardId = '';
-				updated.provinceName = provinces.find(p => p.code === value)?.name || '';
+				updated.provinceName = selectedProvince ? selectedProvince.name : '';
 				fetchDistricts(value);
 			} else if (name === 'districtId') {
+				const selectedDistrict = districts.find(d => d.code.toString() === value);
 				updated.wardId = '';
-				updated.districtName = districts.find(d => d.code === value)?.name || '';
+				updated.districtName = selectedDistrict ? selectedDistrict.name : '';
 				fetchWards(value);
 			} else if (name === 'wardId') {
-				updated.wardName = wards.find(w => w.code === value)?.name || '';
+				const selectedWard = wards.find(w => w.code.toString() === value);
+				updated.wardName = selectedWard ? selectedWard.name : '';
 			}
+			console.log('Updated shipping info:', updated);
 			return updated;
 		});
 	};
@@ -113,20 +122,30 @@ const Checkout = () => {
 		e.preventDefault();
 		const shippingInfo = alternativeShipping ? altShippingInfo : userInfo;
 		
-		if (!shippingInfo.fullName || !shippingInfo.phone || !shippingInfo.address || 
-			!shippingInfo.provinceId || !shippingInfo.districtId || !shippingInfo.wardId) {
+		// Đảm bảo address là string
+		const updatedShippingInfo = {
+			...shippingInfo,
+			address: typeof shippingInfo.address === 'object' ? JSON.stringify(shippingInfo.address) : shippingInfo.address
+		};
+		
+		console.log('Shipping info being sent:', updatedShippingInfo);
+		
+		// Kiểm tra dữ liệu
+		if (!updatedShippingInfo.fullName || !updatedShippingInfo.phone || !updatedShippingInfo.address ||
+			!updatedShippingInfo.provinceId || !updatedShippingInfo.districtId || !updatedShippingInfo.wardId ||
+			!updatedShippingInfo.provinceName || !updatedShippingInfo.districtName || !updatedShippingInfo.wardName) {
 			alert('Vui lòng điền đầy đủ thông tin địa chỉ giao hàng');
 			return;
 		}
 
 		try {
 			if (!alternativeShipping) {
-				await updateUserInfo(userInfo);
+				const updatedUser = await updateUserInfo(updatedShippingInfo);
+				console.log('Updated user info:', updatedUser);
 			}
-			// Gọi API để tạo đơn hàng với thông tin giao hàng đúng
-			// Ví dụ: await createOrder(cartItems, shippingInfo, totalWithShipping, alternativeShipping);
 			setIsEditing(false);
-			// Chuyển hướng người dùng đến trang thanh toán hoặc xác nhận đơn hàng
+			// Proceed to payment or order confirmation
+			console.log('Shipping info being sent:', updatedShippingInfo);
 		} catch (error) {
 			console.error('Error processing order:', error);
 			alert('Có lỗi xảy ra khi xử lý đơn hàng. Vui lòng thử lại.');
@@ -184,7 +203,7 @@ const Checkout = () => {
 			>
 				<option value="">Chọn Tỉnh/Thành phố</option>
 				{provinces.map(province => (
-					<option key={province.code} value={province.code}>{province.name}</option>
+					<option key={province.code} value={province.code.toString()}>{province.name}</option>
 				))}
 			</select>
 			<select
@@ -227,7 +246,11 @@ const Checkout = () => {
 						<p>{userInfo.email}</p>
 						<p>{userInfo.phone}</p>
 						<p>{userInfo.address}</p>
-						<p>{userInfo.wardName}, {userInfo.districtName}, {userInfo.provinceName}</p>
+						<p>
+							{userInfo.wardName && `${userInfo.wardName}, `}
+							{userInfo.districtName && `${userInfo.districtName}, `}
+							{userInfo.provinceName}
+						</p>
 						<button onClick={() => setIsEditing(true)}>Chỉnh sửa</button>
 					</div>
 				)}

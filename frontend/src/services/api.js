@@ -31,6 +31,9 @@ export const setAuthToken = (token) => {
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
     // Chỉ thêm token nếu endpoint không nằm trong danh sách public
     if (token && !publicEndpoints.some(endpoint => config.url.includes(endpoint))) {
       config.headers['Authorization'] = `Bearer ${token}`;
@@ -160,13 +163,21 @@ export const updateUserProfile = (profileData) => api.put('/user/profile', profi
 export const getUserOrders = () => api.get('/user/orders');
 
 // Orders
-export const createOrder = async (paypalOrder) => {
+export const createOrder = async (cartItems, shippingInfo, totalAmount) => {
   try {
-    const token = localStorage.getItem('token');
-    const response = await api.post('/orders', { paypalOrder }, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
+    const formattedCartItems = cartItems.map(item => ({
+      product: item.product._id,
+      quantity: item.quantity,
+      size: item.size,
+      color: item.color
+    }));
+
+    console.log('Sending order data:', { cartItems: formattedCartItems, shippingInfo, totalAmount });
+
+    const response = await api.post('/orders', {
+      cartItems: formattedCartItems,
+      shippingInfo,
+      totalAmount
     });
     return response.data;
   } catch (error) {
@@ -414,6 +425,7 @@ export const updateDeliveryStatus = (deliveryId, status) => api.put(`/deliveries
 export const getProvinces = async () => {
   try {
     const response = await api.get('/address/provinces');
+    console.log('Provinces data:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching provinces:', error);
@@ -424,6 +436,7 @@ export const getProvinces = async () => {
 export const getDistricts = async (provinceId) => {
   try {
     const response = await api.get(`/address/districts/${provinceId}`);
+    console.log('Districts data:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching districts:', error);
@@ -434,6 +447,7 @@ export const getDistricts = async (provinceId) => {
 export const getWards = async (districtId) => {
   try {
     const response = await api.get(`/address/wards/${districtId}`);
+    console.log('Wards data:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching wards:', error);
@@ -451,8 +465,31 @@ export const getUserInfo = async () => {
   }
 };
 
-export const updateUserInfo = (userInfo) => api.put('/user/profile', userInfo);
+export const updateUserInfo = async (userInfo) => {
+  try {
+    console.log('Sending user info to server:', userInfo);
+    const response = await api.put('/user/profile', userInfo);
+    console.log('Server response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating user info:', error.response?.data || error.message);
+    throw error;
+  }
+};
 
 export const fetchCart = () => api.get('/cart');
+
+export const getProductBySlug = async (slug) => {
+  try {
+    console.log('Fetching product with slug:', slug);
+    const response = await api.get(`/products/slug/${slug}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error in getProductBySlug:', error);
+    throw error;
+  }
+};
+
+// ... other API functions
 
 export default api;

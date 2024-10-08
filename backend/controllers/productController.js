@@ -178,7 +178,7 @@ exports.searchProducts = async (req, res) => {
   }
 };
 
-exports.getProductsByCategory = async (req, res) => {
+  exports.getProductsByCategory = async (req, res) => {
   try {
     const categoryId = req.params.categoryId;
     console.log('Fetching products for category:', categoryId);
@@ -221,5 +221,23 @@ exports.getProductsByParentCategory = async (req, res) => {
   } catch (error) {
     console.error('Error in getProductsByParentCategory:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+exports.getProductBySlug = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    console.log('Requested slug:', slug); // Thêm log này để kiểm tra
+    if (!slug || slug === 'undefined') {
+      return res.status(400).json({ message: 'Invalid slug' });
+    }
+    const product = await Product.findOne({ slug });
+    if (!product) {
+      return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
+    }
+    res.json(product);
+  } catch (error) {
+    console.error('Error in getProductBySlug:', error);
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
   }
 };
