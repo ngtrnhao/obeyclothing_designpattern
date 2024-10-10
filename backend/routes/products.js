@@ -20,6 +20,10 @@ router.get('/search', productController.searchProducts);
 router.get('/:id', productController.getProductById);
 router.get('/:id/reviews', productController.getProductReviews);
 router.get('/category/:categoryId', productController.getProductsByCategory);
+router.get('/', productController.getAllProducts);
+router.get('/slug/:slug', productController.getProductBySlug);
+
+
 
 // Các route cần xác thực
 router.use(authMiddleware);

@@ -5,6 +5,8 @@ const dotenv = require('dotenv');
 const path = require('path');
 const authMiddleware = require('./middleware/authMiddleware');
 const adminMiddleware = require('./middleware/adminMiddleware');
+const cron = require('node-cron');
+const inventoryController = require('./controllers/inventoryController');
 
 dotenv.config();
 
@@ -12,12 +14,11 @@ console.log('ADMIN_SECRET:', process.env.ADMIN_SECRET);
 
 const app = express();
 
-const corsOptions = {
-  origin: 'http://localhost:3000', // Đảm bảo đây là URL của frontend
-  credentials: true,
-  optionsSuccessStatus: 200
-};
-app.use(cors(corsOptions));
+// Cấu hình CORS
+app.use(cors({
+  origin: 'http://localhost:3000', // Thay đổi thành URL của frontend của bạn
+  credentials: true
+}));
 
 // Thêm middleware này sau middleware CORS
 app.use((req, res, next) => {
@@ -32,6 +33,11 @@ app.use(express.json());
 app.use((req, res, next) => {
   console.log(`Incoming ${req.method} request to ${req.path}`);
   console.log('Request body:', req.body);
+  next();
+});
+
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
   next();
 });
 
@@ -54,6 +60,12 @@ const userRoutes = require('./routes/userRoutes');
 const categoriesRoutes = require('./routes/categories');
 const addressRoutes = require('./routes/addressRoutes');
 
+// Đặt route admin trước các route khác
+app.use('/api/admin', authMiddleware, adminMiddleware, (req, res, next) => {
+  console.log('Admin route accessed');
+  next();
+}, adminRoutes);
+
 // Serve static files from the 'uploads' directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -66,7 +78,6 @@ app.use('/api/products', (req, res, next) => {
 app.use('/api/cart', cartRoutes);
 //app.use('/api/user', userRoutes);
 //Admin routes
-app.use('/api/admin', authMiddleware, adminMiddleware, adminRoutes);
 app.use('/api/user', userRoutes);
 
 /*app.use('/api/categories', categoryRoutes);*/
@@ -82,6 +93,16 @@ app.get('/api/categories/:slug/products', productController.getProductsByCategor
 
 app.get('/api/products/slug/:slug', productController.getProductBySlug);
 
+const inventoryRoutes = require('./routes/inventoryRoutes');
+
+// Thêm dòng này vào phần sử dụng routes
+app.use('/api/inventory', inventoryRoutes);
+
+const supplierRoutes = require('./routes/supplierRoutes');
+
+// Thêm dòng này vào phần khai báo routes
+app.use('/api/suppliers', supplierRoutes);
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
@@ -94,5 +115,18 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ message: 'Đã xảy ra lỗi server', error: err.message });
 });
+
+// Chạy mỗi ngày lúc 00:00
+cron.schedule('0 0 * * *', () => {
+  inventoryController.checkAndCreatePurchaseOrders();
+});
+
+// Sau đó mới đến các route khác và static files
+app.use(express.static(path.join(__dirname, '../frontend/build')));
+
+
+
+// Add admin routes
+app.use('/api', adminRoutes);
 
 module.exports = app;

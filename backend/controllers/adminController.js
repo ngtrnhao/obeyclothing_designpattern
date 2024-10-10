@@ -7,7 +7,7 @@ exports.getAllProducts = async (req, res) => {
     const products = await Product.find();
     res.json(products);
   } catch (error) {
-    res.status(500).json({ message: 'Lỗi khi lấy danh sách sản phẩm' });
+    res.status(500).json({ message: 'Lỗi khi lấy danh sách sản phẩm', error: error.message });
   }
 };
 
@@ -175,3 +175,20 @@ async function getMonthlySales() {
     };
   });
 }
+
+exports.getDashboardData = async (req, res) => {
+  try {
+    // ... các thống kê khác ...
+
+    const lowStockProducts = await Product.find({
+      $expr: { $lte: ['$stock', '$lowStockThreshold'] }
+    }).select('name stock lowStockThreshold');
+
+    res.json({
+      // ... các thống kê khác ...
+      lowStockProducts
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
+};

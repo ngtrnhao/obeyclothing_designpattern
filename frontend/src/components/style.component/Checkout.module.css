@@ -1,28 +1,137 @@
 .checkoutContainer {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.shippingInfo, .orderSummary {
+  width: 48%;
+}
+
+.shippingInfo h2, .orderSummary h2 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 10px;
+}
+
+.shippingInfo form, .altShippingForm {
+  display: flex;
+  flex-direction: column;
+}
+
+.shippingInfo input, .shippingInfo select {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.shippingInfo button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.shippingInfo button:hover {
+  background-color: #45a049;
+}
+
+.alternativeShipping {
+  margin: 20px 0;
+}
+
+.alternativeShipping label {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+}
+
+.alternativeShipping input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+.orderItem {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.orderItem img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  margin-right: 20px;
+  border-radius: 4px;
+}
+
+.orderItem h3 {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+}
+
+.orderItem p {
+  margin: 5px 0;
+  color: #666;
+}
+
+.orderTotal {
+  margin-top: 20px;
+  text-align: right;
+}
+
+.orderTotal p {
+  margin: 10px 0;
+}
+
+.orderTotal h3 {
+  font-size: 20px;
+  color: #4CAF50;
+}
+
+.emptyCart {
+  text-align: center;
+  padding: 50px;
+  font-size: 20px;
+  color: #666;
+}
+
+.paypalButtonContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.paypalButtonContainer > div,
+.paypalButtonContainer > button {
+  width: 300px;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+  .checkoutContainer {
+    flex-direction: column;
   }
-  
-  .orderSummary {
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
+
+  .shippingInfo, .orderSummary {
+    width: 100%;
+    margin-bottom: 30px;
   }
-  
-  .cartItem {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-  
-  .total {
-    margin-top: 20px;
-    font-size: 1.2em;
-    text-align: right;
-  }
-  
-  .paypalContainer {
-    margin-top: 30px;
-  }
+}

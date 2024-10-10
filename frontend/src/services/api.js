@@ -12,6 +12,19 @@ const api = axios.create({
   withCredentials: true
 });
 
+// Add this interceptor
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 // Danh sách các endpoint không cần xác thực
 const publicEndpoints = ['/products', '/categories', '/products/category'];
@@ -481,7 +494,6 @@ export const fetchCart = () => api.get('/cart');
 
 export const getProductBySlug = async (slug) => {
   try {
-    console.log('Fetching product with slug:', slug);
     const response = await api.get(`/products/slug/${slug}`);
     return response.data;
   } catch (error) {
@@ -491,5 +503,25 @@ export const getProductBySlug = async (slug) => {
 };
 
 // ... other API functions
+
+export const updateStock = (productId, newStock) => api.put('/admin/products/update-stock', { productId, quantity: newStock });
+export const getLowStockProducts = () => api.get('/admin/products/low-stock');
+
+export const getPurchaseOrders = () => api.get('/admin/purchase-orders');
+export const updatePurchaseOrder = (id, data) => api.put(`/admin/purchase-orders/${id}`, data);
+export const createPurchaseOrder = async (orderData) => {
+  try {
+    const response = await api.post('/admin/purchase-orders', orderData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating purchase order:', error);
+    throw error;
+  }
+};
+
+export const getSuppliers = () => api.get('/suppliers');
+export const createSupplier = (data) => api.post('/suppliers', data);
+export const updateSupplier = (id, data) => api.put(`/suppliers/${id}`, data);
+export const deleteSupplier = (id) => api.delete(`/suppliers/${id}`);
 
 export default api;

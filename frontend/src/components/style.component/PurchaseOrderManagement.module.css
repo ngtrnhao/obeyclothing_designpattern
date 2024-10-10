@@ -1,0 +1,165 @@
+.purchaseOrderManagement {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  
+  h2 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+  }
+  
+  .loading, .error {
+    text-align: center;
+    padding: 20px;
+    font-size: 18px;
+    border-radius: 4px;
+  }
+  
+  .loading {
+    background-color: #e3f2fd;
+    color: #1565c0;
+  }
+  
+  .error {
+    background-color: #ffebee;
+    color: #c62828;
+  }
+  
+  .createOrderForm {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .createOrderForm h3 {
+    font-size: 22px;
+    color: #444;
+    margin-bottom: 15px;
+  }
+  
+  .createOrderForm select,
+  .createOrderForm input[type="number"],
+  .createOrderForm textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+  
+  .createOrderForm button {
+    background-color: #4caf50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+  }
+  
+  .createOrderForm button:hover {
+    background-color: #45a049;
+  }
+  
+  .orderTable {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  .orderTable th,
+  .orderTable td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .orderTable th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .orderTable tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .orderTable input[type="number"],
+  .orderTable input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .orderTable button {
+    margin-right: 5px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+  }
+  
+  .orderTable button:first-of-type {
+    background-color: #4caf50;
+    color: white;
+  }
+  
+  .orderTable button:first-of-type:hover {
+    background-color: #45a049;
+  }
+  
+  .orderTable button:nth-of-type(2) {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .orderTable button:nth-of-type(2):hover {
+    background-color: #d32f2f;
+  }
+  
+  .orderTable button:last-of-type {
+    background-color: #2196f3;
+    color: white;
+  }
+  
+  .orderTable button:last-of-type:hover {
+    background-color: #1e88e5;
+  }
+  
+  @media (max-width: 768px) {
+    .purchaseOrderManagement {
+      padding: 20px;
+    }
+  
+    .orderTable {
+      font-size: 14px;
+    }
+  
+    .orderTable th,
+    .orderTable td {
+      padding: 8px 10px;
+    }
+  
+    .orderTable button {
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+  }

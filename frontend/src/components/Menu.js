@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link} from 'react-router-dom';
 import { getCategories } from '../services/api';
 import styles from './style.component/Menu.module.css';
+
 
 const Menu = ({ isOpen, onClose }) => {
   const [categories, setCategories] = useState([]);
@@ -68,43 +69,34 @@ const Menu = ({ isOpen, onClose }) => {
     };
   }, [isOpen, handleClose]);
 
-  const handleCategoryClick = (category, event) => {
-    event.preventDefault();
-    if (category.children && category.children.length > 0) {
-      setExpandedCategories(prev => ({
-        ...prev,
-        [category._id]: !prev[category._id]
-      }));
-    } else {
-      navigate(`/category/${category._id}`);
-      handleClose();
-    }
-  };
-
-  const handleCategoryLinkClick = (category, event) => {
-    event.stopPropagation();
-    navigate(`/category/${category.slug || category._id}`);
-    handleClose();
-  };
-
   const renderCategories = (categories) => {
     return categories.map((category) => (
       <div key={category._id} className={styles.categoryItem}>
         <div 
           className={styles.categoryHeader}
-          onClick={(e) => handleCategoryClick(category, e)}
         >
-          <span 
+          <Link 
+            to={`/category/${category.slug || category._id}`}
             className={styles.categoryLink}
-            onClick={(e) => handleCategoryLinkClick(category, e)}
+            onClick={(e) => {
+              if (category.children && category.children.length > 0) {
+                e.preventDefault();
+                setExpandedCategories(prev => ({
+                  ...prev,
+                  [category._id]: !prev[category._id]
+                }));
+              } else {
+                handleClose();
+              }
+            }}
           >
             {category.name}
-          </span>
-          {category.children && category.children.length > 0 && (
-            <span className={styles.toggleIndicator}>
-              {expandedCategories[category._id] ? '▼' : '▶'}
-            </span>
-          )}
+            {category.children && category.children.length > 0 && (
+              <span className={styles.toggleIndicator}>
+                {expandedCategories[category._id] ? '▼' : '▶'}
+              </span>
+            )}
+          </Link>
         </div>
         {category.children && category.children.length > 0 && expandedCategories[category._id] && (
           <div className={styles.subcategoryList}>

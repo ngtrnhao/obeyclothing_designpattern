@@ -1,66 +1,140 @@
 .footer {
-    background-color: #ffffff;
-    padding: 40px 20px 20px;
-    font-family: Arial, sans-serif;
-  }
-  
+  background-color: #ffffff;
+  color: #333333;
+  padding: 30px 0 10px; /* Giảm padding */
+  font-family: 'Roboto', sans-serif;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  border-top: 2px solid #d8e6e5; /* Giảm độ dày của border */
+}
+
+.footerContent {
+  display: flex;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 10px; /* Giảm padding */
+}
+
+.footerColumn {
+  flex: 1;
+  margin-right: 20px; /* Giảm margin */
+}
+
+.footerColumn:last-child {
+  margin-right: 0;
+}
+
+.footerColumn h3 {
+  font-size: 16px; /* Giảm kích thước font */
+  font-weight: 700;
+  margin-bottom: 15px; /* Giảm margin */
+  text-transform: uppercase;
+  color: #000000;
+}
+
+.footerColumn a {
+  display: block;
+  color: #555555;
+  text-decoration: none;
+  margin-bottom: 8px; /* Giảm margin */
+  font-size: 12px; /* Giảm kích thước font */
+  transition: color 0.3s ease;
+}
+
+.footerColumn a:hover {
+  color: #cde547;
+}
+
+.socialLinks {
+  display: flex;
+  gap: 10px; /* Giảm gap */
+}
+
+.socialLinks a {
+  width: 30px; /* Giảm kích thước */
+  height: 30px; /* Giảm kích thước */
+  background-color: #f0f0f0;
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+}
+
+.socialLinks a:hover {
+  background-color: #ff4500;
+}
+
+.socialLinks i {
+  font-size: 16px; /* Giảm kích thước font */
+  color: #333333;
+}
+
+.socialLinks a:hover i {
+  color: #ffffff;
+}
+
+.footerBottom {
+  max-width: 1200px;
+  margin: 20px auto 0; /* Giảm margin */
+  padding: 10px 10px 0; /* Giảm padding */
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.copyright {
+  display: flex;
+  align-items: center;
+}
+
+.footerLogo {
+  width: 30px; /* Giảm kích thước */
+  height: auto;
+  margin-right: 8px; /* Giảm margin */
+}
+
+.copyright span {
+  font-size: 10px; /* Giảm kích thước font */
+  color: #666666;
+}
+
+.legalLinks {
+  display: flex;
+  gap: 15px; /* Giảm gap */
+}
+
+.legalLinks a {
+  color: #666666;
+  text-decoration: none;
+  font-size: 10px; /* Giảm kích thước font */
+  transition: color 0.3s ease;
+}
+
+.legalLinks a:hover {
+  color: #ff4500;
+}
+
+@media (max-width: 768px) {
   .footerContent {
-    display: flex;
-    justify-content: space-between;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-  
-  .footerSection {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .footerSection h3,
-  .footerSection a {
-    margin-bottom: 10px;
-    color: #000;
-    text-decoration: none;
-    font-size: 14px;
-  }
-  
-  .socialLinks {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  
-  .socialLinks img {
-    width: 24px;
-    height: 24px;
-  }
-  
-  .copyright {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-  
-  .copyright img {
-    width: 24px;
-    height: 24px;
-  }
-  
-  .footerBottom {
-    margin-top: 20px;
-    text-align: center;
-    font-size: 12px;
-  }
-  
-  .footerBottom a {
-    color: #000;
-    text-decoration: none;
-    margin: 0 10px;
-  }
-  
-  @media (max-width: 768px) {
-    .footerContent {
       flex-direction: column;
-      gap: 20px;
-    }
   }
+  
+  .footerColumn {
+      margin-right: 0;
+      margin-bottom: 20px; /* Giảm margin */
+  }
+
+  .footerBottom {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+  }
+
+  .copyright {
+      margin-bottom: 15px; /* Giảm margin */
+  }
+
+  .legalLinks {
+      flex-direction: column;
+      gap: 8px; /* Giảm gap */
+  }
+}

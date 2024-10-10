@@ -20,6 +20,9 @@ import UserOrders from './components/UserOrders';
 import OrderSuccess from './components/OrderSuccess';
 import CategoryManagement from './components/CategoryManagement';
 import Checkout from './components/Checkout';
+import InventoryManagement from './components/InventoryManagement';
+import PurchaseOrderManagement from './components/PurchaseOrderManagement';
+import SupplierManagement from './components/SupplierManagement';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user } = useAuth();
@@ -40,7 +43,6 @@ const AppRoutes = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
       <Route path="/category/:slug" element={<ProductList />} />
-      <Route path="/" exact component={ProductList} />
       <Route path="/checkout" element={<Checkout />} />
       <Route 
         path="/user/*" 
@@ -62,17 +64,24 @@ const AppRoutes = () => {
             <AdminDashboard />
           </ProtectedRoute>
         } 
-      > <Route path='profile' element ={<UserProfile/>} />
+      > 
+        <Route path="suppliers" element={<SupplierManagement />} />
+        <Route index element={<Navigate to="statistics" replace />} />
+        <Route path="profile" element={<UserProfile />} />
         <Route path="products" element={<ProductManagement />} />
         <Route path="orders" element={<OrderManagement />} />
         <Route path="users" element={<UserManagement />} />
         <Route path="create-product" element={<CreateProduct />} />
         <Route path="statistics" element={<Statistics />} />
-        <Route path="categories" element={<CategoryManagement />} /> {/* Thêm dòng này */}
+        <Route path="categories" element={<CategoryManagement />} />
+        <Route path="inventory" element={<InventoryManagement />} />
+        <Route path="purchase-orders" element={<PurchaseOrderManagement />} />
       </Route>
       
       <Route path="/order-success" element={<OrderSuccess />} />
       
+      {/* Catch-all route for 404 Not Found */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };

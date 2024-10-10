@@ -4,9 +4,11 @@ const adminController = require('../controllers/adminController');
 const authMiddleware = require('../middleware/authMiddleware');
 const adminMiddleware = require('../middleware/adminMiddleware');
 const upload = require('../middleware/uploadMiddleware');
-const Order = require('../models/Order');  // Thêm dòng này
-const User = require('../models/User');    // Thêm dòng này
-const Product = require('../models/Product'); // Thêm dòng này
+const Order = require('../models/Order');  
+const User = require('../models/User');
+const Product = require('../models/Product'); 
+const inventoryController = require('../controllers/inventoryController');
+const supplierController = require('../controllers/supplierController');
 
 router.use(authMiddleware);
 router.use(adminMiddleware);
@@ -97,5 +99,27 @@ async function getMonthlySales() {
 
   return fullYearSales;
 }
+
+// Quản lý kho hàng
+router.get('/products/low-stock', inventoryController.getLowStockProducts);
+router.put('/products/update-stock', inventoryController.updateStock);
+
+// Quản lý đơn đặt hàng
+router.get('/purchase-orders', inventoryController.getPurchaseOrders);
+router.post('/purchase-orders', inventoryController.createPurchaseOrder);
+router.put('/purchase-orders/:id', inventoryController.updatePurchaseOrder);
+router.get('/purchase-orders/:id/pdf', authMiddleware, adminMiddleware, (req, res, next) => {
+  console.log('PDF route hit');
+  inventoryController.generatePurchaseOrderPDF(req, res, next);
+});
+
+// Kiểm tra hàng tồn kho thấp
+router.post('/check-low-stock', inventoryController.manualCheckLowStock);
+
+// Quản lý nhà cung cấp
+router.get('/suppliers', supplierController.getSuppliers);
+router.post('/suppliers', supplierController.createSupplier);
+router.put('/suppliers/:id', supplierController.updateSupplier);
+router.delete('/suppliers/:id', supplierController.deleteSupplier);
 
 module.exports = router;

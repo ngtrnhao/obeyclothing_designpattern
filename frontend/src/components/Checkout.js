@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { getUserInfo, updateUserInfo, getProvinces, getDistricts, getWards } from '../services/api';
 import PayPalCheckout from './PayPalCheckout1';
@@ -35,12 +35,7 @@ const Checkout = () => {
 	const [districts, setDistricts] = useState([]);
 	const [wards, setWards] = useState([]);
 
-	useEffect(() => {
-		fetchUserInfo();
-		fetchProvinces();
-	}, []);
-
-	const fetchUserInfo = async () => {
+	const fetchUserInfo = useCallback(async () => {
 		try {
 			const info = await getUserInfo();
 			setUserInfo(info);
@@ -57,7 +52,12 @@ const Checkout = () => {
 			console.error('Error fetching user info:', error);
 			setIsEditing(true);
 		}
-	};
+	}, []);
+
+	useEffect(() => {
+		fetchUserInfo();
+		fetchProvinces();
+	}, [fetchUserInfo]);
 
 	const fetchProvinces = async () => {
 		try {

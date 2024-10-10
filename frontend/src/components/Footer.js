@@ -6,42 +6,47 @@ const Footer = () => {
   return (
     <footer className={styles.footer}>
       <div className={styles.footerContent}>
-        <div className={styles.footerSection}>
-          <h3>OBEY CLOTHING</h3>
-          <Link to="/shipping">SHIPPING</Link>
-          <Link to="/returns">RETURNS</Link>
+        <div className={styles.footerColumn}>
+          <h3>OBEY CLOTHING VIỆT NAM</h3>
+          <Link to="/chinh-sach-giao-hang">Chính sách giao hàng</Link>
+          <Link to="/chinh-sach-doi-tra">Chính sách đổi trả</Link>
+          <Link to="/the-qua-tang">Thẻ quà tặng OBEY</Link>
         </div>
-        <div className={styles.footerSection}>
-          <Link to="/gift-cards">GIFT CARDS</Link>
-          <Link to="/stockists">STOCKISTS</Link>
-          <Link to="/contact">CONTACT</Link>
+        <div className={styles.footerColumn}>
+          <h3>THÔNG TIN CỬA HÀNG</h3>
+          <Link to="/he-thong-cua-hang">Hệ thống cửa hàng</Link>
+          <Link to="/lien-he">Liên hệ</Link>
+          <Link to="/bao-ve-thuong-hieu">Bảo vệ thương hiệu</Link>
         </div>
-        <div className={styles.footerSection}>
-          <Link to="/brand-protection">BRAND PROTECTION</Link>
-          <Link to="/help">HELP</Link>
-          <Link to="/newsletter">NEWSLETTER</Link>
+        <div className={styles.footerColumn}>
+          <h3>HỖ TRỢ KHÁCH HÀNG</h3>
+          <Link to="/ho-tro-khach-hang">Trung tâm hỗ trợ</Link>
+          <Link to="/dang-ky-nhan-tin">Đăng ký nhận tin mới nhất</Link>
         </div>
-        <div className={styles.footerSection}>
+        <div className={styles.footerColumn}>
+          <h3>KẾT NỐI VỚI CHÚNG TÔI</h3>
           <div className={styles.socialLinks}>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
-              <img src="/assets/instagram-icon.png" alt="Instagram" />
+            <a href="https://instagram.com/obeyclothing_vietnam" target="_blank" rel="noopener noreferrer">
+              <i className="fab fa-instagram"></i>
             </a>
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
-              <img src="/assets/facebook-icon.png" alt="Facebook" />
+            <a href="https://facebook.com/obeyclothing.vietnam" target="_blank" rel="noopener noreferrer">
+              <i className="fab fa-facebook-f"></i>
             </a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">
-              <img src="/assets/twitter-icon.png" alt="Twitter" />
+            <a href="https://twitter.com/obey_vietnam" target="_blank" rel="noopener noreferrer">
+              <i className="fab fa-twitter"></i>
             </a>
-          </div>
-          <div className={styles.copyright}>
-            <img src="/assets/obey-icon.png" alt="OBEY icon" />
-            <span>© OBEY CLOTHING</span>
           </div>
         </div>
       </div>
       <div className={styles.footerBottom}>
-        <Link to="/terms">TERMS OF SERVICE</Link>
-        <Link to="/privacy">PRIVACY POLICY</Link>
+        <div className={styles.copyright}>
+          <img src="/assets/obey-logo.png" alt="OBEY Logo" className={styles.footerLogo} />
+          <span>© 2023 OBEY CLOTHING VIỆT NAM</span>
+        </div>
+        <div className={styles.legalLinks}>
+          <Link to="/dieu-khoan-dich-vu">Điều khoản dịch vụ</Link>
+          <Link to="/chinh-sach-bao-mat">Chính sách bảo mật</Link>
+        </div>
       </div>
     </footer>
   );

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { FaChartLine, FaShoppingCart, FaUsers, FaBox, FaPlus, FaTags, FaUser } from 'react-icons/fa';
+import { FaChartLine, FaShoppingCart, FaUsers, FaBox, FaPlus, FaTags, FaUser, FaWarehouse, FaFileInvoiceDollar, FaUserTie } from 'react-icons/fa';
 import styles from './style.component/AdminDashboard.module.css';
+
 
 const AdminDashboard = () => {
   const location = useLocation();
@@ -13,7 +14,10 @@ const AdminDashboard = () => {
     { path: '/admin/orders', icon: <FaShoppingCart />, text: 'Quản lý đơn hàng' },
     { path: '/admin/users', icon: <FaUsers />, text: 'Quản lý người dùng' },
     { path: '/admin/create-product', icon: <FaPlus />, text: 'Tạo sản phẩm mới' },
-    { path: '/admin/profile', icon: <FaUser />, text: 'Thông tin cá nhân' }, // New item for admin profile
+    { path: '/admin/profile', icon: <FaUser />, text: 'Thông tin cá nhân' },
+    { path: '/admin/inventory', icon: <FaWarehouse />, text: 'Quản lý kho hàng' },
+    { path: '/admin/purchase-orders', icon: <FaFileInvoiceDollar />, text: 'Quản lý đơn đặt hàng' },
+    { path: '/admin/suppliers', icon: <FaUserTie />, text: 'Quản lý nhà cung cấp' },
   ];
 
   return (
@@ -35,9 +39,9 @@ const AdminDashboard = () => {
       </aside>
       <main className={styles.mainContent}>
         <header className={styles.header}>
-          <h2>Welcome, Admin</h2>
+          <h2>Xin chào, Quản trị viên</h2>
           <div className={styles.userMenu}>
-            {/* Add user menu items here if needed */}
+            {/* Thêm các mục menu người dùng nếu cần */}
           </div>
         </header>
         <div className={styles.dashboardOutlet}>

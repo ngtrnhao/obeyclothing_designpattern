@@ -26,7 +26,7 @@ const Home = () => {
 
   return (
     <div className={styles.homeContainer}>
-      <h1 className={styles.homeTitle}>Chào mừng đến với Fashion Store</h1>
+      <h1 className={styles.homeTitle}>Chào mừng đến với Cửa hàng Thời trang</h1>
       
       <div className={styles.featuredCategories}>
         <h2>Danh mục sản phẩm</h2>

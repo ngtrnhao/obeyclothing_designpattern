@@ -36,15 +36,15 @@ const CategoryManagement = () => {
       if (newCategory.slug && newCategory.slug.trim() !== '') {
         categoryData.slug = newCategory.slug.trim();
       }
-      console.log('Sending category data:', categoryData);
       const response = await createCategory(categoryData);
       setCategories(prevCategories => [...prevCategories, response]);
       setNewCategory({ name: '', slug: '', parentId: '' });
       setSuccess('Danh mục đã được tạo thành công');
+      setError('');
       fetchCategories();
     } catch (error) {
-      console.error('Error creating category:', error);
       setError(error.response?.data?.message || 'Lỗi khi tạo danh mục');
+      setSuccess('');
     }
   };
 
@@ -53,10 +53,11 @@ const CategoryManagement = () => {
       try {
         await deleteCategory(categoryId);
         setSuccess('Danh mục đã được xóa thành công');
+        setError('');
         fetchCategories();
       } catch (error) {
-        console.error('Error deleting category:', error);
         setError(error.response?.data?.message || 'Có lỗi xảy ra khi xóa danh mục');
+        setSuccess('');
       }
     }
   };
@@ -64,9 +65,9 @@ const CategoryManagement = () => {
   const renderCategories = (categories, level = 0) => {
     return categories.map(category => (
       <React.Fragment key={category._id}>
-        <div style={{ marginLeft: `${level * 20}px` }}>
-          {category.name} - {category.slug}
-          <button onClick={() => handleDeleteCategory(category._id)}>Xóa</button>
+        <div className={styles.categoryItem} style={{ marginLeft: `${level * 20}px` }}>
+          <span className={styles.categoryName}>{category.name} - {category.slug}</span>
+          <button className={styles.deleteButton} onClick={() => handleDeleteCategory(category._id)}>Xóa</button>
         </div>
         {category.children && category.children.length > 0 && renderCategories(category.children, level + 1)}
       </React.Fragment>
@@ -74,11 +75,11 @@ const CategoryManagement = () => {
   };
 
   return (
-    <div>
+    <div className={styles.categoryManagement}>
       <h2>Quản lý danh mục</h2>
       {error && <p className={styles.error}>{error}</p>}
       {success && <p className={styles.success}>{success}</p>}
-      <form onSubmit={handleCreateCategory}>
+      <form onSubmit={handleCreateCategory} className={styles.form}>
         <input
           type="text"
           name="name"
@@ -86,6 +87,7 @@ const CategoryManagement = () => {
           onChange={handleInputChange}
           placeholder="Tên danh mục mới"
           required
+          className={styles.input}
         />
         <input
           type="text"
@@ -93,11 +95,13 @@ const CategoryManagement = () => {
           value={newCategory.slug}
           onChange={handleInputChange}
           placeholder="Slug danh mục (tùy chọn)"
+          className={styles.input}
         />
         <select
           name="parentId"
           value={newCategory.parentId}
           onChange={handleInputChange}
+          className={styles.select}
         >
           <option value="">Không có danh mục cha</option>
           {categories.map((category) => (

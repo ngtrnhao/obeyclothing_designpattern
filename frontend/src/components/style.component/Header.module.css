@@ -7,7 +7,7 @@
   /* Đặt z-index cao để header luôn hiển thị trên cùng */
   z-index: 1000;
   /* Màu nền trắng cho header */
-  background-color: #fff;
+  background-color: #f5f5f5;
   border-bottom: 1px solid #e0e0e0;
 }
 

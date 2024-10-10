@@ -106,12 +106,22 @@ exports.createOrder = async (req, res) => {
 
     console.log('Received shipping info:', shippingInfo);
 
-    // Kiểm tra và sử dụng tên địa chỉ từ shippingInfo
     const shippingAddress = `${shippingInfo.address}, ${shippingInfo.wardName || ''}, ${shippingInfo.districtName || ''}, ${shippingInfo.provinceName || ''}`.trim();
 
     if (!shippingInfo.provinceName || !shippingInfo.districtName || !shippingInfo.wardName) {
       console.log('Missing address information:', shippingInfo);
       return res.status(400).json({ message: 'Thông tin địa chỉ giao hàng không đầy đủ' });
+    }
+
+    // Kiểm tra số lượng tồn kho
+    for (let item of cartItems) {
+      const product = await Product.findById(item.product);
+      if (!product) {
+        return res.status(404).json({ message: `Không tìm thấy sản phẩm với ID ${item.product}` });
+      }
+      if (product.stock < item.quantity) {
+        return res.status(400).json({ message: `Sản phẩm ${product.name} không đủ số lượng trong kho` });
+      }
     }
 
     const newOrder = new Order({
@@ -142,6 +152,13 @@ exports.createOrder = async (req, res) => {
     console.log('New order object:', newOrder);
 
     await newOrder.save();
+
+    // Cập nhật số lượng tồn kho
+    for (let item of cartItems) {
+      await Product.findByIdAndUpdate(item.product, {
+        $inc: { stock: -item.quantity }
+      });
+    }
 
     // Xóa giỏ hàng sau khi đặt hàng thành công
     await Cart.findOneAndUpdate({ user: userId }, { $set: { items: [] } });

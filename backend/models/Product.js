@@ -22,11 +22,25 @@ const productSchema = new mongoose.Schema({
   detailImages:[{type:String}],
   sizes :[{type:String}],
   colors:[{type:String}],
-  stock: { type: Number, required: true, min: 0 },
+  stock: { 
+    type: Number, 
+    required: true, 
+    min: 0,
+    default: 0
+  },
+  lowStockThreshold: { 
+    type: Number, 
+    default: 10 
+  },
   reviews: [reviewSchema],
   createdAt: { type: Date, default: Date.now },
   averageRating: { type: Number, default: 0 },
   salesCount: { type: Number, default: 0 },
+  supplierInfo: {
+    name: { type: String },
+    email: { type: String },
+    phone: { type: String }
+  }
 }, { timestamps: true });
 
 productSchema.pre('save', async function(next) {
@@ -44,5 +58,16 @@ async function createUniqueSlug(model, name, suffix = '') {
   }
   return slug;
 }
+
+// Thêm phương thức để kiểm tra hàng sắp hết
+productSchema.methods.isLowStock = function() {
+  return this.stock <= this.lowStockThreshold;
+};
+
+// Thêm phương thức để cập nhật số lượng tồn kho
+productSchema.methods.updateStock = function(quantity) {
+  this.stock += quantity;
+  return this.save();
+};
 
 module.exports = mongoose.model('Product', productSchema);
