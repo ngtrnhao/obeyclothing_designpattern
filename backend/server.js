@@ -124,9 +124,10 @@ cron.schedule('0 0 * * *', () => {
 // Sau đó mới đến các route khác và static files
 app.use(express.static(path.join(__dirname, '../frontend/build')));
 
-
-
 // Add admin routes
 app.use('/api', adminRoutes);
+
+// Add route for delivery management
+app.use('/api/admin/deliveries', require('./routes/deliveryRoutes'));
 
 module.exports = app;

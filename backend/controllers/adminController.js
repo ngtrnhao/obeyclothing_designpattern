@@ -1,6 +1,7 @@
 const Product = require('../models/Product');
 const Order = require('../models/Order');
 const User = require('../models/User');
+const Voucher = require('../models/Voucher');
 
 exports.getAllProducts = async (req, res) => {
   try {
@@ -190,5 +191,50 @@ exports.getDashboardData = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
+};
+
+exports.createVoucher = async (req, res) => {
+  try {
+    const newVoucher = new Voucher(req.body);
+    await newVoucher.save();
+    res.status(201).json(newVoucher);
+  } catch (error) {
+    res.status(400).json({ message: 'Lỗi khi tạo voucher', error: error.message });
+  }
+};
+
+exports.getAllVouchers = async (req, res) => {
+  try {
+    const vouchers = await Voucher.find();
+    console.log('Vouchers from database:', vouchers); // Thêm dòng này
+    res.json(vouchers);
+  } catch (error) {
+    console.error('Error fetching vouchers:', error); // Thêm dòng này
+    res.status(500).json({ message: 'Lỗi khi lấy danh sách voucher', error: error.message });
+  }
+};
+
+exports.updateVoucher = async (req, res) => {
+  try {
+    const updatedVoucher = await Voucher.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updatedVoucher) {
+      return res.status(404).json({ message: 'Không tìm thấy voucher' });
+    }
+    res.json(updatedVoucher);
+  } catch (error) {
+    res.status(400).json({ message: 'Lỗi khi cập nhật voucher', error: error.message });
+  }
+};
+
+exports.deleteVoucher = async (req, res) => {
+  try {
+    const deletedVoucher = await Voucher.findByIdAndDelete(req.params.id);
+    if (!deletedVoucher) {
+      return res.status(404).json({ message: 'Không tìm thấy voucher' });
+    }
+    res.json({ message: 'Đã xóa voucher thành công' });
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi khi xóa voucher', error: error.message });
   }
 };

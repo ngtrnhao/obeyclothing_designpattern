@@ -44,7 +44,15 @@ const orderSchema = new mongoose.Schema({
     wardId: String,
     wardName: String
   },
-  shippingAddress: String
+  shippingAddress: String,
+  voucher: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Voucher'
+  },
+  discountAmount: {
+    type: Number,
+    default: 0
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Order', orderSchema);

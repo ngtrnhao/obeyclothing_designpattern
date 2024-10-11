@@ -23,7 +23,8 @@ import Checkout from './components/Checkout';
 import InventoryManagement from './components/InventoryManagement';
 import PurchaseOrderManagement from './components/PurchaseOrderManagement';
 import SupplierManagement from './components/SupplierManagement';
-
+import DeliveryManagement from './components/DeliveryManagement';
+import VoucherManagement from './components/VoucherManagement';
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user } = useAuth();
   if (!user || !allowedRoles.includes(user.role)) {
@@ -66,6 +67,7 @@ const AppRoutes = () => {
         } 
       > 
         <Route path="suppliers" element={<SupplierManagement />} />
+        <Route path="vouchers" element={<VoucherManagement />} />
         <Route index element={<Navigate to="statistics" replace />} />
         <Route path="profile" element={<UserProfile />} />
         <Route path="products" element={<ProductManagement />} />
@@ -76,6 +78,7 @@ const AppRoutes = () => {
         <Route path="categories" element={<CategoryManagement />} />
         <Route path="inventory" element={<InventoryManagement />} />
         <Route path="purchase-orders" element={<PurchaseOrderManagement />} />
+        <Route path="deliveries" element={<DeliveryManagement />} />
       </Route>
       
       <Route path="/order-success" element={<OrderSuccess />} />

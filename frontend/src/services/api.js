@@ -432,8 +432,9 @@ export const completePaypalOrder = async (orderData) => {
   }
 };
 
-export const getDeliveries = () => api.get('/deliveries');
-export const updateDeliveryStatus = (deliveryId, status) => api.put(`/deliveries/${deliveryId}`, { status });
+export const getDeliveries = () => api.get('/admin/deliveries');
+
+export const updateDeliveryStatus = (deliveryId, status) => api.put(`/admin/deliveries/${deliveryId}`, { status });
 
 export const getProvinces = async () => {
   try {

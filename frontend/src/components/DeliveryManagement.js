@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getDeliveries, updateDeliveryStatus } from '../services/api';
-import styles from './style.component/DeliveryManagement.module.css';
+import styles from './style.component/DeliveryManagement.module.css'
 
 const DeliveryManagement = () => {
   const [deliveries, setDeliveries] = useState([]);
@@ -43,6 +43,8 @@ const DeliveryManagement = () => {
         <thead>
           <tr>
             <th>Mã đơn hàng</th>
+            <th>Mã PayPal</th>
+            <th>Người đặt</th>
             <th>Địa chỉ giao hàng</th>
             <th>Trạng thái</th>
             <th>Hành động</th>
@@ -74,6 +76,6 @@ const DeliveryManagement = () => {
       </table>
     </div>
   );
-};
+}
 
 export default DeliveryManagement;

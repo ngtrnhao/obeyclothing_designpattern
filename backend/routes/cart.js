@@ -4,6 +4,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 const Cart = require('../models/Cart');
 const Product = require('../models/Product'); // Thêm dòng này
 const Order = require('../models/Order'); // Thêm dòng này
+const Voucher = require('../models/Voucher'); // Thêm dòng này
 
 // Áp dụng authMiddleware cho tất cả các route của giỏ hàng
 router.use(authMiddleware);
@@ -156,6 +157,48 @@ router.put('/update/:itemId', async (req, res) => {
     res.json(cart);
   } catch (error) {
     res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
+});
+
+// Apply voucher
+router.post('/apply-voucher', async (req, res) => {
+  try {
+    const { voucherCode } = req.body;
+    const cart = await Cart.findOne({ user: req.user._id }).populate('items.product');
+    
+    if (!cart) {
+      return res.status(404).json({ message: 'Không tìm thấy giỏ hàng' });
+    }
+
+    const voucher = await Voucher.findOne({ code: voucherCode, isActive: true });
+    
+    if (!voucher || !voucher.isValid()) {
+      return res.status(400).json({ message: 'Mã giảm giá không hợp lệ hoặc đã hết hạn' });
+    }
+
+    const totalAmount = cart.items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+
+    if (totalAmount < voucher.minPurchase) {
+      return res.status(400).json({ message: `Đơn hàng phải có giá trị tối thiểu ${voucher.minPurchase}đ để áp dụng mã giảm giá này` });
+    }
+
+    let discountAmount;
+    if (voucher.discountType === 'percentage') {
+      discountAmount = totalAmount * (voucher.discountValue / 100);
+      if (voucher.maxDiscount) {
+        discountAmount = Math.min(discountAmount, voucher.maxDiscount);
+      }
+    } else {
+      discountAmount = voucher.discountValue;
+    }
+
+    cart.voucher = voucher._id;
+    cart.discountAmount = discountAmount;
+    await cart.save();
+
+    res.json({ message: 'Áp dụng mã giảm giá thành công', discountAmount, totalAfterDiscount: totalAmount - discountAmount });
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi khi áp dụng mã giảm giá', error: error.message });
   }
 });
 

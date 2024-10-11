@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { FaChartLine, FaShoppingCart, FaUsers, FaBox, FaPlus, FaTags, FaUser, FaWarehouse, FaFileInvoiceDollar, FaUserTie } from 'react-icons/fa';
+import { FaChartLine, FaShoppingCart, FaUsers, FaBox, FaPlus, FaTags, FaUser, FaWarehouse, FaFileInvoiceDollar, FaUserTie, FaTruck, FaTicketAlt } from 'react-icons/fa';
 import styles from './style.component/AdminDashboard.module.css';
 
 
@@ -18,6 +18,8 @@ const AdminDashboard = () => {
     { path: '/admin/inventory', icon: <FaWarehouse />, text: 'Quản lý kho hàng' },
     { path: '/admin/purchase-orders', icon: <FaFileInvoiceDollar />, text: 'Quản lý đơn đặt hàng' },
     { path: '/admin/suppliers', icon: <FaUserTie />, text: 'Quản lý nhà cung cấp' },
+    { path: '/admin/deliveries', icon: <FaTruck />, text: 'Quản lý giao hàng' },
+    { path: '/admin/vouchers', icon: <FaTicketAlt />, text: 'Quản lý voucher' },
   ];
 
   return (

@@ -1,14 +1,20 @@
-﻿import React, { useContext, useEffect } from 'react';
+﻿import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CartContext } from '../contexts/CartContext';
 import styles from './style.component/Cart.module.css';
+import VoucherInput from './VoucherInput';
 
 const Cart = () => {
   const { cartItems, removeFromCart, updateCartItem, total, fetchCart } = useContext(CartContext);
+  const [totalAmount, setTotalAmount] = useState(total);
 
   useEffect(() => {
     fetchCart();
   }, [fetchCart]);
+
+  useEffect(() => {
+    setTotalAmount(total);
+  }, [total]);
 
   const handleQuantityChange = (itemId, newQuantity) => {
     updateCartItem(itemId, { quantity: newQuantity });
@@ -20,6 +26,10 @@ const Cart = () => {
 
   const handleColorChange = (itemId, newColor) => {
     updateCartItem(itemId, { color: newColor });
+  };
+
+  const handleApplyVoucher = (discountAmount, totalAfterDiscount) => {
+    setTotalAmount(totalAfterDiscount);
   };
 
   if (cartItems.length === 0) {
@@ -61,10 +71,9 @@ const Cart = () => {
           </div>
         </div>
       ))}
-      <div className={styles.cartTotal}>
-        <h3>Tổng cộng: {total.toLocaleString('vi-VN')} đ</h3>
-        <Link to="/checkout" className={styles.checkoutButton}>Thanh toán</Link>
-      </div>
+      <VoucherInput onApplyVoucher={handleApplyVoucher} />
+      <p>Tổng cộng: {totalAmount.toLocaleString('vi-VN')} đ</p>
+      <Link to="/checkout" className={styles.checkoutButton}>Thanh toán</Link>
     </div>
   );
 };

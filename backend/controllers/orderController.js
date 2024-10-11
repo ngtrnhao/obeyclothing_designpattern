@@ -4,6 +4,7 @@ const Product = require('../models/Product');
 const Delivery = require('../models/Delivery'); // Thêm dòng này
 const paypal = require('@paypal/checkout-server-sdk');
 const User = require('../models/User');
+const Voucher = require('../models/Voucher');
 
 let environment = new paypal.core.SandboxEnvironment(process.env.PAYPAL_CLIENT_ID, process.env.PAYPAL_CLIENT_SECRET);
 let client = new paypal.core.PayPalHttpClient(environment);
@@ -124,6 +125,26 @@ exports.createOrder = async (req, res) => {
       }
     }
 
+    // Xử lý voucher nếu có
+    let discountAmount = 0;
+    if (req.body.voucherId) {
+      const voucher = await Voucher.findById(req.body.voucherId);
+      if (voucher && voucher.isValid()) {
+        if (totalAmount >= voucher.minPurchase) {
+          if (voucher.discountType === 'percentage') {
+            discountAmount = totalAmount * (voucher.discountValue / 100);
+            if (voucher.maxDiscount) {
+              discountAmount = Math.min(discountAmount, voucher.maxDiscount);
+            }
+          } else {
+            discountAmount = voucher.discountValue;
+          }
+          voucher.usedCount += 1;
+          await voucher.save();
+        }
+      }
+    }
+
     const newOrder = new Order({
       user: userId,
       items: cartItems.map(item => ({
@@ -133,7 +154,9 @@ exports.createOrder = async (req, res) => {
         size: item.size,
         color: item.color
       })),
-      totalAmount,
+      voucher: req.body.voucherId,
+      discountAmount: discountAmount,
+      totalAmount: totalAmount - discountAmount,
       shippingInfo: {
         fullName: shippingInfo.fullName,
         phone: shippingInfo.phone,

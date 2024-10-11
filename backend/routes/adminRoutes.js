@@ -122,4 +122,10 @@ router.post('/suppliers', supplierController.createSupplier);
 router.put('/suppliers/:id', supplierController.updateSupplier);
 router.delete('/suppliers/:id', supplierController.deleteSupplier);
 
+// Quản lý voucher
+router.post('/vouchers', adminController.createVoucher);
+router.get('/vouchers', authMiddleware, adminMiddleware, adminController.getAllVouchers);
+router.put('/vouchers/:id', adminController.updateVoucher);
+router.delete('/vouchers/:id', adminController.deleteVoucher);
+
 module.exports = router;
