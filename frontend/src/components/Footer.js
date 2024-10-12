@@ -38,6 +38,7 @@ const Footer = () => {
           </div>
         </div>
       </div>
+      <div className={styles.footerSeparator}></div>
       <div className={styles.footerBottom}>
         <div className={styles.copyright}>
           <img src="/assets/obey-logo.png" alt="OBEY Logo" className={styles.footerLogo} />

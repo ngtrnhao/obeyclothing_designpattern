@@ -5,6 +5,7 @@ const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const Supplier = require('../models/Supplier'); // Added import for Supplier model
 const path = require('path');
+const { createPurchaseOrderPDF, createReceiptConfirmationPDF } = require('../utils/pdfGenerator');
 
 exports.checkLowStock = async () => {
   try {
@@ -54,81 +55,41 @@ exports.updatePurchaseOrder = async (req, res) => {
   try {
     const { id } = req.params;
     const { status, actualQuantity, notes } = req.body;
-    const updatedOrder = await PurchaseOrder.findByIdAndUpdate(id, 
-      { status, actualQuantity, notes, orderDate: status === 'approved' ? Date.now() : undefined },
-      { new: true }
-    );
-    res.json(updatedOrder);
+
+    const purchaseOrder = await PurchaseOrder.findById(id);
+    if (!purchaseOrder) {
+      return res.status(404).json({ message: 'Không tìm thấy đơn đặt hàng' });
+    }
+
+    purchaseOrder.status = status;
+    if (actualQuantity) purchaseOrder.actualQuantity = actualQuantity;
+    if (notes) purchaseOrder.notes = notes;
+
+    await purchaseOrder.save();
+
+    res.json({ message: 'Đã cập nhật đơn đặt hàng', purchaseOrder });
   } catch (error) {
-    res.status(500).json({ message: 'Error updating purchase order', error: error.message });
+    console.error('Lỗi khi cập nhật đơn đặt hàng:', error);
+    res.status(500).json({ message: 'Lỗi khi cập nhật đơn đặt hàng', error: error.message });
   }
 };
 
 exports.generatePurchaseOrderPDF = async (req, res) => {
-  console.log('generatePurchaseOrderPDF function called');
   try {
     const { id } = req.params;
-    console.log('Purchase order ID:', id);
-    
     const purchaseOrder = await PurchaseOrder.findById(id).populate('product supplier');
     
     if (!purchaseOrder) {
-      console.log('Purchase order not found');
       return res.status(404).json({ message: 'Không tìm thấy đơn đặt hàng' });
     }
     
-    const doc = new PDFDocument({
-      size: 'A4',
-      margin: 50
-    });
-    
-    // Thiết lập response headers
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=purchase-order-${id}.pdf`);
     
-    // Pipe the PDF directly to the response
-    doc.pipe(res);
-
-    // Đăng ký và sử dụng font Roboto
-    const fontPath = path.join(__dirname, '../fonts/Roboto-Regular.ttf');
-    const fontBoldPath = path.join(__dirname, '../fonts/Roboto-Bold.ttf');
-    doc.registerFont('Roboto', fontPath);
-    doc.registerFont('Roboto-Bold', fontBoldPath);
-    
-    doc.font('Roboto');
-
-    // Add header
-    doc.font('Roboto-Bold').fontSize(24).text('PHIẾU NHẬP HÀNG', { align: 'center' });
-    doc.moveDown(2);
-
-    // Add purchase order details
-    doc.font('Roboto').fontSize(12);
-    doc.text(`Mã đơn: ${purchaseOrder._id}`);
-    doc.text(`Ngày đặt hàng: ${purchaseOrder.orderDate ? new Date(purchaseOrder.orderDate).toLocaleDateString('vi-VN') : 'Chưa có'}`);
-    doc.moveDown();
-
-    doc.text(`Sản phẩm: ${purchaseOrder.product ? purchaseOrder.product.name : 'N/A'}`);
-    doc.text(`Nhà cung cấp: ${purchaseOrder.supplier ? purchaseOrder.supplier.name : 'N/A'}`);
-    doc.text(`Số lượng đề xuất: ${purchaseOrder.suggestedQuantity}`);
-    doc.text(`Trạng thái: ${purchaseOrder.status}`);
-    doc.moveDown();
-
-    doc.text(`Ghi chú: ${purchaseOrder.notes || 'Không có'}`);
-
-    // Add footer
-    doc.fontSize(10);
-    doc.text(
-      `Tạo bởi: ${req.user ? req.user.name : 'Hệ thống'} | Ngày tạo: ${new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}`,
-      { align: 'center' }
-    );
-
-    // Finalize the PDF and end the stream
-    doc.end();
-
-    console.log('PDF generation completed');
+    createPurchaseOrderPDF(purchaseOrder, res, req.user.name);
   } catch (error) {
-    console.error('Error generating PDF:', error);
-    res.status(500).json({ message: 'Lỗi khi tạo PDF', error: error.message });
+    console.error('Lỗi khi tạo PDF đơn đặt hàng:', error);
+    res.status(500).json({ message: 'Lỗi khi tạo PDF đơn đặt hàng', error: error.message });
   }
 };
 
@@ -215,5 +176,59 @@ exports.getLowStockProducts = async (req, res) => {
     res.json(lowStockProducts);
   } catch (error) {
     res.status(500).json({ message: 'Lỗi khi lấy danh sách sản phẩm tồn kho thấp', error: error.message });
+  }
+};
+
+exports.confirmReceiptAndUpdateInventory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { actualQuantity } = req.body;
+
+    const purchaseOrder = await PurchaseOrder.findById(id).populate('product');
+    if (!purchaseOrder) {
+      return res.status(404).json({ message: 'Không tìm thấy đơn đặt hàng' });
+    }
+
+    if (purchaseOrder.status !== 'approved') {
+      return res.status(400).json({ message: 'Đơn đặt hàng chưa được phê duyệt' });
+    }
+
+    purchaseOrder.actualQuantity = actualQuantity;
+    purchaseOrder.receiptDate = new Date();
+    purchaseOrder.status = 'received';
+
+    await purchaseOrder.save();
+
+    // Update product inventory
+    const product = purchaseOrder.product;
+    product.stock += actualQuantity;
+    await product.save();
+
+    res.json({ message: 'Đã xác nhận nhận hàng và cập nhật tồn kho', purchaseOrder });
+  } catch (error) {
+    console.error('Error confirming receipt and updating inventory:', error);
+    res.status(500).json({ message: 'Lỗi khi xác nhận nhận hàng và cập nhật tồn kho', error: error.message });
+  }
+};
+
+exports.generateReceiptConfirmationPDF = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const purchaseOrder = await PurchaseOrder.findById(id).populate('product supplier');
+    
+    if (!purchaseOrder || purchaseOrder.status !== 'received') {
+      return res.status(404).json({ message: 'Không tìm thấy đơn đặt hàng đã nhập kho' });
+    }
+    
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=receipt-confirmation-${id}.pdf`);
+    
+    const userName = req.user ? req.user.fullName : 'Không xác định';
+    const currentDate = new Date().toLocaleDateString('vi-VN');
+    
+    createReceiptConfirmationPDF(purchaseOrder, res, userName, currentDate);
+  } catch (error) {
+    console.error('Lỗi khi tạo PDF phiếu nhập kho:', error);
+    res.status(500).json({ message: 'Lỗi khi tạo PDF phiếu nhập kho', error: error.message });
   }
 };

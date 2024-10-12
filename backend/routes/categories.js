@@ -21,4 +21,7 @@ router.get('/:slug/products', categoryController.getProductsByCategorySlug);
 // New route to handle products by category and children recursively
 router.get('/:id/products-recursive', categoryController.getProductsByCategoryAndChildren);
 
+// New route to handle categories by full slug
+router.get('/by-full-slug/*', categoryController.getCategoryByFullSlug);
+
 module.exports = router;

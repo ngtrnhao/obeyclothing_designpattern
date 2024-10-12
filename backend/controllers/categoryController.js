@@ -3,13 +3,37 @@ const Product = require('../models/Product');
 
 exports.createCategory = async (req, res) => {
   try {
-    const { name, slug, parentId } = req.body;
+    console.log('Received category data:', req.body); // Log để kiểm tra
+    const { name, parentId, slug } = req.body;
     
+    let newSlug = slug;
+    if (!newSlug) {
+      newSlug = slugify(name, { lower: true, remove: /[*+~.()'"!:@]/g });
+    }
+
+    // Kiểm tra xem slug đã tồn tại chưa
+    const existingCategory = await Category.findOne({ slug: newSlug });
+    if (existingCategory) {
+      return res.status(400).json({ message: 'Slug đã tồn tại, vui lòng chọn slug khác' });
+    }
+
     const newCategory = new Category({
       name,
-      slug: slug || slugify(name, { lower: true }),
-      parent: parentId || null
+      parent: parentId || null,
+      slug: newSlug
     });
+
+    // Tạo fullSlug
+    if (parentId) {
+      const parentCategory = await Category.findById(parentId);
+      if (parentCategory) {
+        newCategory.fullSlug = `${parentCategory.fullSlug}/${newSlug}`;
+      } else {
+        return res.status(400).json({ message: 'Danh mục cha không tồn tại' });
+      }
+    } else {
+      newCategory.fullSlug = newSlug;
+    }
 
     await newCategory.save();
 
@@ -17,8 +41,12 @@ exports.createCategory = async (req, res) => {
       await Category.findByIdAndUpdate(parentId, { $push: { children: newCategory._id } });
     }
 
+    await newCategory.populate('parent');
+
+    console.log('Created category:', newCategory); // Log để kiểm tra
     res.status(201).json(newCategory);
   } catch (error) {
+    console.error('Error creating category:', error);
     res.status(500).json({ message: 'Lỗi khi tạo danh mục', error: error.message });
   }
 };
@@ -206,6 +234,20 @@ exports.getProductsByCategoryAndChildren = async (req, res) => {
     
     const products = await Product.find({ category: { $in: categoryIds } });
     res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
+};
+
+// Thêm hàm mới này vào cuối file
+exports.getCategoryByFullSlug = async (req, res) => {
+  try {
+    const fullSlug = req.params[0];
+    const category = await Category.findOne({ fullSlug }).populate('children');
+    if (!category) {
+      return res.status(404).json({ message: 'Không tìm thấy danh mục' });
+    }
+    res.json(category);
   } catch (error) {
     res.status(500).json({ message: 'Lỗi server', error: error.message });
   }

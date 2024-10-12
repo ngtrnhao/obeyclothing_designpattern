@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getPurchaseOrders, updatePurchaseOrder, createPurchaseOrder, getAdminProducts, getSuppliers } from '../services/api';
+import { getPurchaseOrders, updatePurchaseOrder, createPurchaseOrder, getAdminProducts, getSuppliers, confirmReceiptAndUpdateInventory } from '../services/api';
 import styles from './style.component/PurchaseOrderManagement.module.css';
 
 const PurchaseOrderManagement = () => {
@@ -13,6 +13,7 @@ const PurchaseOrderManagement = () => {
     suggestedQuantity: 0,
     supplier: '',
   });
+  const [actualQuantities, setActualQuantities] = useState({});
 
   useEffect(() => {
     fetchPurchaseOrders();
@@ -68,21 +69,35 @@ const PurchaseOrderManagement = () => {
     }
   };
 
-  const handleUpdateOrder = async (orderId, status, actualQuantity, notes) => {
+  const handleUpdateOrder = async (orderId, status, actualQuantity = null) => {
     try {
-      await updatePurchaseOrder(orderId, { status, actualQuantity, notes });
+      if (status === 'received') {
+        if (!actualQuantity || isNaN(parseInt(actualQuantity))) {
+          alert('Vui lòng nhập số lượng thực tế hợp lệ');
+          return;
+        }
+        await confirmReceiptAndUpdateInventory(orderId, parseInt(actualQuantity));
+      } else {
+        await updatePurchaseOrder(orderId, { status });
+      }
       fetchPurchaseOrders();
+      // Xóa số lượng thực tế sau khi cập nhật thành công
+      setActualQuantities(prev => {
+        const newQuantities = {...prev};
+        delete newQuantities[orderId];
+        return newQuantities;
+      });
     } catch (error) {
-      console.error('Error updating purchase order:', error);
-      alert('An error occurred while updating the purchase order. Please try again.');
+      console.error('Lỗi khi cập nhật đơn đặt hàng:', error);
+      alert(`Đã xảy ra lỗi khi cập nhật đơn đặt hàng: ${error.response?.data?.message || error.message}`);
     }
   };
 
-  const handleDownloadPDF = async (orderId) => {
+  const handleDownloadPDF = async (orderId, type) => {
     try {
-      console.log('Downloading PDF for order:', orderId);
       const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/admin/purchase-orders/${orderId}/pdf`, {
+      const endpoint = type === 'receipt' ? 'receipt-pdf' : 'pdf';
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/admin/purchase-orders/${orderId}/${endpoint}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -98,11 +113,11 @@ const PurchaseOrderManagement = () => {
       const a = document.createElement('a');
       a.style.display = 'none';
       a.href = url;
-      a.download = `purchase-order-${orderId}.pdf`;
+      a.download = type === 'receipt' ? `receipt-confirmation-${orderId}.pdf` : `purchase-order-${orderId}.pdf`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
-      alert('PDF đã được tải xuống thành công');
+      alert(`${type === 'receipt' ? 'Phiếu nhập kho' : 'Phiếu đặt hàng'} đã được tải xuống thành công`);
     } catch (error) {
       console.error('Error downloading PDF:', error);
       alert('Có lỗi xảy ra khi tải xuống PDF. Vui lòng thử lại.');
@@ -128,6 +143,13 @@ const PurchaseOrderManagement = () => {
       console.error('Error creating purchase order:', error);
       alert('Có lỗi xảy ra khi tạo đơn đặt hàng. Vui lòng thử lại.');
     }
+  };
+
+  const handleActualQuantityChange = (orderId, quantity) => {
+    setActualQuantities(prev => ({
+      ...prev,
+      [orderId]: quantity
+    }));
   };
 
   if (loading) return <div className={styles.loading}>Loading...</div>;
@@ -195,11 +217,16 @@ const PurchaseOrderManagement = () => {
               <td>{order.product.name}</td>
               <td>{order.suggestedQuantity}</td>
               <td>
-                <input 
-                  type="number" 
-                  defaultValue={order.actualQuantity || order.suggestedQuantity}
-                  onChange={(e) => handleUpdateOrder(order._id, order.status, e.target.value, order.notes)}
-                />
+                {order.status === 'approved' ? (
+                  <input
+                    type="number"
+                    value={actualQuantities[order._id] || ''}
+                    onChange={(e) => handleActualQuantityChange(order._id, e.target.value)}
+                    min="0"
+                  />
+                ) : (
+                  order.actualQuantity || order.suggestedQuantity
+                )}
               </td>
               <td>{order.status}</td>
               <td>
@@ -212,17 +239,27 @@ const PurchaseOrderManagement = () => {
               <td>
                 {order.status === 'pending' && (
                   <>
-                    <button onClick={() => handleUpdateOrder(order._id, 'approved', order.actualQuantity, order.notes)}>
-                      Approve
+                    <button onClick={() => handleUpdateOrder(order._id, 'approved')}>
+                      Phê duyệt
                     </button>
-                    <button onClick={() => handleUpdateOrder(order._id, 'rejected', order.actualQuantity, order.notes)}>
-                      Reject
+                    <button onClick={() => handleUpdateOrder(order._id, 'cancelled')}>
+                      Hủy bỏ
                     </button>
                   </>
                 )}
-                <button onClick={() => handleDownloadPDF(order._id)}>
-                  Download PDF
+                {order.status === 'approved' && (
+                  <button onClick={() => handleUpdateOrder(order._id, 'received', actualQuantities[order._id])}>
+                    Xác nhận nhận hàng
+                  </button>
+                )}
+                <button onClick={() => handleDownloadPDF(order._id, 'order')}>
+                  Tải phiếu đặt hàng
                 </button>
+                {order.status === 'received' && (
+                  <button onClick={() => handleDownloadPDF(order._id, 'receipt')}>
+                    Tải phiếu nhập kho
+                  </button>
+                )}
               </td>
             </tr>
           ))}

@@ -31,12 +31,12 @@ const CategoryManagement = () => {
     try {
       const categoryData = {
         name: newCategory.name,
-        parentId: newCategory.parentId || null
+        parentId: newCategory.parentId || null,
+        slug: newCategory.slug // Đảm bảo rằng slug được gửi
       };
-      if (newCategory.slug && newCategory.slug.trim() !== '') {
-        categoryData.slug = newCategory.slug.trim();
-      }
+      console.log('Sending category data:', categoryData); // Log để kiểm tra
       const response = await createCategory(categoryData);
+      console.log('Server response:', response);
       setCategories(prevCategories => [...prevCategories, response]);
       setNewCategory({ name: '', slug: '', parentId: '' });
       setSuccess('Danh mục đã được tạo thành công');
@@ -94,7 +94,7 @@ const CategoryManagement = () => {
           name="slug"
           value={newCategory.slug}
           onChange={handleInputChange}
-          placeholder="Slug danh mục (tùy chọn)"
+          placeholder="Nhập slug (tùy chọn)"
           className={styles.input}
         />
         <select

@@ -525,4 +525,7 @@ export const createSupplier = (data) => api.post('/suppliers', data);
 export const updateSupplier = (id, data) => api.put(`/suppliers/${id}`, data);
 export const deleteSupplier = (id) => api.delete(`/suppliers/${id}`);
 
+export const confirmReceiptAndUpdateInventory = (orderId, actualQuantity) => 
+  api.put(`/admin/purchase-orders/${orderId}/confirm-receipt`, { actualQuantity });
+
 export default api;

@@ -107,11 +107,9 @@ router.put('/products/update-stock', inventoryController.updateStock);
 // Quản lý đơn đặt hàng
 router.get('/purchase-orders', inventoryController.getPurchaseOrders);
 router.post('/purchase-orders', inventoryController.createPurchaseOrder);
-router.put('/purchase-orders/:id', inventoryController.updatePurchaseOrder);
-router.get('/purchase-orders/:id/pdf', authMiddleware, adminMiddleware, (req, res, next) => {
-  console.log('PDF route hit');
-  inventoryController.generatePurchaseOrderPDF(req, res, next);
-});
+router.put('/purchase-orders/:id', authMiddleware, adminMiddleware, inventoryController.updatePurchaseOrder);
+router.get('/purchase-orders/:id/pdf', authMiddleware, adminMiddleware, inventoryController.generatePurchaseOrderPDF);
+router.get('/purchase-orders/:id/receipt-pdf', authMiddleware, adminMiddleware, inventoryController.generateReceiptConfirmationPDF);
 
 // Kiểm tra hàng tồn kho thấp
 router.post('/check-low-stock', inventoryController.manualCheckLowStock);
@@ -127,5 +125,7 @@ router.post('/vouchers', adminController.createVoucher);
 router.get('/vouchers', authMiddleware, adminMiddleware, adminController.getAllVouchers);
 router.put('/vouchers/:id', adminController.updateVoucher);
 router.delete('/vouchers/:id', adminController.deleteVoucher);
+
+router.put('/purchase-orders/:id/confirm-receipt', authMiddleware, adminMiddleware, inventoryController.confirmReceiptAndUpdateInventory);
 
 module.exports = router;

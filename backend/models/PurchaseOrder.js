@@ -13,9 +13,12 @@ const purchaseOrderSchema = new mongoose.Schema({
   actualQuantity: {
     type: Number
   },
+  receiptDate: {
+    type: Date
+  },
   status: {
     type: String,
-    enum: ['pending', 'approved', 'completed'],
+    enum: ['pending', 'approved', 'received', 'cancelled'],
     default: 'pending'
   },
   orderDate: {
