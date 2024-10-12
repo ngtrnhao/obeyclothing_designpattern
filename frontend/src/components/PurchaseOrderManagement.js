@@ -214,7 +214,7 @@ const PurchaseOrderManagement = () => {
         <tbody>
           {purchaseOrders.map(order => (
             <tr key={order._id}>
-              <td>{order.product.name}</td>
+              <td>{order.product ? order.product.name : 'Unknown Product'}</td>
               <td>{order.suggestedQuantity}</td>
               <td>
                 {order.status === 'approved' ? (

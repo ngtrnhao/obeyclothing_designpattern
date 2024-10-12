@@ -13,20 +13,30 @@ const DeliveryManagement = () => {
 
   const fetchDeliveries = async () => {
     try {
+      setLoading(true);
       const response = await getDeliveries();
-      setDeliveries(response.data);
-      setLoading(false);
+      if (Array.isArray(response.data)) {
+        setDeliveries(response.data);
+      } else {
+        console.error('Unexpected API response:', response);
+        setError('Dữ liệu không hợp lệ từ máy chủ.');
+      }
     } catch (error) {
       console.error('Error fetching deliveries:', error);
       setError('Không thể tải danh sách giao hàng. Vui lòng thử lại sau.');
+    } finally {
       setLoading(false);
     }
   };
 
   const handleStatusChange = async (deliveryId, newStatus) => {
     try {
-      await updateDeliveryStatus(deliveryId, newStatus);
-      fetchDeliveries();
+      const { delivery, order } = await updateDeliveryStatus(deliveryId, newStatus);
+      setDeliveries(prevDeliveries => 
+        prevDeliveries.map(d => 
+          d._id === delivery._id ? { ...d, status: delivery.status, order: { ...d.order, status: order.status } } : d
+        )
+      );
     } catch (error) {
       console.error('Error updating delivery status:', error);
       setError('Không thể cập nhật trạng thái giao hàng. Vui lòng thử lại.');
@@ -39,41 +49,47 @@ const DeliveryManagement = () => {
   return (
     <div className={styles.deliveryManagement}>
       <h2>Quản lý giao hàng</h2>
-      <table className={styles.deliveryTable}>
-        <thead>
-          <tr>
-            <th>Mã đơn hàng</th>
-            <th>Mã PayPal</th>
-            <th>Người đặt</th>
-            <th>Địa chỉ giao hàng</th>
-            <th>Trạng thái</th>
-            <th>Hành động</th>
-          </tr>
-        </thead>
-        <tbody>
-          {deliveries.map(delivery => (
-            <tr key={delivery._id}>
-              <td>{delivery._id}</td>
-              <td>{delivery.order.paypalOrderId || 'N/A'}</td>
-              <td>{delivery.order.user ? delivery.order.user.username || delivery.order.user.email : 'Không có thông tin'}</td>
-              <td>{delivery.shippingAddress || 'Chưa có địa chỉ'}</td>
-              <td>{delivery.status}</td>
-              <td>
-                <select
-                  value={delivery.status}
-                  onChange={(e) => handleStatusChange(delivery._id, e.target.value)}
-                  className={styles.statusSelect}
-                >
-                  <option value="pending">Chờ xử lý</option>
-                  <option value="shipping">Đang giao hàng</option>
-                  <option value="delivered">Đã giao hàng</option>
-                  <option value="cancelled">Đã hủy</option>
-                </select>
-              </td>
+      {deliveries.length === 0 ? (
+        <p>Không có đơn giao hàng nào.</p>
+      ) : (
+        <table className={styles.deliveryTable}>
+          <thead>
+            <tr>
+              <th>Mã đơn hàng</th>
+              <th>Mã PayPal</th>
+              <th>Người đặt</th>
+              <th>Địa chỉ giao hàng</th>
+              <th>Trạng thái giao hàng</th>
+              <th>Trạng thái đơn hàng</th>
+              <th>Hành động</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {deliveries.map(delivery => (
+              <tr key={delivery._id}>
+                <td>{delivery.order?._id || 'N/A'}</td>
+                <td>{delivery.order?.paypalOrderId || 'N/A'}</td>
+                <td>{delivery.order?.user ? delivery.order.user.username || delivery.order.user.email : 'Không có thông tin'}</td>
+                <td>{delivery.shippingAddress || 'Chưa có địa chỉ'}</td>
+                <td>{delivery.status || 'N/A'}</td>
+                <td>{delivery.order?.status || 'N/A'}</td>
+                <td>
+                  <select
+                    value={delivery.status || ''}
+                    onChange={(e) => handleStatusChange(delivery._id, e.target.value)}
+                    className={styles.statusSelect}
+                  >
+                    <option value="pending">Chờ xử lý</option>
+                    <option value="shipping">Đang giao hàng</option>
+                    <option value="delivered">Đã giao hàng</option>
+                    <option value="cancelled">Đã hủy</option>
+                  </select>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

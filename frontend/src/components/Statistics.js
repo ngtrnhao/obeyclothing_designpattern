@@ -3,15 +3,9 @@ import { getAdminStatistics } from '../services/api';
 import { motion } from 'framer-motion';
 import { FaChartLine, FaShoppingCart, FaUsers } from 'react-icons/fa';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 import styles from './style.component/Statistics.module.css';
-
-const getSoldQuantity = (product) => {
-  return product.soldQuantity || 0;
-};
-
-const sortProductsBySoldQuantity = (products) => {
-  return [...products].sort((a, b) => getSoldQuantity(b) - getSoldQuantity(a));
-};
 
 const Statistics = () => {
   const [stats, setStats] = useState({
@@ -19,34 +13,24 @@ const Statistics = () => {
     totalOrders: 0,
     totalUsers: 0,
     topProducts: [],
-    monthlySales: [],
+    salesData: [],
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [startDate, setStartDate] = useState(new Date(new Date().setDate(new Date().getDate() - 30)));
+  const [endDate, setEndDate] = useState(new Date());
+  const [period, setPeriod] = useState('day');
 
   useEffect(() => {
     fetchStatistics();
-  }, []);
+  }, [startDate, endDate, period]);
 
   const fetchStatistics = async () => {
     try {
       setLoading(true);
-      const response = await getAdminStatistics();
-      console.log("Received statistics:", response);
-      console.log("Top Products:", response.topProducts); // Thêm dòng này
-      
-      // Kiểm tra và xử lý dữ liệu
-      if (response && typeof response === 'object') {
-        setStats({
-          totalRevenue: response.totalRevenue || 0,
-          totalOrders: response.totalOrders || 0,
-          totalUsers: response.totalUsers || 0,
-          topProducts: Array.isArray(response.topProducts) ? response.topProducts : [],
-          monthlySales: Array.isArray(response.monthlySales) ? response.monthlySales : []
-        });
-      } else {
-        throw new Error('Invalid data format received from server');
-      }
+      const response = await getAdminStatistics(startDate, endDate, period);
+      console.log('Received statistics:', response);
+      setStats(response);
     } catch (error) {
       console.error('Error fetching statistics:', error);
       setError('Không thể tải thống kê. Vui lòng thử lại sau.');
@@ -69,116 +53,188 @@ const Statistics = () => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
   };
 
-  const prepareTopProductsData = (products) => {
-    const sortedProducts = sortProductsBySoldQuantity(products);
-    return sortedProducts.slice(0, 5).map(product => ({
-      name: product.name,
-      value: getSoldQuantity(product)
-    }));
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('vi-VN').format(date);
   };
 
   return (
     <div className={styles.statisticsContainer}>
       <h2 className={styles.title}>Thống kê</h2>
-      <div className={styles.statsGrid}>
-        <motion.div 
-          className={styles.statCard}
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
-          <FaChartLine className={styles.icon} />
-          <h3>Tổng doanh thu</h3>
-          <p>{formatCurrency(stats.totalRevenue)}</p>
-        </motion.div>
-        <motion.div 
-          className={styles.statCard}
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <FaShoppingCart className={styles.icon} />
-          <h3>Tổng số đơn hàng</h3>
-          <p>{stats.totalOrders}</p>
-        </motion.div>
-        <motion.div 
-          className={styles.statCard}
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          <FaUsers className={styles.icon} />
-          <h3>Tổng số người dùng</h3>
-          <p>{stats.totalUsers}</p>
-        </motion.div>
+      
+      <div className={styles.dateControls}>
+        <DatePicker
+          selected={startDate}
+          onChange={date => setStartDate(date)}
+          selectsStart
+          startDate={startDate}
+          endDate={endDate}
+        />
+        <DatePicker
+          selected={endDate}
+          onChange={date => setEndDate(date)}
+          selectsEnd
+          startDate={startDate}
+          endDate={endDate}
+          minDate={startDate}
+        />
+        <select value={period} onChange={e => setPeriod(e.target.value)}>
+          <option value="day">Ngày</option>
+          <option value="week">Tuần</option>
+          <option value="month">Tháng</option>
+        </select>
       </div>
 
-      {stats.monthlySales && stats.monthlySales.length > 0 && (
-        <motion.div 
-          className={styles.chartContainer}
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          transition={{ duration: 0.5, delay: 0.4 }}
-        >
-          <h3>Doanh thu theo tháng</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={stats.monthlySales}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="month" 
-                scale="point" 
-                padding={{ left: 10, right: 10 }}
-                tick={{ fontSize: 12 }}
-              />
-              <YAxis
-                tickFormatter={(value) => `${value / 1000000}M`}
-                tick={{ fontSize: 12 }}
-              />
-              <Tooltip formatter={(value) => formatCurrency(value)} />
-              <Legend />
-              <Bar dataKey="revenue" fill="#8884d8" name="Doanh thu" />
-            </BarChart>
-          </ResponsiveContainer>
-        </motion.div>
-      )}
+      <div className={styles.statsGrid}>
+        <StatCard
+          icon={<FaChartLine />}
+          title="Tổng doanh thu"
+          value={formatCurrency(stats.totalRevenue)}
+          delay={0.1}
+        />
+        <StatCard
+          icon={<FaShoppingCart />}
+          title="Tổng số đơn hàng đã giao"
+          value={stats.totalOrders}
+          delay={0.2}
+        />
+        <StatCard
+          icon={<FaUsers />}
+          title="Tổng số người dùng"
+          value={stats.totalUsers}
+          delay={0.3}
+        />
+      </div>
 
-      {stats.topProducts && stats.topProducts.length > 0 && (
-        <motion.div 
-          className={styles.chartContainer}
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          transition={{ duration: 0.5, delay: 0.5 }}
-        >
-          <h3>Top 5 sản phẩm bán chạy</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={prepareTopProductsData(stats.topProducts)}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                label={({ name, value }) => `${name}: ${value}`}
-              >
-                {prepareTopProductsData(stats.topProducts).map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value, name) => [`Số lượng bán: ${value}`, name]} />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </motion.div>
-      )}
+      <SalesChart
+        data={stats.salesData}
+        period={period}
+        formatCurrency={formatCurrency}
+      />
+
+      <TopProductsChart
+        data={stats.topProducts}
+        colors={COLORS}
+      />
     </div>
   );
 };
+
+const StatCard = ({ icon, title, value, delay }) => (
+  <motion.div 
+    className={styles.statCard}
+    variants={{
+      hidden: { opacity: 0, y: 20 },
+      visible: { opacity: 1, y: 0 },
+    }}
+    initial="hidden"
+    animate="visible"
+    transition={{ duration: 0.5, delay }}
+  >
+    {React.cloneElement(icon, { className: styles.icon })}
+    <h3>{title}</h3>
+    <p>{value}</p>
+  </motion.div>
+);
+
+const SalesChart = ({ data, period, formatCurrency }) => (
+  <motion.div 
+    className={styles.chartContainer}
+    variants={{
+      hidden: { opacity: 0, y: 20 },
+      visible: { opacity: 1, y: 0 },
+    }}
+    initial="hidden"
+    animate="visible"
+    transition={{ duration: 0.5, delay: 0.4 }}
+  >
+    <h3>Doanh thu theo {period === 'day' ? 'ngày' : period === 'week' ? 'tuần' : 'tháng'}</h3>
+    {data && data.length > 0 ? (
+      <ResponsiveContainer width="100%" height={300}>
+        <BarChart 
+          data={data}
+          margin={{ top: 20, right: 30, left: 50, bottom: 5 }} // Adjust margins
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis 
+            dataKey="date" 
+            tickFormatter={(tick) => {
+              if (period === 'week') {
+                const [year, week] = tick.split('-W');
+                return `Tuần ${week}`;
+              }
+              return tick;
+            }}
+          />
+          <YAxis 
+            yAxisId="left" 
+            orientation="left" 
+            stroke="#8884d8" 
+            width={80} // Set width for Y-Axis
+          />
+          <YAxis 
+            yAxisId="right" 
+            orientation="right" 
+            stroke="#82ca9d" 
+          />
+          <Tooltip 
+            labelFormatter={(label) => {
+              if (period === 'week') {
+                const [year, week] = label.split('-W');
+                return `Năm ${year}, Tuần ${week}`;
+              }
+              return label;
+            }}
+            formatter={(value, name) => [formatCurrency(value), name]}
+          />
+          <Legend />
+          <Bar yAxisId="left" dataKey="revenue" fill="#8884d8" name="Doanh thu" />
+          <Bar yAxisId="right" dataKey="orders" fill="#82ca9d" name="Số đơn hàng" />
+        </BarChart>
+      </ResponsiveContainer>
+    ) : (
+      <p>Không có dữ liệu cho khoảng thời gian này</p>
+    )}
+  </motion.div>
+);
+
+const TopProductsChart = ({ data, colors }) => (
+  <motion.div 
+    className={styles.chartContainer}
+    variants={{
+      hidden: { opacity: 0, y: 20 },
+      visible: { opacity: 1, y: 0 },
+    }}
+    initial="hidden"
+    animate="visible"
+    transition={{ duration: 0.5, delay: 0.5 }}
+  >
+    <h3>Top 5 sản phẩm bán chạy</h3>
+    {data && data.length > 0 ? (
+      <ResponsiveContainer width="100%" height={300}>
+        <PieChart>
+          <Pie
+            data={data}
+            cx="50%"
+            cy="50%"
+            labelLine={false}
+            outerRadius={80}
+            fill="#8884d8"
+            dataKey="totalSold"
+            label={({ name, totalSold }) => `${name}: ${totalSold}`}
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+            ))}
+          </Pie>
+          <Tooltip formatter={(value, name, props) => [`Số lượng: ${value}`, props.payload.name]} />
+          <Legend />
+        </PieChart>
+      </ResponsiveContainer>
+    ) : (
+      <p>Không có dữ liệu sản phẩm bán chạy</p>
+    )}
+  </motion.div>
+);
 
 export default Statistics;

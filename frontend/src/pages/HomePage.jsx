@@ -3,6 +3,12 @@ import { Link } from 'react-router-dom';
 import styles from './HomePage.module.css';
 import { getProducts } from '../services/api'; // Make sure to import the API function
 
+const imageUrl = (img) => {
+  if (!img) return '/assets/placeholder-image.jpg'; // Đường dẫn đến hình ảnh placeholder
+  if (img.startsWith('http')) return img;
+  return `${process.env.REACT_APP_API_URL}/uploads/${img}`;
+};
+
 const HomePage = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
 
@@ -12,15 +18,17 @@ const HomePage = () => {
 
   const fetchFeaturedProducts = async () => {
     try {
-      const response = await getProducts();
-      const allProducts = response.data;
-      // Sort products by soldQuantity in descending order and take the top 4
-      const featured = allProducts
-        .sort((a, b) => (b.soldQuantity || 0) - (a.soldQuantity || 0))
-        .slice(0, 4);
-      setFeaturedProducts(featured);
+      const response = await getProducts(); // Giả sử đây là API call của bạn
+      if (response && Array.isArray(response)) {
+        const sortedProducts = response.sort((a, b) => b.sales - a.sales);
+        setFeaturedProducts(sortedProducts.slice(0, 4));
+      } else {
+        console.error('Unexpected response format:', response);
+        setFeaturedProducts([]);
+      }
     } catch (error) {
-      console.error('Lỗi khi lấy sản phẩm nổi bật:', error);
+      console.error('Error fetching featured products:', error);
+      setFeaturedProducts([]);
     }
   };
 
@@ -72,10 +80,17 @@ const HomePage = () => {
         <div className={styles.productCarousel}>
           {featuredProducts.map((product) => (
             <div key={product._id} className={styles.productCard}>
-              <img src={product.image} alt={product.name} />
+              <img 
+                src={imageUrl(product.image)} 
+                alt={product.name} 
+                onError={(e) => {
+                  e.target.onerror = null; 
+                  e.target.src = '/assets/placeholder-image.jpg';
+                }}
+              />
               <h3>{product.name}</h3>
               <p>{product.price.toLocaleString('vi-VN')} đ</p>
-              <Link to={`/product/${product._id}`} className={styles.shopButton}>Mua ngay</Link>
+              <Link to={`/product/${product.slug}`} className={styles.shopButton}>Mua ngay</Link>
             </div>
           ))}
         </div>

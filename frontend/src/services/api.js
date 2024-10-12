@@ -291,15 +291,20 @@ export const toggleAdminUserStatus = (userId, isActive) => {
   });
 };
 
-export const getAdminStatistics = async () => {
+export const getAdminStatistics = async (startDate, endDate, period) => {
   const token = localStorage.getItem('token');
   try {
     const response = await api.get('/admin/statistics', {
       headers: {
         'Authorization': `Bearer ${token}`
+      },
+      params: {
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        period
       }
     });
-    return response.data; // Trả về response.data thay vì ton b response
+    return response.data;
   } catch (error) {
     console.error('Error fetching admin statistics:', error.response?.data || error.message);
     throw error;
@@ -434,7 +439,15 @@ export const completePaypalOrder = async (orderData) => {
 
 export const getDeliveries = () => api.get('/admin/deliveries');
 
-export const updateDeliveryStatus = (deliveryId, status) => api.put(`/admin/deliveries/${deliveryId}`, { status });
+export const updateDeliveryStatus = async (deliveryId, status) => {
+  try {
+    const response = await api.put(`/admin/deliveries/${deliveryId}`, { status });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating delivery status:', error);
+    throw error;
+  }
+};
 
 export const getProvinces = async () => {
   try {

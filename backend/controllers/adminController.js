@@ -2,6 +2,7 @@ const Product = require('../models/Product');
 const Order = require('../models/Order');
 const User = require('../models/User');
 const Voucher = require('../models/Voucher');
+const moment = require('moment');
 
 exports.getAllProducts = async (req, res) => {
   try {
@@ -109,18 +110,22 @@ exports.updateUserStatus = async (req, res) => {
 
 exports.getStatistics = async (req, res) => {
   try {
-    const totalRevenue = await calculateTotalRevenue();
-    const totalOrders = await Order.countDocuments();
+    const { startDate, endDate, period } = req.query;
+    const start = startDate ? moment(startDate).startOf('day') : moment().subtract(30, 'days').startOf('day');
+    const end = endDate ? moment(endDate).endOf('day') : moment().endOf('day');
+
+    const totalRevenue = await calculateTotalRevenue(start, end);
+    const totalOrders = await countDeliveredOrders(start, end);
     const totalUsers = await User.countDocuments();
-    const topProducts = await getTopProducts();
-    const monthlySales = await getMonthlySales();
+    const topProducts = await getTopProducts(start, end);
+    const salesData = await getSalesData(start, end, period);
 
     res.json({
       totalRevenue,
       totalOrders,
       totalUsers,
       topProducts,
-      monthlySales
+      salesData
     });
   } catch (error) {
     console.error('Error in getStatistics:', error);
@@ -128,53 +133,117 @@ exports.getStatistics = async (req, res) => {
   }
 };
 
-async function calculateTotalRevenue() {
+async function calculateTotalRevenue(start, end) {
   const result = await Order.aggregate([
+    {
+      $match: {
+        status: 'delivered',
+        updatedAt: { $gte: start.toDate(), $lte: end.toDate() }
+      }
+    },
     { $group: { _id: null, total: { $sum: '$totalAmount' } } }
   ]);
   return result[0]?.total || 0;
 }
 
-async function getTopProducts(limit = 5) {
-  return await Product.aggregate([
-    { $sort: { soldQuantity: -1 } },
+async function countDeliveredOrders(start, end) {
+  return await Order.countDocuments({
+    status: 'delivered',
+    updatedAt: { $gte: start.toDate(), $lte: end.toDate() }
+  });
+}
+
+async function getTopProducts(start, end, limit = 5) {
+  return await Order.aggregate([
+    {
+      $match: {
+        status: 'delivered',
+        updatedAt: { $gte: start.toDate(), $lte: end.toDate() }
+      }
+    },
+    { $unwind: '$items' },
+    {
+      $group: {
+        _id: '$items.product',
+        totalSold: { $sum: '$items.quantity' },
+        totalRevenue: { $sum: { $multiply: ['$items.price', '$items.quantity'] } }
+      }
+    },
+    { $sort: { totalSold: -1 } },
     { $limit: limit },
-    { $project: { name: 1, soldQuantity: 1 } }
+    {
+      $lookup: {
+        from: 'products',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'productInfo'
+      }
+    },
+    { $unwind: '$productInfo' },
+    {
+      $project: {
+        name: '$productInfo.name',
+        totalSold: 1,
+        totalRevenue: 1
+      }
+    }
   ]);
 }
 
-async function getMonthlySales() {
-  const currentYear = new Date().getFullYear();
+async function getSalesData(start, end, period) {
+  let groupBy;
+  let dateFormat;
+
+  switch (period) {
+    case 'day':
+      groupBy = { $dateToString: { format: "%Y-%m-%d", date: "$updatedAt" } };
+      dateFormat = 'YYYY-MM-DD';
+      break;
+    case 'week':
+      groupBy = { 
+        year: { $year: "$updatedAt" },
+        week: { $week: "$updatedAt" }
+      };
+      dateFormat = 'YYYY-[W]WW';
+      break;
+    case 'month':
+    default:
+      groupBy = { $dateToString: { format: "%Y-%m", date: "$updatedAt" } };
+      dateFormat = 'YYYY-MM';
+  }
+
   const result = await Order.aggregate([
     {
       $match: {
-        createdAt: { $gte: new Date(`${currentYear}-01-01`), $lt: new Date(`${currentYear + 1}-01-01`) }
+        status: 'delivered',
+        updatedAt: { $gte: start.toDate(), $lte: end.toDate() }
       }
     },
     {
       $group: {
-        _id: { $month: '$createdAt' },
-        revenue: { $sum: '$totalAmount' }
+        _id: groupBy,
+        revenue: { $sum: '$totalAmount' },
+        orders: { $sum: 1 }
       }
     },
-    {
-      $project: {
-        _id: 0,
-        month: '$_id',
-        revenue: 1
-      }
-    },
-    { $sort: { month: 1 } }
+    { $sort: { _id: 1 } }
   ]);
 
-  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  return monthNames.map((name, index) => {
-    const monthData = result.find(item => item.month === index + 1);
-    return {
-      month: name,
-      revenue: monthData ? monthData.revenue : 0
-    };
-  });
+  // Fill in missing dates
+  const filledData = [];
+  let current = moment(start);
+  while (current.isSameOrBefore(end)) {
+    const key = current.format(dateFormat);
+    const existingData = result.find(item => item._id === key);
+    filledData.push({
+      date: key,
+      revenue: existingData ? existingData.revenue : 0,
+      orders: existingData ? existingData.orders : 0
+    });
+    current.add(1, period);
+  }
+
+  return filledData;
 }
 
 exports.getDashboardData = async (req, res) => {
