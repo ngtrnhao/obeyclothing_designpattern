@@ -8,7 +8,7 @@ const orderSchema = new mongoose.Schema({
     enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'paid'], // Thêm 'paid' vào danh sách
     default: 'pending'
   },
-  createdAt: { type: Date, default: Date.now },
+ 
   items: [{
     product: {
       type: mongoose.Schema.Types.ObjectId,
@@ -33,17 +33,7 @@ const orderSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  shippingInfo: {
-    fullName: String,
-    phone: String,
-    address: String,
-    provinceId: String,
-    provinceName: String,
-    districtId: String,
-    districtName: String,
-    wardId: String,
-    wardName: String
-  },
+  shippingInfo: { type: mongoose.Schema.Types.ObjectId, ref: 'ShippingInfo' },
   shippingAddress: String,
   voucher: {
     type: mongoose.Schema.Types.ObjectId,

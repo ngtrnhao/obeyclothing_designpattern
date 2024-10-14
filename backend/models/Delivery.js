@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const deliverySchema = new mongoose.Schema({
   order: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true },
-  shippingAddress: { type: String, required: true },
+  shippingInfo: { type: mongoose.Schema.Types.ObjectId,ref: 'ShippingInfo',require:true},
   status: {
     type: String,
     enum: ['pending', 'processing', 'shipped', 'delivered'],

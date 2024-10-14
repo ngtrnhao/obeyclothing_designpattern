@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getAdminStatistics } from '../services/api';
 import { motion } from 'framer-motion';
 import { FaChartLine, FaShoppingCart, FaUsers } from 'react-icons/fa';
@@ -21,11 +21,7 @@ const Statistics = () => {
   const [endDate, setEndDate] = useState(new Date());
   const [period, setPeriod] = useState('day');
 
-  useEffect(() => {
-    fetchStatistics();
-  }, [startDate, endDate, period]);
-
-  const fetchStatistics = async () => {
+  const fetchStatistics = useCallback(async () => {
     try {
       setLoading(true);
       const response = await getAdminStatistics(startDate, endDate, period);
@@ -37,25 +33,19 @@ const Statistics = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [startDate, endDate, period]);
+
+  useEffect(() => {
+    fetchStatistics();
+  }, [fetchStatistics]);
 
   if (loading) return <div className={styles.loading}>Đang tải...</div>;
   if (error) return <div className={styles.error}>{error}</div>;
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-  };
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
-  };
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('vi-VN').format(date);
   };
 
   return (
@@ -160,7 +150,7 @@ const SalesChart = ({ data, period, formatCurrency }) => (
             dataKey="date" 
             tickFormatter={(tick) => {
               if (period === 'week') {
-                const [year, week] = tick.split('-W');
+                const [, week] = tick.split('-W');
                 return `Tuần ${week}`;
               }
               return tick;
@@ -180,8 +170,8 @@ const SalesChart = ({ data, period, formatCurrency }) => (
           <Tooltip 
             labelFormatter={(label) => {
               if (period === 'week') {
-                const [year, week] = label.split('-W');
-                return `Năm ${year}, Tuần ${week}`;
+                const [, week] = label.split('-W');
+                return `Tuần ${week}`;
               }
               return label;
             }}

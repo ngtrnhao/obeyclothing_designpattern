@@ -16,7 +16,8 @@ const DeliveryManagement = () => {
       setLoading(true);
       const response = await getDeliveries();
       if (Array.isArray(response.data)) {
-        setDeliveries(response.data);
+        const validDeliveries = response.data.filter(delivery => delivery && delivery._id);
+        setDeliveries(validDeliveries);
       } else {
         console.error('Unexpected API response:', response);
         setError('Dữ liệu không hợp lệ từ máy chủ.');
@@ -31,12 +32,18 @@ const DeliveryManagement = () => {
 
   const handleStatusChange = async (deliveryId, newStatus) => {
     try {
-      const { delivery, order } = await updateDeliveryStatus(deliveryId, newStatus);
-      setDeliveries(prevDeliveries => 
-        prevDeliveries.map(d => 
-          d._id === delivery._id ? { ...d, status: delivery.status, order: { ...d.order, status: order.status } } : d
-        )
-      );
+      const response = await updateDeliveryStatus(deliveryId, newStatus);
+      if (response && response.data && response.data.delivery && response.data.order) {
+        const { delivery, order } = response.data;
+        setDeliveries(prevDeliveries => 
+          prevDeliveries.map(d => 
+            d._id === delivery._id ? { ...d, status: delivery.status, order: { ...d.order, status: order.status } } : d
+          )
+        );
+      } else {
+        console.error('Unexpected response from updateDeliveryStatus:', response);
+        setError('Không thể cập nhật trạng thái giao hàng. Dữ liệu không hợp lệ.');
+      }
     } catch (error) {
       console.error('Error updating delivery status:', error);
       setError('Không thể cập nhật trạng thái giao hàng. Vui lòng thử lại.');
@@ -65,12 +72,16 @@ const DeliveryManagement = () => {
             </tr>
           </thead>
           <tbody>
-            {deliveries.map(delivery => (
+            {deliveries.map(delivery => delivery && (
               <tr key={delivery._id}>
                 <td>{delivery.order?._id || 'N/A'}</td>
                 <td>{delivery.order?.paypalOrderId || 'N/A'}</td>
                 <td>{delivery.order?.user ? delivery.order.user.username || delivery.order.user.email : 'Không có thông tin'}</td>
-                <td>{delivery.shippingAddress || 'Chưa có địa chỉ'}</td>
+                <td>
+                  {delivery.shippingInfo ? 
+                    `${delivery.shippingInfo.address || ''}, ${delivery.shippingInfo.wardName || ''}, ${delivery.shippingInfo.districtName || ''}, ${delivery.shippingInfo.provinceName || ''}`.trim() 
+                    : 'Chưa có địa chỉ'}
+                </td>
                 <td>{delivery.status || 'N/A'}</td>
                 <td>{delivery.order?.status || 'N/A'}</td>
                 <td>
