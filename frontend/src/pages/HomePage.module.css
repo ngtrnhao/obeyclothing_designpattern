@@ -353,3 +353,164 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+.glitchSlogan {
+  font-family: 'Roboto', sans-serif;
+  text-align: center;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  position: relative;
+  overflow: visible;
+  margin-bottom: 20px;
+}
+
+.brand {
+  display: block;
+  font-size: 5em;
+  font-weight: 900;
+  letter-spacing: 10px;
+  transform: skew(-5deg);
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.brand::before,
+.brand::after {
+  content: 'OBEY';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.brand::before {
+  left: 2px;
+  text-shadow: -2px 0 #ff00c1;
+  clip: rect(24px, 550px, 90px, 0);
+  animation: glitch-anim 3s infinite linear alternate-reverse;
+}
+
+.brand::after {
+  left: -2px;
+  text-shadow: -2px 0 #00fff9;
+  clip: rect(85px, 550px, 140px, 0);
+  animation: glitch-anim 2s infinite linear alternate-reverse;
+}
+
+.separator {
+  font-size: 3em;
+  display: inline-block;
+  animation: rotate 3s infinite linear;
+  margin-bottom: 10px; /* Thêm khoảng cách dưới dấu hai chấm */
+}
+
+.sloganContainer {
+  position: relative;
+  height: auto;
+  overflow: visible;
+}
+
+.sloganText {
+  display: block;
+  font-size: 1.8em;
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+
+@keyframes glitch-anim {
+  0% {
+    clip: rect(42px, 9999px, 44px, 0);
+  }
+  5% {
+    clip: rect(12px, 9999px, 59px, 0);
+  }
+  10% {
+    clip: rect(48px, 9999px, 29px, 0);
+  }
+  15% {
+    clip: rect(42px, 9999px, 73px, 0);
+  }
+  20% {
+    clip: rect(63px, 9999px, 27px, 0);
+  }
+  25% {
+    clip: rect(34px, 9999px, 55px, 0);
+  }
+  30% {
+    clip: rect(86px, 9999px, 73px, 0);
+  }
+  35% {
+    clip: rect(20px, 9999px, 20px, 0);
+  }
+  40% {
+    clip: rect(26px, 9999px, 60px, 0);
+  }
+  45% {
+    clip: rect(25px, 9999px, 66px, 0);
+  }
+  50% {
+    clip: rect(57px, 9999px, 98px, 0);
+  }
+  55% {
+    clip: rect(5px, 9999px, 46px, 0);
+  }
+  60% {
+    clip: rect(82px, 9999px, 31px, 0);
+  }
+  65% {
+    clip: rect(54px, 9999px, 27px, 0);
+  }
+  70% {
+    clip: rect(28px, 9999px, 99px, 0);
+  }
+  75% {
+    clip: rect(45px, 9999px, 69px, 0);
+  }
+  80% {
+    clip: rect(23px, 9999px, 85px, 0);
+  }
+  85% {
+    clip: rect(54px, 9999px, 84px, 0);
+  }
+  90% {
+    clip: rect(45px, 9999px, 47px, 0);
+  }
+  95% {
+    clip: rect(37px, 9999px, 20px, 0);
+  }
+  100% {
+    clip: rect(4px, 9999px, 91px, 0);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes slide {
+  0% {
+    top: 0;
+  }
+  50% {
+    top: -60px;
+  }
+  100% {
+    top: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .glitchSlogan {
+    font-size: 0.8em;
+  }
+  
+  .sloganText {
+    font-size: 1.5em;
+  }
+}

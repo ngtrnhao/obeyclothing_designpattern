@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './HomePage.module.css';
-import { getProducts } from '../services/api'; // Make sure to import the API function
+import { getProducts } from '../services/api';
 
 const imageUrl = (img) => {
-  if (!img) return '/assets/placeholder-image.jpg'; // Đường dẫn đến hình ảnh placeholder
+  if (!img) return '/assets/placeholder-image.jpg';
   if (img.startsWith('http')) return img;
   return `${process.env.REACT_APP_API_URL}/uploads/${img}`;
 };
@@ -39,38 +39,44 @@ const HomePage = () => {
           <source src="/assets/hiphop_banner.mp4" type="video/mp4" />
         </video>
         <div className={styles.heroOverlay}>
-          <h1>OBEY THE BOLD</h1>
-          <Link to="/products" className={styles.ctaButton}>SHOP NOW</Link>
+          <h1 className={styles.glitchSlogan}>
+            <span className={styles.brand}>OBEY</span>
+            <div className={styles.sloganContainer}>
+              <span className={styles.sloganText}>Ôm Trọn Bản Sắc</span>
+              <span className={styles.sloganText}>Yêu Thương Phong Cách</span>
+            </div>
+          </h1>
+          <Link to="/products" className={styles.ctaButton}>Mua Sắm Ngay</Link>
         </div>
       </section>
 
       <section className={styles.categoriesGrid}>
         <div className={`${styles.categoryItem} ${styles.large}`}>
-          <img src="/assets/1_MENS-BIGWIG.jpg" alt="Men's Collection" />
+          <img src="/assets/1_MENS-BIGWIG.jpg" alt="Bộ Sưu Tập Nam" />
           <div className={styles.categoryOverlay}>
-            <h2>Men's Collection</h2>
-            <Link to="/men" className={styles.categoryLink}>Explore</Link>
+            <h2>Bộ Sưu Tập Nam</h2>
+            <Link to="/men" className={styles.categoryLink}>Khám Phá</Link>
           </div>
         </div>
         <div className={`${styles.categoryItem} ${styles.medium}`}>
-          <img src="/assets/women.jpg" alt="Women's Collection" />
+          <img src="/assets/women.jpg" alt="Bộ Sưu Tập Nữ" />
           <div className={styles.categoryOverlay}>
-            <h2>Women's Collection</h2>
-            <Link to="/women" className={styles.categoryLink}>Explore</Link>
+            <h2>Bộ Sưu Tập Nữ</h2>
+            <Link to="/women" className={styles.categoryLink}>Khám Phá</Link>
           </div>
         </div>
         <div className={`${styles.categoryItem} ${styles.small}`}>
-          <img src="/assets/3_PRINTABLES.jpg" alt="Graphic T's" />
+          <img src="/assets/3_PRINTABLES.jpg" alt="Áo Thun Họa Tiết" />
           <div className={styles.categoryOverlay}>
-            <h2>Graphic T's</h2>
-            <Link to="/graphic-tees" className={styles.categoryLink}>Explore</Link>
+            <h2>Áo Thun Họa Tiết</h2>
+            <Link to="/graphic-tees" className={styles.categoryLink}>Khám Phá</Link>
           </div>
         </div>
         <div className={`${styles.categoryItem} ${styles.small}`}>
-          <img src="/assets/4_SHEPARD_COLLECTION.jpg" alt="Shepard Fairey Collection" />
+          <img src="/assets/4_SHEPARD_COLLECTION.jpg" alt="Bộ Sưu Tập Shepard Fairey" />
           <div className={styles.categoryOverlay}>
-            <h2>Shepard Fairey Collection</h2>
-            <Link to="/shepard-fairey" className={styles.categoryLink}>Explore</Link>
+            <h2>Bộ Sưu Tập Shepard Fairey</h2>
+            <Link to="/shepard-fairey" className={styles.categoryLink}>Khám Phá</Link>
           </div>
         </div>
       </section>
@@ -114,21 +120,23 @@ OBEY Clothing được thành lập vào năm 2001 như một phần mở rộng
           </div>
         </div>
       </section>
+
       <section className={styles.obeyLookbook}>
-        <h2>OBEY Lookbook</h2>
+        <h2>Bộ Sưu Tập OBEY</h2>
         <div className={styles.lookbookGrid}>
           {[1, 2, 3, 4, 5, 6].map((item) => (
             <div key={item} className={styles.lookbookItem}>
-              <img src={`/assets/lookbook-${item}.jpg`} alt={`Lookbook item ${item}`} />
+              <img src={`/assets/lookbook-${item}.jpg`} alt={`Hình ảnh bộ sưu tập ${item}`} />
             </div>
           ))}
         </div>
         <div className={styles.buttonContainer}>
-          <Link to="/lookbook" className={styles.viewLookbookButton}>Xem toàn bộ Lookbook</Link>
+          <Link to="/lookbook" className={styles.viewLookbookButton}>Xem Toàn Bộ Bộ Sưu Tập</Link>
         </div>
       </section>
+
       <section className={styles.obeyAwareness}>
-        <h2>OBEY Awareness</h2>
+        <h2>OBEY Vì Cộng Đồng</h2>
         <div className={styles.awarenessContent}>
           <p>OBEY Awareness là sáng kiến của chúng tôi nhằm nâng cao nhận thức về các vấn đề xã hội và môi trường quan trọng thông qua nghệ thuật và thời trang.</p>
           <Link to="/awareness" className={styles.exploreButton}>Khám phá các dự án</Link>
