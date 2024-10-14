@@ -77,20 +77,22 @@ const HomePage = () => {
 
       <section className={styles.featuredProducts}>
         <h2>Sản phẩm nổi bật</h2>
-        <div className={styles.productCarousel}>
+        <div className={styles.productGrid}>
           {featuredProducts.map((product) => (
             <div key={product._id} className={styles.productCard}>
-              <img 
-                src={imageUrl(product.image)} 
-                alt={product.name} 
-                onError={(e) => {
-                  e.target.onerror = null; 
-                  e.target.src = '/assets/placeholder-image.jpg';
-                }}
-              />
+              <div className={styles.imageContainer}>
+                <img 
+                  src={imageUrl(product.image)} 
+                  alt={product.name} 
+                  onError={(e) => {
+                    e.target.onerror = null; 
+                    e.target.src = '/assets/placeholder-image.jpg';
+                  }}
+                />
+              </div>
               <h3>{product.name}</h3>
               <p>{product.price.toLocaleString('vi-VN')} đ</p>
-              <Link to={`/product/${product.slug}`} className={styles.shopButton}>Mua ngay</Link>
+              <Link to={`/product/${product.slug}`} className={styles.shopButton}>MUA NGAY</Link>
             </div>
           ))}
         </div>
@@ -112,7 +114,6 @@ OBEY Clothing được thành lập vào năm 2001 như một phần mở rộng
           </div>
         </div>
       </section>
-
       <section className={styles.obeyLookbook}>
         <h2>OBEY Lookbook</h2>
         <div className={styles.lookbookGrid}>
@@ -126,7 +127,6 @@ OBEY Clothing được thành lập vào năm 2001 như một phần mở rộng
           <Link to="/lookbook" className={styles.viewLookbookButton}>Xem toàn bộ Lookbook</Link>
         </div>
       </section>
-
       <section className={styles.obeyAwareness}>
         <h2>OBEY Awareness</h2>
         <div className={styles.awarenessContent}>

@@ -100,7 +100,103 @@
   grid-column: span 1;
 }
 
-.featuredProducts,
+.featuredProducts {
+  width: 100%;
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 20px;
+}
+
+.featuredProducts h2 {
+  text-align: left;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  justify-content: center;
+}
+
+.productCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.productCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.imageContainer {
+  width: 100%;
+  padding-top: 100%; /* Tạo tỷ lệ khung hình 1:1 */
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.productCard img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Đảm bảo ảnh lấp đầy container mà không bị méo */
+  border-radius: 4px;
+}
+
+.productCard h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+  height: 2.4em;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+}
+
+.productCard p {
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.shopButton {
+  background-color: #000;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+.shopButton:hover {
+  background-color: #333;
+}
+
+@media (max-width: 1024px) {
+  .productGrid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .productGrid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+}
+
 .aboutUs,
 .instagramFeed,
 .obeyAwareness {
