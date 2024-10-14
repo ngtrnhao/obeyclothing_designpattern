@@ -16,7 +16,7 @@ const Footer = () => {
         </div>
         <div className={styles.footerColumn}>
           <h3>THÔNG TIN CỬA HÀNG</h3>
-          <Link to="/he-thong-cua-hang">Hệ thống cửa hàng</Link>
+          <Link to="/stores">Hệ thống cửa hàng</Link>
           <Link to="/lien-he">Liên hệ</Link>
           <Link to="/bao-ve-thuong-hieu">Bảo vệ thương hiệu</Link>
         </div>

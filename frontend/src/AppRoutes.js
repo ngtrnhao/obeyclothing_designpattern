@@ -25,6 +25,9 @@ import PurchaseOrderManagement from './components/PurchaseOrderManagement';
 import SupplierManagement from './components/SupplierManagement';
 import DeliveryManagement from './components/DeliveryManagement';
 import VoucherManagement from './components/VoucherManagement';
+import Lookbook from './components/Lookbook';
+import StoreLocator from './components/StoreLocator';
+
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user } = useAuth();
   if (!user || !allowedRoles.includes(user.role)) {
@@ -45,6 +48,9 @@ const AppRoutes = () => {
       <Route path="/reset-password/:token" element={<ResetPassword />} />
       <Route path="/category/:slug" element={<ProductList />} />
       <Route path="/checkout" element={<Checkout />} />
+      <Route path="/lookbook" element={<Lookbook />} />
+      <Route path="/stores" element={<StoreLocator />} />
+      
       <Route 
         path="/user/*" 
         element={

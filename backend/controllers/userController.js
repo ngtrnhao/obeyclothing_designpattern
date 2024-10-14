@@ -13,59 +13,33 @@ exports.getProfile = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
   try {
-    console.log('Received update data:', req.body);
-    const user = await User.findById(req.user._id);
-    if (user) {
-      // Cập nhật các trường thông tin cơ bản
-      const fieldsToUpdate = ['fullName', 'email', 'phone'];
-      fieldsToUpdate.forEach(field => {
-        if (req.body[field] !== undefined) {
-          user[field] = req.body[field];
-        }
-      });
+    const userId = req.user._id;
+    const updates = req.body;
 
-      // Cập nhật hoặc tạo mới ShippingInfo
-      if (user.shippingInfo) {
-        await ShippingInfo.findByIdAndUpdate(user.shippingInfo, {
-          fullName: req.body.fullName,
-          phone: req.body.phone,
-          address: req.body.address,
-          provinceId: req.body.provinceId,
-          provinceName: req.body.provinceName,
-          districtId: req.body.districtId,
-          districtName: req.body.districtName,
-          wardId: req.body.wardId,
-          wardName: req.body.wardName
-        });
-      } else {
-        const newShippingInfo = new ShippingInfo({
-          fullName: req.body.fullName,
-          phone: req.body.phone,
-          address: req.body.address,
-          provinceId: req.body.provinceId,
-          provinceName: req.body.provinceName,
-          districtId: req.body.districtId,
-          districtName: req.body.districtName,
-          wardId: req.body.wardId,
-          wardName: req.body.wardName
-        });
-        const savedShippingInfo = await newShippingInfo.save();
-        user.shippingInfo = savedShippingInfo._id;
-      }
+    // Cập nhật thông tin người dùng
+    const updatedUser = await User.findByIdAndUpdate(userId, updates, { new: true });
 
-      console.log('Updated user object before save:', user);
-      const updatedUser = await user.save();
-      console.log('Updated user object after save:', updatedUser);
-      
-      // Trả về thông tin người dùng đã cập nhật
-      const userResponse = await User.findById(updatedUser._id).populate('shippingInfo');
-      res.json(userResponse);
+    // Cập nhật hoặc tạo mới thông tin giao hàng
+    let shippingInfo = await ShippingInfo.findOne({ user: userId });
+    if (shippingInfo) {
+      Object.assign(shippingInfo, updates);
     } else {
-      res.status(404).json({ message: 'Không tìm thấy người dùng' });
+      shippingInfo = new ShippingInfo({
+        ...updates,
+        user: userId // Đảm bảo trường user được gán giá trị
+      });
     }
+    await shippingInfo.save();
+
+    res.json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      shippingInfo: shippingInfo
+    });
   } catch (error) {
     console.error('Error in updateProfile:', error);
-    res.status(500).json({ message: 'Lỗi server', error: error.message });
+    res.status(400).json({ message: 'Không thể cập nhật thông tin người dùng', error: error.message });
   }
 };
 

@@ -47,12 +47,24 @@ const voucherSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
-  }
+  },
+  applicableCategories: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category'
+  }],
+  applicableUsers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  usedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 });
 
-voucherSchema.methods.isValid = function() {
+voucherSchema.methods.isValid = function(userId, cartItems) {
   const now = new Date();
-  return this.isActive && now >= this.startDate && now <= this.endDate && this.usedCount < this.usageLimit;
+  return this.isActive &&
+         now >= this.startDate &&
+         now <= this.endDate &&
+         this.usageCount < this.usageLimit;
 };
 
 module.exports = mongoose.model('Voucher', voucherSchema);

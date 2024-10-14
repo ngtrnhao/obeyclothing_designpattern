@@ -6,4 +6,4 @@ export const updateVoucher = (id, voucherData) => api.put(`/admin/vouchers/${id}
 export const deleteVoucher = (id) => api.delete(`/admin/vouchers/${id}`);
 
 // Thêm hàm applyVoucher
-export const applyVoucher = (code, totalAmount) => api.post('/vouchers/apply', { code, totalAmount });
+export const applyVoucher = (code, totalAmount, cartItems) => api.post('/api/vouchers/apply', { code, totalAmount, cartItems });

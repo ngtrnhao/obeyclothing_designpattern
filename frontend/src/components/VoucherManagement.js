@@ -22,12 +22,21 @@ const VoucherManagement = () => {
     fetchVouchers();
   }, []);
 
+  useEffect(() => {
+    console.log('Current vouchers:', vouchers);
+  }, [vouchers]);
+
   const fetchVouchers = async () => {
     try {
       setLoading(true);
-      const data = await getVouchers();
-      console.log('Fetched vouchers:', data); // Thêm dòng này
-      setVouchers(Array.isArray(data) ? data : []);
+      const response = await getVouchers();
+      console.log('Dữ liệu voucher nhận được:', response);
+      if (response && response.data && Array.isArray(response.data)) {
+        setVouchers(response.data);
+      } else {
+        console.error('Định dạng dữ liệu không mong đợi:', response);
+        setVouchers([]);
+      }
       setLoading(false);
     } catch (error) {
       console.error('Lỗi khi lấy danh sách voucher:', error);
@@ -53,7 +62,7 @@ const VoucherManagement = () => {
         usageLimit: 1,
         isActive: true
       });
-      fetchVouchers(); // Thêm dòng này
+      // Không cần gọi fetchVouchers() ở đây
     } catch (error) {
       console.error('Lỗi khi tạo voucher:', error);
       setError('Không thể tạo voucher. Vui lòng thử lại sau.');
@@ -156,7 +165,11 @@ const VoucherManagement = () => {
           </tr>
         </thead>
         <tbody>
-          {Array.isArray(vouchers) && vouchers.length > 0 ? (
+          {loading ? (
+            <tr><td colSpan="10">Đang tải...</td></tr>
+          ) : error ? (
+            <tr><td colSpan="10">{error}</td></tr>
+          ) : vouchers.length > 0 ? (
             vouchers.map((voucher) => (
               <tr key={voucher._id}>
                 <td>{voucher.code}</td>
@@ -177,12 +190,17 @@ const VoucherManagement = () => {
               </tr>
             ))
           ) : (
-            <tr>
-              <td colSpan="7">Không có voucher nào.</td>
-            </tr>
+            <tr><td colSpan="10">Không có voucher nào.</td></tr>
           )}
         </tbody>
       </table>
+      {/* Add this debug information */}
+      <div>
+        <h3>Debug Info:</h3>
+        <p>Vouchers count: {vouchers.length}</p>
+        <p>Loading: {loading.toString()}</p>
+        <p>Error: {error || 'No error'}</p>
+      </div>
     </div>
   );
 };

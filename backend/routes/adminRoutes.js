@@ -10,6 +10,7 @@ const Product = require('../models/Product');
 const inventoryController = require('../controllers/inventoryController');
 const supplierController = require('../controllers/supplierController');
 const Delivery = require('../models/Delivery');
+const voucherController = require('../controllers/voucherController');
 
 router.use(authMiddleware);
 router.use(adminMiddleware);
@@ -97,5 +98,7 @@ router.put('/deliveries/:id', async (req, res) => {
     res.status(500).json({ message: 'Lỗi server', error: error.message });
   }
 });
+
+router.post('/api/vouchers/apply', voucherController.applyVoucher);
 
 module.exports = router;

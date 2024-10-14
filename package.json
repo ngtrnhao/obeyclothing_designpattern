@@ -3,10 +3,11 @@
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
   },
   "dependencies": {
+    "@react-google-maps/api": "^2.20.3",
     "axios": "^1.7.7",
     "chart.js": "^4.4.4",
     "eslint-plugin-react-hooks": "^5.1.0-rc-e4953922-20240919",
-    "framer-motion": "^11.5.4",
+    "framer-motion": "^11.11.8",
     "i18next": "^23.15.1",
     "i18next-browser-languagedetector": "^8.0.0",
     "i18next-http-backend": "^2.6.1",
@@ -18,6 +19,7 @@
     "react-datepicker": "^7.4.0",
     "react-i18next": "^15.0.2",
     "react-icons": "^5.3.0",
+    "react-masonry-css": "^1.0.16",
     "recharts": "^2.12.7",
     "slugify": "^1.6.6",
     "svg-to-pdfkit": "^0.1.8"
