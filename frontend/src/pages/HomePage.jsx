@@ -18,7 +18,7 @@ const HomePage = () => {
 
   const fetchFeaturedProducts = async () => {
     try {
-      const response = await getProducts(); // Giả sử đây là API call của bạn
+      const response = await getProducts(); 
       if (response && Array.isArray(response)) {
         const sortedProducts = response.sort((a, b) => b.sales - a.sales);
         setFeaturedProducts(sortedProducts.slice(0, 4));

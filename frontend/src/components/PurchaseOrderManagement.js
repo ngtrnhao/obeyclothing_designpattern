@@ -137,6 +137,7 @@ const PurchaseOrderManagement = () => {
         suggestedQuantity: parseInt(newOrder.suggestedQuantity),
         supplier: newOrder.supplier,
       });
+      alert(`Đơn đặt hàng đã được tạo thành công với ID: ${response.data._id}`);
       fetchPurchaseOrders();
       setNewOrder({ product: '', suggestedQuantity: 0, supplier: '' });
     } catch (error) {

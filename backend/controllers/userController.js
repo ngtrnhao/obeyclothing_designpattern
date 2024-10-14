@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Order = require('../models/Order');
+const ShippingInfo = require('../models/ShippingInfo');
 
 exports.getProfile = async (req, res) => {
   try {
@@ -15,34 +16,49 @@ exports.updateProfile = async (req, res) => {
     console.log('Received update data:', req.body);
     const user = await User.findById(req.user._id);
     if (user) {
-      // Cập nhật các trường thông tin
-      const fieldsToUpdate = [
-        'fullName', 'email', 'phone', 'address', 
-        'provinceId', 'districtId', 'wardId', 
-        'provinceName', 'districtName', 'wardName'
-      ];
-      
+      // Cập nhật các trường thông tin cơ bản
+      const fieldsToUpdate = ['fullName', 'email', 'phone'];
       fieldsToUpdate.forEach(field => {
         if (req.body[field] !== undefined) {
-          // Đảm bảo address là string
-          if (field === 'address' && typeof req.body[field] === 'object') {
-            user[field] = JSON.stringify(req.body[field]);
-          } else {
-            user[field] = req.body[field];
-          }
+          user[field] = req.body[field];
         }
       });
+
+      // Cập nhật hoặc tạo mới ShippingInfo
+      if (user.shippingInfo) {
+        await ShippingInfo.findByIdAndUpdate(user.shippingInfo, {
+          fullName: req.body.fullName,
+          phone: req.body.phone,
+          address: req.body.address,
+          provinceId: req.body.provinceId,
+          provinceName: req.body.provinceName,
+          districtId: req.body.districtId,
+          districtName: req.body.districtName,
+          wardId: req.body.wardId,
+          wardName: req.body.wardName
+        });
+      } else {
+        const newShippingInfo = new ShippingInfo({
+          fullName: req.body.fullName,
+          phone: req.body.phone,
+          address: req.body.address,
+          provinceId: req.body.provinceId,
+          provinceName: req.body.provinceName,
+          districtId: req.body.districtId,
+          districtName: req.body.districtName,
+          wardId: req.body.wardId,
+          wardName: req.body.wardName
+        });
+        const savedShippingInfo = await newShippingInfo.save();
+        user.shippingInfo = savedShippingInfo._id;
+      }
 
       console.log('Updated user object before save:', user);
       const updatedUser = await user.save();
       console.log('Updated user object after save:', updatedUser);
       
       // Trả về thông tin người dùng đã cập nhật
-      const userResponse = fieldsToUpdate.reduce((acc, field) => {
-        acc[field] = updatedUser[field];
-        return acc;
-      }, { _id: updatedUser._id });
-
+      const userResponse = await User.findById(updatedUser._id).populate('shippingInfo');
       res.json(userResponse);
     } else {
       res.status(404).json({ message: 'Không tìm thấy người dùng' });

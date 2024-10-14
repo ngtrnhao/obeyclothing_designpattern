@@ -49,21 +49,7 @@ const userSchema = new mongoose.Schema({
   loginAttempts: { type: Number, required: true, default: 0 },
   lockUntil: { type: Number },
   isActive: { type: Boolean, default: true },
-  shippingInfo: {
-    fullName: String,
-    email: String,
-    phone: String,
-    address: String,
-    province: String,
-    district: String,
-    ward: String
-  },
-  provinceId: { type: String },
-  districtId: { type: String },
-  wardId: { type: String },
-  provinceName: { type: String },
-  districtName: { type: String },
-  wardName: { type: String }
+  shippingInfo: { type: mongoose.Schema.Types.ObjectId, ref: 'ShippingInfo' }
 });
 
 userSchema.pre('save', function(next) {

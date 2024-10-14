@@ -439,15 +439,7 @@ export const completePaypalOrder = async (orderData) => {
 
 export const getDeliveries = () => api.get('/admin/deliveries');
 
-export const updateDeliveryStatus = async (deliveryId, status) => {
-  try {
-    const response = await api.put(`/admin/deliveries/${deliveryId}`, { status });
-    return response.data;
-  } catch (error) {
-    console.error('Error updating delivery status:', error);
-    throw error;
-  }
-};
+export const updateDeliveryStatus = (deliveryId, status) => api.put(`/admin/deliveries/${deliveryId}`, { status });
 
 export const getProvinces = async () => {
   try {
