@@ -36,11 +36,6 @@ const productSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   averageRating: { type: Number, default: 0 },
   salesCount: { type: Number, default: 0 },
-  supplierInfo: {
-    name: { type: String },
-    email: { type: String },
-    phone: { type: String }
-  }
 }, { timestamps: true });
 
 productSchema.pre('save', async function(next) {

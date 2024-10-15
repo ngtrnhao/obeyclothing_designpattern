@@ -6,6 +6,7 @@ const paypal = require('@paypal/checkout-server-sdk');
 const User = require('../models/User');
 const Voucher = require('../models/Voucher');
 const ShippingInfo = require('../models/ShippingInfo');
+const Invoice = require('../models/Invoice');
 
 let environment = new paypal.core.SandboxEnvironment(process.env.PAYPAL_CLIENT_ID, process.env.PAYPAL_CLIENT_SECRET);
 let client = new paypal.core.PayPalHttpClient(environment);
@@ -109,7 +110,30 @@ exports.completePaypalOrder = async (req, res) => {
     });
     await newDelivery.save();
 
-    res.status(200).json({ message: 'Đơn hàng đã được tạo và thanh toán thành công', order: newOrder });
+    // Tạo hóa đơn
+    const invoice = new Invoice({
+      order: newOrder._id,
+      invoiceNumber: `INV-${Date.now()}`,
+      totalAmount: newOrder.totalAmount,
+      items: newOrder.items,
+      customer: {
+        name: shippingInfo.fullName,
+        address: `${shippingInfo.address}, ${shippingInfo.wardName}, ${shippingInfo.districtName}, ${shippingInfo.provinceName}`,
+        phone: shippingInfo.phone
+      }
+    });
+
+    await invoice.save();
+
+    // Thêm ID hóa đơn vào đơn hàng
+    newOrder.invoice = invoice._id;
+    await newOrder.save();
+
+    res.status(200).json({ 
+      message: 'Đơn hàng đã được tạo và thanh toán thành công', 
+      order: newOrder,
+      invoiceId: invoice._id
+    });
   } catch (error) {
     console.error('Error completing PayPal order:', error);
     res.status(500).json({ message: 'Lỗi khi xử lý đơn hàng PayPal', error: error.message });
@@ -207,5 +231,23 @@ exports.createOrder = async (req, res) => {
   } catch (error) {
     console.error('Error creating order:', error);
     res.status(400).json({ message: 'Lỗi khi tạo đơn hàng', error: error.message });
+  }
+};
+
+exports.getOrderById = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
+    }
+    
+    // Kiểm tra quyền truy cập
+    if (req.user.role !== 'admin' && order.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Không có quyền truy cập đơn hàng này' });
+    }
+
+    res.json(order);
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
   }
 };

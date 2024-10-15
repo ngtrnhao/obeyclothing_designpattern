@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getAdminOrders, updateAdminOrderStatus } from '../services/api';
 import { FaSearch, FaSort } from 'react-icons/fa';
 import styles from './style.component/OrderManagement.module.css';
+import { Link } from 'react-router-dom';
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
@@ -126,6 +127,9 @@ const OrderManagement = () => {
                   <option value="delivered">Đã giao</option>
                   <option value="cancelled">Đã hủy</option>
                 </select>
+                <Link to={`/admin/orders/${order._id}`} className={styles.viewDetailsButton}>
+                  Xem chi tiết
+                </Link>
               </td>
             </tr>
           ))}

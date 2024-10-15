@@ -18,7 +18,7 @@ const UserDashboard = () => {
           </Link>
           <Link 
             to="/user/orders" 
-            className={`${styles.navButton} ${location.pathname === '/user/orders' ? styles.active : ''}`}
+            className={`${styles.navButton} ${location.pathname.startsWith('/user/orders') ? styles.active : ''}`}
           >
             Đơn hàng của tôi
           </Link>

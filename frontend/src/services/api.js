@@ -485,10 +485,9 @@ export const getUserInfo = async () => {
 };
 
 export const updateUserInfo = async (userInfo) => {
+  console.log('Sending user info to server:', userInfo);
   try {
-    console.log('Sending user info to server:', userInfo);
     const response = await api.put('/user/profile', userInfo);
-    console.log('Server response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error updating user info:', error.response?.data || error.message);
@@ -532,5 +531,27 @@ export const deleteSupplier = (id) => api.delete(`/suppliers/${id}`);
 
 export const confirmReceiptAndUpdateInventory = (orderId, actualQuantity) => 
   api.put(`/admin/purchase-orders/${orderId}/confirm-receipt`, { actualQuantity });
+
+export const getOrderDetails = async (orderId) => {
+  const response = await axios.get(`/api/orders/${orderId}`);
+  return response.data;
+};
+
+export const downloadInvoice = async (orderId) => {
+  try {
+    const response = await api.get(`/orders/invoice/${orderId}`, {
+      responseType: 'blob'
+    });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `invoice-${orderId}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+  } catch (error) {
+    console.error('Error downloading invoice:', error);
+    throw error;
+  }
+};
 
 export default api;

@@ -55,14 +55,14 @@ const HomePage = () => {
           <img src="/assets/1_MENS-BIGWIG.jpg" alt="Bộ Sưu Tập Nam" />
           <div className={styles.categoryOverlay}>
             <h2>Bộ Sưu Tập Nam</h2>
-            <Link to="/men" className={styles.categoryLink}>Khám Phá</Link>
+            <Link to="/category/men" className={styles.categoryLink}>Khám Phá</Link>
           </div>
         </div>
         <div className={`${styles.categoryItem} ${styles.medium}`}>
           <img src="/assets/women.jpg" alt="Bộ Sưu Tập Nữ" />
           <div className={styles.categoryOverlay}>
             <h2>Bộ Sưu Tập Nữ</h2>
-            <Link to="/women" className={styles.categoryLink}>Khám Phá</Link>
+            <Link to="/category/women" className={styles.categoryLink}>Khám Phá</Link>
           </div>
         </div>
         <div className={`${styles.categoryItem} ${styles.small}`}>

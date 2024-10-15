@@ -34,7 +34,6 @@ const orderSchema = new mongoose.Schema({
     default: Date.now
   },
   shippingInfo: { type: mongoose.Schema.Types.ObjectId, ref: 'ShippingInfo' },
-  shippingAddress: String,
   voucher: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Voucher'

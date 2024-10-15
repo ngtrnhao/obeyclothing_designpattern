@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getUserOrders } from '../services/api';
 import styles from './style.component/UserOrders.module.css';
+import { Link } from 'react-router-dom';
 
 const UserOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -37,6 +38,7 @@ const UserOrders = () => {
             <th>Ngày đặt</th>
             <th>Tổng tiền</th>
             <th>Trạng thái</th>
+            <th>Chi tiết</th>
           </tr>
         </thead>
         <tbody>
@@ -46,6 +48,9 @@ const UserOrders = () => {
               <td>{new Date(order.createdAt).toLocaleDateString()}</td>
               <td>{order.totalAmount.toLocaleString('vi-VN')} đ</td>
               <td>{order.status}</td>
+              <td>
+                <Link to={`/user/orders/${order._id}`}>Xem chi tiết</Link>
+              </td>
             </tr>
           ))}
         </tbody>

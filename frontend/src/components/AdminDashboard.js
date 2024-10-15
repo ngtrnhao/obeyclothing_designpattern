@@ -31,7 +31,7 @@ const AdminDashboard = () => {
             <Link
               key={item.path}
               to={item.path}
-              className={`${styles.navButton} ${location.pathname === item.path ? styles.active : ''}`}
+              className={`${styles.navButton} ${location.pathname.startsWith(item.path) ? styles.active : ''}`}
             >
               {item.icon}
               <span>{item.text}</span>

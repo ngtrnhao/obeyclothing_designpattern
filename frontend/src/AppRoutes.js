@@ -27,6 +27,7 @@ import DeliveryManagement from './components/DeliveryManagement';
 import VoucherManagement from './components/VoucherManagement';
 import Lookbook from './components/Lookbook';
 import StoreLocator from './components/StoreLocator';
+import OrderDetails from './components/OrderDetails';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user } = useAuth();
@@ -62,6 +63,7 @@ const AppRoutes = () => {
         <Route index element={<Navigate to="profile" replace />} />
         <Route path="profile" element={<UserProfile />} />
         <Route path="orders" element={<UserOrders />} />
+        <Route path="orders/:id" element={<OrderDetails />} />
       </Route>
 
       <Route 
@@ -78,6 +80,7 @@ const AppRoutes = () => {
         <Route path="profile" element={<UserProfile />} />
         <Route path="products" element={<ProductManagement />} />
         <Route path="orders" element={<OrderManagement />} />
+        <Route path="orders/:id" element={<OrderDetails />} />
         <Route path="users" element={<UserManagement />} />
         <Route path="create-product" element={<CreateProduct />} />
         <Route path="statistics" element={<Statistics />} />

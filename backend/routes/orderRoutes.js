@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const orderController = require('../controllers/orderController');
 const authMiddleware = require('../middleware/authMiddleware');
+const Invoice = require('../models/Invoice'); // Thêm dòng này
+const { createInvoicePDF } = require('../utils/pdfGenerator');
 
 router.use(authMiddleware);
 
@@ -42,5 +44,24 @@ router.post('/', async (req, res) => {
     res.status(500).json({ message: 'Lỗi server', error: error.message });
   }
 });
+
+router.get('/invoice/:id', authMiddleware, async (req, res) => {
+  try {
+    const invoice = await Invoice.findOne({ order: req.params.id }).populate('items.product');
+    if (!invoice) {
+      return res.status(404).json({ message: 'Không tìm thấy hóa đơn' });
+    }
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=invoice-${invoice.invoiceNumber}.pdf`);
+
+    createInvoicePDF(invoice, res);
+  } catch (error) {
+    console.error('Lỗi khi tạo PDF hóa đơn:', error);
+    res.status(500).json({ message: 'Lỗi khi tạo PDF hóa đơn', error: error.message });
+  }
+});
+
+router.get('/:id', authMiddleware, orderController.getOrderById);
 
 module.exports = router;
