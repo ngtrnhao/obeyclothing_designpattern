@@ -6,6 +6,7 @@ const StoreLocator = () => {
   const [stores, setStores] = useState([]);
   const [selectedStore, setSelectedStore] = useState(null);
   const [mapCenter, setMapCenter] = useState({ lat: 10.762622, lng: 106.660172 });
+  const googleMapsApiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
 
   const fetchStores = () => {
     const dummyStores = [
@@ -23,7 +24,7 @@ const StoreLocator = () => {
 
   const mapContainerStyle = {
     width: '100%',
-    height: '600px' // Tăng chiều cao của bản đồ
+    height: '600px'
   };
 
   const options = {
@@ -41,33 +42,37 @@ const StoreLocator = () => {
       <h1 className={styles.title}>Tìm cửa hàng OBEY</h1>
       <div className={styles.container}>
         <div className={styles.mapContainer}>
-          <LoadScript googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}>
-            <GoogleMap
-              mapContainerStyle={mapContainerStyle}
-              center={mapCenter}
-              zoom={14}
-              options={options}
-            >
-              {stores.map(store => (
-                <Marker
-                  key={store.id}
-                  position={{ lat: store.lat, lng: store.lng }}
-                  onClick={() => handleStoreSelect(store)}
-                />
-              ))}
-              {selectedStore && (
-                <InfoWindow
-                  position={{ lat: selectedStore.lat, lng: selectedStore.lng }}
-                  onCloseClick={() => setSelectedStore(null)}
-                >
-                  <div>
-                    <h3>{selectedStore.name}</h3>
-                    <p>{selectedStore.address}</p>
-                  </div>
-                </InfoWindow>
-              )}
-            </GoogleMap>
-          </LoadScript>
+          {googleMapsApiKey ? (
+            <LoadScript googleMapsApiKey={googleMapsApiKey}>
+              <GoogleMap
+                mapContainerStyle={mapContainerStyle}
+                center={mapCenter}
+                zoom={14}
+                options={options}
+              >
+                {stores.map(store => (
+                  <Marker
+                    key={store.id}
+                    position={{ lat: store.lat, lng: store.lng }}
+                    onClick={() => handleStoreSelect(store)}
+                  />
+                ))}
+                {selectedStore && (
+                  <InfoWindow
+                    position={{ lat: selectedStore.lat, lng: selectedStore.lng }}
+                    onCloseClick={() => setSelectedStore(null)}
+                  >
+                    <div>
+                      <h3>{selectedStore.name}</h3>
+                      <p>{selectedStore.address}</p>
+                    </div>
+                  </InfoWindow>
+                )}
+              </GoogleMap>
+            </LoadScript>
+          ) : (
+            <div>Không thể tải Google Maps. Vui lòng kiểm tra API key.</div>
+          )}
         </div>
         <div className={styles.storeList}>
           <h2>Danh sách cửa hàng</h2>

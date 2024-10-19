@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { register } from '../services/api';
 import styles from './style.component/Register.module.css';
+import { FaUserPlus } from 'react-icons/fa';
 
 const Register = () => {
   const [username, setUsername] = useState('');
@@ -9,8 +10,6 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState({});
-  const [role, setRole] = useState('user');
-  const [adminSecret, setAdminSecret] = useState('');
   const navigate = useNavigate();
 
   const validate = () => {
@@ -35,15 +34,10 @@ const Register = () => {
     const validationErrors = validate();
     if (Object.keys(validationErrors).length === 0) {
       try {
-        console.log('Gọi API đăng ký...');
-        const response = await register(username, email, password, role, adminSecret);
-        console.log('Đăng ký thành công:', response);
-        console.log('Chuẩn bị chuyển hướng...');
-        navigate('/');
-        console.log('Đã chuyển hướng');
+        await register(username, email, password);
+        navigate('/login');
       } catch (error) {
-        console.error('Lỗi đăng ký:', error);
-        setErrors({ ...validationErrors, ...error.response?.data?.message || 'Đăng ký thất bại' });
+        setErrors({ ...validationErrors, apiError: error.response?.data?.message || 'Đăng ký thất bại' });
       }
     } else {
       setErrors(validationErrors);
@@ -52,7 +46,9 @@ const Register = () => {
 
   return (
     <div className={styles.registerContainer}>
-      <h2 className={styles.registerTitle}>Thông Tin Đăng ký</h2>
+      <h2 className={styles.registerTitle}>
+        <FaUserPlus className={styles.titleIcon} /> Đăng ký
+      </h2>
       {errors.username && <p className={styles.errorMessage}>{errors.username}</p>}
       {errors.email && <p className={styles.errorMessage}>{errors.email}</p>}
       {errors.password && <p className={styles.errorMessage}>{errors.password}</p>}
@@ -98,29 +94,6 @@ const Register = () => {
             required
           />
         </div>
-        <div className={styles.formGroup}>
-          <label className={styles.label}>Vai trò:</label>
-          <select 
-            className={styles.select}
-            value={role} 
-            onChange={(e) => setRole(e.target.value)}
-          >
-            <option value="user">Người dùng</option>
-            <option value="admin">Quản trị viên</option>
-          </select>
-        </div>
-        {role === 'admin' && (
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Mã bí mật quản trị:</label>
-            <input
-              className={styles.input}
-              type="password"
-              value={adminSecret}
-              onChange={(e) => setAdminSecret(e.target.value)}
-              required
-            />
-          </div>
-        )}
         <button className={styles.button} type="submit">Đăng ký</button>
       </form>
     </div>

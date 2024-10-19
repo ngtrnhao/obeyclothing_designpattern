@@ -1,127 +1,136 @@
-/* Định nghĩa style cho container đăng nhập */
+/* Định nghĩa style cho trang đăng nhập */
+.loginPage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  font-family: 'Playfair Display', serif;
+}
+
 .loginContainer {
-  /* Giới hạn chiều rộng tối đa */
-  max-width: 350px;
-  /* Căn giữa container và thêm margin trên dưới */
-  margin: 50px auto;
-  /* Thêm padding xung quanh */
-  padding: 30px;
-  /* Màu nền xám nhạt */
-  background-color: #f9f9f9;
-  /* Bo tròn góc */
-  border-radius: 8px;
-  /* Thêm bóng đổ */
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  width: 80%;
+  max-width: 1000px;
+  background-color: #ffffff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
-/* Định nghĩa style cho tiêu đề đăng nhập */
+.loginImage {
+  flex: 1;
+  background-image: url('https://as2.ftcdn.net/v2/jpg/09/81/55/91/1000_F_981559130_0V4GQsjVlf9C4Y7Q4M87Lj4VVcHo4S3L.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.loginForm {
+  flex: 1;
+  padding: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .loginTitle {
-  /* Căn giữa text */
-  text-align: center;
-  /* Màu chữ */
+  font-size: 2.5rem;
   color: #333;
-  /* Kích thước chữ */
-  font-size: 24px;
-  /* Thêm margin dưới */
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.loginSubtitle {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.inputGroup {
+  position: relative;
   margin-bottom: 20px;
 }
 
-/* Định nghĩa style cho nhóm form */
-.formGroup {
-  /* Thêm margin dưới */
-  margin-bottom: 20px;
-}
-
-/* Định nghĩa style cho label */
-.label {
-  /* Hiển thị dưới dạng block */
-  display: block;
-  /* Thêm margin dưới */
-  margin-bottom: 5px;
-  /* Màu chữ */
-  color: #555;
-  /* Độ đậm cho chữ */
-  font-weight: bold;
-}
-
-/* Định nghĩa style cho input */
 .input {
-  /* Chiều rộng 100% */
   width: 100%;
-  /* Thêm padding */
-  padding: 10px;
-  /* Thêm viền */
-  border: 1px solid #ddd;
-  /* Bo tròn góc */
-  border-radius: 4px;
-  /* Kích thước chữ */
-  font-size: 16px;
-}
-
-/* Định nghĩa style cho nút */
-.button {
-  /* Chiều rộng 100% */
-  width: 100%;
-  /* Thêm padding */
-  padding: 12px;
-  /* Màu nền xanh dương */
-  background-color: #3498db;
-  /* Màu chữ trắng */
-  color: white;
-  /* Loại bỏ viền */
+  padding: 12px 40px 12px 12px;
   border: none;
-  /* Bo tròn góc */
-  border-radius: 4px;
-  /* Kích thước chữ */
-  font-size: 16px;
-  /* Thay đổi con trỏ khi di chuột qua */
+  border-bottom: 2px solid #ddd;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.input:focus {
+  border-color: #000;
+  outline: none;
+}
+
+.inputIcon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+}
+
+.loginButton {
+  background-color: #000;
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  font-size: 1rem;
   cursor: pointer;
-  /* Hiệu ứng chuyển đổi */
-  transition: background-color 0.3s;
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
 }
 
-/* Hiệu ứng khi hover vào nút */
-.button:hover {
-  /* Thay đổi màu nền khi hover */
-  background-color: #2980b9;
+.loginButton:hover {
+  background-color: #333;
 }
 
-/* Style cho nút khi bị vô hiệu hóa */
-.button:disabled {
-  /* Màu nền xám */
-  background-color: #bdc3c7;
-  /* Thay đổi con trỏ */
-  cursor: not-allowed;
+.buttonIcon {
+  margin-right: 8px;
 }
 
-/* Định nghĩa style cho thông báo lỗi */
+.loginFooter {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
+}
+
+.footerLink {
+  color: #666;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
+}
+
+.footerLink:hover {
+  color: #000;
+}
+
 .errorMessage {
-  /* Màu chữ đỏ */
-  color: #e74c3c;
-  /* Căn giữa text */
+  background-color: #fff0f0;
+  color: #ff3333;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
   text-align: center;
-  /* Thêm margin trên */
-  margin-top: 10px;
 }
 
-/* Định nghĩa style cho thông báo thành công */
-.successMessage {
-  /* Màu chữ xanh lá */
-  color: #2ecc71;
-  /* Căn giữa text */
-  text-align: center;
-  /* Thêm margin trên */
-  margin-top: 10px;
-}
+@media (max-width: 768px) {
+  .loginContainer {
+    flex-direction: column;
+    width: 90%;
+  }
 
-/* Định nghĩa style cho thông báo vai trò */
-.roleMessage {
-  /* Căn giữa text */
-  text-align: center;
-  /* Thêm margin trên */
-  margin-top: 15px;
-  /* Độ đậm cho chữ */
-  font-weight: bold;
-  /* Màu chữ xanh dương */
-  color: #3498db;
+  .loginImage {
+    height: 200px;
+  }
+
+  .loginForm {
+    padding:30px;
+}
 }

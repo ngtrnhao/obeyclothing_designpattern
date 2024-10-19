@@ -89,14 +89,14 @@ const Header = () => {
                     </Link>
                   )}
                   <button onClick={logout} className={styles.navLink}>
-                    Logout
+                    Đăng Xuất
                   </button>
                 </>
               ) : (
-                <Link to="/auth" className={styles.navLink}>SIGN IN</Link>
+                <Link to="/login" className={styles.navLink}>Đăng Nhập</Link>
               )}
               <Link to="/cart" className={styles.bagLink}>
-                BAG <span className={styles.bagCount}></span>
+                Giỏ Hàng <span className={styles.bagCount}></span>
               </Link>
             </div>
           </div>

@@ -85,10 +85,31 @@ export const register = async (username, email, password, role, adminSecret) => 
     throw error;
   }
 };
+
 export const forgotPassword = (email) => api.post('/auth/forgot-password', { email });
+
 export const resetPassword = (token, newPassword) => {
   console.log('Resetting password with token:', token);
   return api.post(`/auth/reset-password/${token}`, { password: newPassword });
+};
+
+export const loginWithGoogle = async () => {
+  window.location.href = `${API_URL}/auth/google`;
+};
+
+export const loginWithFacebook = async () => {
+  try {
+    const response = await api.get('/auth/facebook');
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      setAuthToken(response.data.token);
+    }
+    return response;
+  } catch (error) {
+    console.error('API Facebook login error:', error.response?.data || error.message);
+    throw error;
+  }
 };
 
 // Products
@@ -507,7 +528,7 @@ export const getProductBySlug = async (slug) => {
   }
 };
 
-// ... other API functions
+
 
 export const updateStock = (productId, newStock) => api.put('/admin/products/update-stock', { productId, quantity: newStock });
 export const getLowStockProducts = () => api.get('/admin/products/low-stock');

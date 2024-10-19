@@ -2,13 +2,14 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import HomePage from './pages/HomePage';
-import AuthPage from './pages/AuthPage';
+import Login from './components/Login';
+import Register from './components/Register';
+import ForgotPassword from './components/ForgotPassword';
 import ProductList from './components/ProductList';
 import ProductDetail from './components/ProductDetail';
 import Cart from './components/Cart';
 import CreateProduct from './components/CreateProduct';
 import ResetPassword from './components/ResetPassword';
-import ForgotPassword from './components/ForgotPassword';
 import UserDashboard from './components/UserDashboard';
 import AdminDashboard from './components/AdminDashboard';
 import ProductManagement from './components/ProductManagement';
@@ -32,7 +33,7 @@ import OrderDetails from './components/OrderDetails';
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user } = useAuth();
   if (!user || !allowedRoles.includes(user.role)) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/login" replace />;
   }
   return children;
 };
@@ -41,11 +42,12 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
-      <Route path="/auth" element={<AuthPage />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/products" element={<ProductList />} />
       <Route path="/product/:slug" element={<ProductDetail />} />
       <Route path="/cart" element={<Cart />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
       <Route path="/category/:slug" element={<ProductList />} />
       <Route path="/checkout" element={<Checkout />} />
