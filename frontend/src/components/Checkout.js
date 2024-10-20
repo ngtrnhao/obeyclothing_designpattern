@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useCart } from '../contexts/CartContext';
-import { getUserInfo, updateUserInfo, getProvinces, getDistricts, getWards } from '../services/api';
+import { getUserInfo, updateUserInfo } from '../services/api';
 import PayPalCheckout from './PayPalCheckout1';
 import styles from './style.component/Checkout.module.css';
+import { provinces, getDistricts, getWards } from '../data/vietnamData';
 
 const Checkout = () => {
 	const { cartItems, total } = useCart();
@@ -10,10 +11,10 @@ const Checkout = () => {
 		fullName: '',
 		email: '',
 		phone: '',
-		address: '',
-		provinceId: '',
-		districtId: '',
-		wardId: '',
+		streetAddress: '',
+		provinceCode: '',
+		districtCode: '',
+		wardCode: '',
 		provinceName: '',
 		districtName: '',
 		wardName: ''
@@ -22,16 +23,15 @@ const Checkout = () => {
 	const [altShippingInfo, setAltShippingInfo] = useState({
 		fullName: '',
 		phone: '',
-		address: '',
-		provinceId: '',
-		districtId: '',
-		wardId: '',
+		streetAddress: '',
+		provinceCode: '',
+		districtCode: '',
+		wardCode: '',
 		provinceName: '',
 		districtName: '',
 		wardName: ''
 	});
 	const [isEditing, setIsEditing] = useState(false);
-	const [provinces, setProvinces] = useState([]);
 	const [districts, setDistricts] = useState([]);
 	const [wards, setWards] = useState([]);
 
@@ -41,12 +41,14 @@ const Checkout = () => {
 			setUserInfo(info);
 			setIsEditing(!isUserInfoComplete(info));
 			
-			if (info.provinceId) {
-				fetchDistricts(info.provinceId);
+			if (info.provinceCode) {
+				const districts = getDistricts(info.provinceCode);
+				setDistricts(districts);
 			}
 			
-			if (info.districtId) {
-				fetchWards(info.districtId);
+			if (info.districtCode) {
+				const wards = getWards(info.provinceCode, info.districtCode);
+				setWards(wards);
 			}
 		} catch (error) {
 			console.error('Error fetching user info:', error);
@@ -56,41 +58,10 @@ const Checkout = () => {
 
 	useEffect(() => {
 		fetchUserInfo();
-		fetchProvinces();
 	}, [fetchUserInfo]);
 
-	const fetchProvinces = async () => {
-		try {
-			const data = await getProvinces();
-			console.log('Fetched provinces:', data);
-			setProvinces(data);
-		} catch (error) {
-			console.error('Error fetching provinces:', error);
-		}
-	};
-
-	const fetchDistricts = async (provinceId) => {
-		try {
-			const data = await getDistricts(provinceId);
-			console.log('Fetched districts:', data);
-			setDistricts(data);
-		} catch (error) {
-			console.error('Error fetching districts:', error);
-		}
-	};
-
-	const fetchWards = async (districtId) => {
-		try {
-			const data = await getWards(districtId);
-			console.log('Fetched wards:', data);
-			setWards(data);
-		} catch (error) {
-			console.error('Error fetching wards:', error);
-		}
-	};
-
 	const isUserInfoComplete = (info) => {
-		return info.fullName && info.phone && info.address && info.provinceId && info.districtId && info.wardId;
+		return info.fullName && info.phone && info.streetAddress && info.provinceCode && info.districtCode && info.wardCode;
 	};
 
 	const handleInputChange = (e, isAltShipping = false) => {
@@ -98,19 +69,22 @@ const Checkout = () => {
 		const updateFunction = isAltShipping ? setAltShippingInfo : setUserInfo;
 		updateFunction(prev => {
 			const updated = { ...prev, [name]: value };
-			if (name === 'provinceId') {
-				const selectedProvince = provinces.find(p => p.code.toString() === value);
-				updated.districtId = '';
-				updated.wardId = '';
+			if (name === 'provinceCode') {
+				const selectedProvince = provinces.find(p => p.code === value);
+				updated.districtCode = '';
+				updated.wardCode = '';
 				updated.provinceName = selectedProvince ? selectedProvince.name : '';
-				fetchDistricts(value);
-			} else if (name === 'districtId') {
-				const selectedDistrict = districts.find(d => d.code.toString() === value);
-				updated.wardId = '';
+				const districts = getDistricts(value);
+				setDistricts(districts);
+				setWards([]);
+			} else if (name === 'districtCode') {
+				const selectedDistrict = districts.find(d => d.code === value);
+				updated.wardCode = '';
 				updated.districtName = selectedDistrict ? selectedDistrict.name : '';
-				fetchWards(value);
-			} else if (name === 'wardId') {
-				const selectedWard = wards.find(w => w.code.toString() === value);
+				const wards = getWards(updated.provinceCode, value);
+				setWards(wards);
+			} else if (name === 'wardCode') {
+				const selectedWard = wards.find(w => w.code === value);
 				updated.wardName = selectedWard ? selectedWard.name : '';
 			}
 			console.log('Updated shipping info:', updated);
@@ -122,30 +96,21 @@ const Checkout = () => {
 		e.preventDefault();
 		const shippingInfo = alternativeShipping ? altShippingInfo : userInfo;
 		
-		// Đảm bảo address là string
-		const updatedShippingInfo = {
-			...shippingInfo,
-			address: typeof shippingInfo.address === 'object' ? JSON.stringify(shippingInfo.address) : shippingInfo.address
-		};
+		console.log('Shipping info being sent:', shippingInfo);
 		
-		console.log('Shipping info being sent:', updatedShippingInfo);
-		
-		// Kiểm tra dữ liệu
-		if (!updatedShippingInfo.fullName || !updatedShippingInfo.phone || !updatedShippingInfo.address ||
-			!updatedShippingInfo.provinceId || !updatedShippingInfo.districtId || !updatedShippingInfo.wardId ||
-			!updatedShippingInfo.provinceName || !updatedShippingInfo.districtName || !updatedShippingInfo.wardName) {
+		if (!isUserInfoComplete(shippingInfo)) {
 			alert('Vui lòng điền đầy đủ thông tin địa chỉ giao hàng');
 			return;
 		}
 
 		try {
 			if (!alternativeShipping) {
-				const updatedUser = await updateUserInfo(updatedShippingInfo);
+				const updatedUser = await updateUserInfo(shippingInfo);
 				console.log('Updated user info:', updatedUser);
 			}
 			setIsEditing(false);
 			// Proceed to payment or order confirmation
-			console.log('Shipping info being sent:', updatedShippingInfo);
+			console.log('Shipping info being sent:', shippingInfo);
 		} catch (error) {
 			console.error('Error processing order:', error);
 			alert('Có lỗi xảy ra khi xử lý đơn hàng. Vui lòng thử lại.');
@@ -189,26 +154,26 @@ const Checkout = () => {
 			/>
 			<input
 				type="text"
-				name="address"
-				value={info.address}
+				name="streetAddress"
+				value={info.streetAddress}
 				onChange={(e) => handleInputChange(e, isAltShipping)}
 				placeholder="Địa chỉ"
 				required
-			/>
+				/>
 			<select
-				name="provinceId"
-				value={info.provinceId}
+				name="provinceCode"
+				value={info.provinceCode}
 				onChange={(e) => handleInputChange(e, isAltShipping)}
 				required
 			>
 				<option value="">Chọn Tỉnh/Thành phố</option>
 				{provinces.map(province => (
-					<option key={province.code} value={province.code.toString()}>{province.name}</option>
+					<option key={province.code} value={province.code}>{province.name}</option>
 				))}
 			</select>
 			<select
-				name="districtId"
-				value={info.districtId}
+				name="districtCode"
+				value={info.districtCode}
 				onChange={(e) => handleInputChange(e, isAltShipping)}
 				required
 			>
@@ -218,8 +183,8 @@ const Checkout = () => {
 				))}
 			</select>
 			<select
-				name="wardId"
-				value={info.wardId}
+				name="wardCode"
+				value={info.wardCode}
 				onChange={(e) => handleInputChange(e, isAltShipping)}
 				required
 			>
@@ -245,7 +210,7 @@ const Checkout = () => {
 						<p>{userInfo.fullName}</p>
 						<p>{userInfo.email}</p>
 						<p>{userInfo.phone}</p>
-						<p>{userInfo.address}</p>
+						<p>{userInfo.streetAddress}</p>
 						<p>
 							{userInfo.wardName && `${userInfo.wardName}, `}
 							{userInfo.districtName && `${userInfo.districtName}, `}
