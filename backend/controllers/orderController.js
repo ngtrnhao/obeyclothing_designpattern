@@ -1,7 +1,7 @@
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
-const Delivery = require('../models/Delivery'); // Thêm dòng này
+const Delivery = require('../models/Delivery');
 const paypal = require('@paypal/checkout-server-sdk');
 const User = require('../models/User');
 const Voucher = require('../models/Voucher');
@@ -45,9 +45,9 @@ exports.completePaypalOrder = async (req, res) => {
     const { orderId, paypalDetails, shippingInfo } = req.body;
     const userId = req.user._id;
 
-    console.log('Received shipping info in order completion:', shippingInfo);
+    console.log('Received shipping info:', shippingInfo);
 
-    if (!shippingInfo.address || !shippingInfo.wardName || !shippingInfo.districtName || !shippingInfo.provinceName) {
+    if (!shippingInfo || !shippingInfo.address || !shippingInfo.wardName || !shippingInfo.districtName || !shippingInfo.provinceName) {
       return res.status(400).json({ message: 'Thông tin địa chỉ giao hàng không đầy đủ' });
     }
 
@@ -55,26 +55,6 @@ exports.completePaypalOrder = async (req, res) => {
     if (!cart) {
       return res.status(404).json({ message: 'Không tìm thấy giỏ hàng' });
     }
-
-    // Tạo hoặc cập nhật ShippingInfo
-    let shippingInfoDoc = await ShippingInfo.findOneAndUpdate(
-      { user: userId },
-      {
-        $set: {
-          user: userId, // Thêm trường user vào đây
-          fullName: shippingInfo.fullName,
-          phone: shippingInfo.phone,
-          address: shippingInfo.address,
-          provinceId: shippingInfo.provinceId,
-          provinceName: shippingInfo.provinceName,
-          districtId: shippingInfo.districtId,
-          districtName: shippingInfo.districtName,
-          wardId: shippingInfo.wardId,
-          wardName: shippingInfo.wardName
-        }
-      },
-      { new: true, upsert: true }
-    );
 
     const newOrder = new Order({
       user: userId,
@@ -88,51 +68,60 @@ exports.completePaypalOrder = async (req, res) => {
       totalAmount: cart.items.reduce((total, item) => total + item.quantity * item.product.price, 0),
       paypalOrderId: orderId,
       paypalDetails: paypalDetails,
-      shippingInfo: shippingInfoDoc._id,
+      shippingInfo: {
+        fullName: shippingInfo.fullName,
+        phone: shippingInfo.phone,
+        address: shippingInfo.address,
+        provinceCode: shippingInfo.provinceCode,
+        districtCode: shippingInfo.districtCode,
+        wardCode: shippingInfo.wardCode,
+        provinceName: shippingInfo.provinceName,
+        districtName: shippingInfo.districtName,
+        wardName: shippingInfo.wardName
+      },
       status: 'paid'
     });
 
     await newOrder.save();
+    console.log('New order created:', newOrder);
 
-    // Cập nhật số lượng sản phẩm và xóa giỏ hàng
-    for (let item of cart.items) {
-      await Product.findByIdAndUpdate(item.product._id, {
-        $inc: { stock: -item.quantity }
-      });
-    }
-    await Cart.findByIdAndDelete(cart._id);
-
-    // Tạo đơn giao hàng mới
+    // Create a new delivery record
     const newDelivery = new Delivery({
       order: newOrder._id,
-      shippingInfo: shippingInfoDoc._id,
+      shippingInfo: { ...newOrder.shippingInfo },
       status: 'pending'
     });
     await newDelivery.save();
 
-    // Tạo hóa đơn
-    const invoice = new Invoice({
+    // Create a unique invoice number
+    const invoiceNumber = `INV-${Date.now()}`;
+
+    // Create a new invoice
+    const newInvoice = new Invoice({
       order: newOrder._id,
-      invoiceNumber: `INV-${Date.now()}`,
-      totalAmount: newOrder.totalAmount,
-      items: newOrder.items,
       customer: {
-        name: shippingInfo.fullName,
-        address: `${shippingInfo.address}, ${shippingInfo.wardName}, ${shippingInfo.districtName}, ${shippingInfo.provinceName}`,
-        phone: shippingInfo.phone
-      }
+        name: newOrder.shippingInfo.fullName,
+        address: `${newOrder.shippingInfo.address}, ${newOrder.shippingInfo.wardName}, ${newOrder.shippingInfo.districtName}, ${newOrder.shippingInfo.provinceName}`,
+        phone: newOrder.shippingInfo.phone
+      },
+      items: newOrder.items,
+      totalAmount: newOrder.totalAmount,
+      invoiceNumber: invoiceNumber,
+      status: 'issued'
     });
+    await newInvoice.save();
 
-    await invoice.save();
-
-    // Thêm ID hóa đơn vào đơn hàng
-    newOrder.invoice = invoice._id;
+    // Link the invoice to the order
+    newOrder.invoice = newInvoice._id;
     await newOrder.save();
+
+    // Clear the user's cart after successful payment
+    await Cart.findByIdAndDelete(cart._id);
 
     res.status(200).json({ 
       message: 'Đơn hàng đã được tạo và thanh toán thành công', 
       order: newOrder,
-      invoiceId: invoice._id
+      invoiceId: newInvoice._id
     });
   } catch (error) {
     console.error('Error completing PayPal order:', error);
@@ -142,20 +131,21 @@ exports.completePaypalOrder = async (req, res) => {
 
 exports.createOrder = async (req, res) => {
   try {
-    console.log('Received order data:', req.body);
-    const { cartItems, shippingInfo, totalAmount } = req.body;
+    const { cartItems, selectedAddressId, totalAmount } = req.body;
     const userId = req.user._id;
 
-    console.log('Received shipping info:', shippingInfo);
-
-    const shippingAddress = `${shippingInfo.address}, ${shippingInfo.wardName || ''}, ${shippingInfo.districtName || ''}, ${shippingInfo.provinceName || ''}`.trim();
-
-    if (!shippingInfo.provinceName || !shippingInfo.districtName || !shippingInfo.wardName) {
-      console.log('Missing address information:', shippingInfo);
-      return res.status(400).json({ message: 'Thông tin địa chỉ giao hàng không đầy đủ' });
+    const shippingInfo = await ShippingInfo.findOne({ user: userId, 'addresses._id': selectedAddressId }, { 'addresses.$': 1 });
+    if (!shippingInfo || !shippingInfo.addresses.length) {
+      return res.status(404).json({ message: 'Không tìm thấy địa chỉ giao hàng' });
     }
 
-    // Kiểm tra số lượng tồn kho
+    const selectedAddress = shippingInfo.addresses[0];
+
+    console.log('Selected Address ID:', selectedAddressId); // Add this line in createOrder
+
+    console.log('Retrieved Address:', selectedAddress); // Add this line after retrieving the address
+
+    // Check stock availability
     for (let item of cartItems) {
       const product = await Product.findById(item.product);
       if (!product) {
@@ -166,7 +156,7 @@ exports.createOrder = async (req, res) => {
       }
     }
 
-    // Xử lý voucher nếu có
+    // Handle voucher if applicable
     let discountAmount = 0;
     if (req.body.voucherId) {
       const voucher = await Voucher.findById(req.body.voucherId);
@@ -195,42 +185,57 @@ exports.createOrder = async (req, res) => {
         size: item.size,
         color: item.color
       })),
-      voucher: req.body.voucherId,
-      discountAmount: discountAmount,
-      totalAmount: totalAmount - discountAmount,
-      shippingInfo: {
-        fullName: shippingInfo.fullName,
-        phone: shippingInfo.phone,
-        address: shippingInfo.address,
-        provinceId: shippingInfo.provinceId,
-        districtId: shippingInfo.districtId,
-        wardId: shippingInfo.wardId,
-        provinceName: shippingInfo.provinceName,
-        districtName: shippingInfo.districtName,
-        wardName: shippingInfo.wardName
-      },
-      shippingAddress,
-      status: 'pending'
+      totalAmount: totalAmount,
+      shippingInfo: selectedAddress
     });
-
-    console.log('New order object:', newOrder);
-
     await newOrder.save();
 
-    // Cập nhật số lượng tồn kho
+    console.log('Order Details:', newOrder); // Add this line before saving the order
+
+    // Create a new Delivery record
+    const newDelivery = new Delivery({
+      order: newOrder._id,
+      shippingInfo: { ...newOrder.shippingInfo },
+      status: 'pending'
+    });
+    await newDelivery.save();
+
+    // Link the Delivery record to the order
+    newOrder.delivery = newDelivery._id;
+    await newOrder.save();
+
+    // Create a new Invoice
+    const newInvoice = new Invoice({
+      order: newOrder._id,
+      customer: {
+        name: newOrder.shippingInfo.fullName,
+        address: `${newOrder.shippingInfo.address}, ${newOrder.shippingInfo.wardName}, ${newOrder.shippingInfo.districtName}, ${newOrder.shippingInfo.provinceName}`,
+        phone: newOrder.shippingInfo.phone
+      },
+      items: newOrder.items,
+      totalAmount: newOrder.totalAmount,
+      status: 'issued'
+    });
+    await newInvoice.save();
+
+    // Link the Invoice to the order
+    newOrder.invoice = newInvoice._id;
+    await newOrder.save();
+
+    // Update stock quantities
     for (let item of cartItems) {
       await Product.findByIdAndUpdate(item.product, {
         $inc: { stock: -item.quantity }
       });
     }
 
-    // Xóa giỏ hàng sau khi đặt hàng thành công
+    // Clear the user's cart after successful order
     await Cart.findOneAndUpdate({ user: userId }, { $set: { items: [] } });
 
-    res.status(201).json(newOrder);
+    res.status(201).json({ message: 'Đơn hàng đã được tạo thành công', order: newOrder });
   } catch (error) {
     console.error('Error creating order:', error);
-    res.status(400).json({ message: 'Lỗi khi tạo đơn hàng', error: error.message });
+    res.status(500).json({ message: 'Lỗi khi tạo đơn hàng', error: error.message });
   }
 };
 
@@ -251,3 +256,4 @@ exports.getOrderById = async (req, res) => {
     res.status(500).json({ message: 'Lỗi server', error: error.message });
   }
 };
+

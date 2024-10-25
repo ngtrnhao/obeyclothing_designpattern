@@ -6,15 +6,21 @@ const shippingInfoSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  fullName: String,
-  phone: String,
-  address: String,
-  provinceId: String,
-  districtId: String,
-  wardId: String,
-  provinceName: String,
-  districtName: String,
-  wardName: String
-});
+  addresses: [{
+    fullName: String,
+    phone: String,
+    address: String,
+    provinceId: String,
+    provinceName: String,
+    districtId: String,
+    districtName: String,
+    wardId: String,
+    wardName: String,
+    isDefault: {
+      type: Boolean,
+      default: false
+    }
+  }]
+}, { timestamps: true });
 
 module.exports = mongoose.model('ShippingInfo', shippingInfoSchema);

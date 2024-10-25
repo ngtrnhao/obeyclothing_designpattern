@@ -1,26 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useCart } from '../contexts/CartContext';
-import { getUserInfo, updateUserInfo } from '../services/api';
+import { getShippingAddresses, addShippingAddress, updateShippingAddress, deleteShippingAddress } from '../services/api';
 import PayPalCheckout from './PayPalCheckout1';
 import styles from './style.component/Checkout.module.css';
 import { provinces, getDistricts, getWards } from '../data/vietnamData';
 
 const Checkout = () => {
 	const { cartItems, total } = useCart();
-	const [userInfo, setUserInfo] = useState({
-		fullName: '',
-		email: '',
-		phone: '',
-		streetAddress: '',
-		provinceCode: '',
-		districtCode: '',
-		wardCode: '',
-		provinceName: '',
-		districtName: '',
-		wardName: ''
-	});
-	const [alternativeShipping, setAlternativeShipping] = useState(false);
-	const [altShippingInfo, setAltShippingInfo] = useState({
+	const [shippingAddresses, setShippingAddresses] = useState([]);
+	const [selectedAddressId, setSelectedAddressId] = useState(null);
+	const [editingAddress, setEditingAddress] = useState(null);
+	const [newAddress, setNewAddress] = useState({
 		fullName: '',
 		phone: '',
 		streetAddress: '',
@@ -31,90 +21,124 @@ const Checkout = () => {
 		districtName: '',
 		wardName: ''
 	});
-	const [isEditing, setIsEditing] = useState(false);
+	const [isAddingNewAddress, setIsAddingNewAddress] = useState(false);
 	const [districts, setDistricts] = useState([]);
 	const [wards, setWards] = useState([]);
 
-	const fetchUserInfo = useCallback(async () => {
+	const fetchShippingAddresses = useCallback(async () => {
 		try {
-			const info = await getUserInfo();
-			setUserInfo(info);
-			setIsEditing(!isUserInfoComplete(info));
-			
-			if (info.provinceCode) {
-				const districts = getDistricts(info.provinceCode);
-				setDistricts(districts);
-			}
-			
-			if (info.districtCode) {
-				const wards = getWards(info.provinceCode, info.districtCode);
-				setWards(wards);
+			const response = await getShippingAddresses();
+			console.log('Fetched addresses:', response);
+			const addresses = response.data;
+			setShippingAddresses(Array.isArray(addresses) ? addresses : []);
+			if (addresses.length > 0 && !selectedAddressId) {
+				setSelectedAddressId(addresses[0]._id);
 			}
 		} catch (error) {
-			console.error('Error fetching user info:', error);
-			setIsEditing(true);
+			console.error('Error fetching shipping addresses:', error);
+			setShippingAddresses([]);
 		}
-	}, []);
+	}, [selectedAddressId]);
 
 	useEffect(() => {
-		fetchUserInfo();
-	}, [fetchUserInfo]);
+		fetchShippingAddresses();
+	}, [fetchShippingAddresses]);
 
-	const isUserInfoComplete = (info) => {
-		return info.fullName && info.phone && info.streetAddress && info.provinceCode && info.districtCode && info.wardCode;
-	};
+	useEffect(() => {
+		console.log('shippingAddresses updated:', shippingAddresses);
+	}, [shippingAddresses]);
 
-	const handleInputChange = (e, isAltShipping = false) => {
+	useEffect(() => {
+		console.log('Selected Address ID:', selectedAddressId);
+		console.log('Selected shipping address:', shippingAddresses.find(addr => addr._id === selectedAddressId));
+	}, [selectedAddressId, shippingAddresses]);
+
+	const handleInputChange = (e) => {
 		const { name, value } = e.target;
-		const updateFunction = isAltShipping ? setAltShippingInfo : setUserInfo;
-		updateFunction(prev => {
-			const updated = { ...prev, [name]: value };
-			if (name === 'provinceCode') {
-				const selectedProvince = provinces.find(p => p.code === value);
-				updated.districtCode = '';
-				updated.wardCode = '';
-				updated.provinceName = selectedProvince ? selectedProvince.name : '';
-				const districts = getDistricts(value);
-				setDistricts(districts);
-				setWards([]);
-			} else if (name === 'districtCode') {
-				const selectedDistrict = districts.find(d => d.code === value);
-				updated.wardCode = '';
-				updated.districtName = selectedDistrict ? selectedDistrict.name : '';
-				const wards = getWards(updated.provinceCode, value);
-				setWards(wards);
-			} else if (name === 'wardCode') {
-				const selectedWard = wards.find(w => w.code === value);
-				updated.wardName = selectedWard ? selectedWard.name : '';
-			}
-			console.log('Updated shipping info:', updated);
-			return updated;
-		});
+		const updatedAddress = editingAddress || newAddress;
+		const updated = { ...updatedAddress, [name]: value };
+
+		if (name === 'provinceCode') {
+			const selectedProvince = provinces.find(p => p.code === value);
+			updated.districtCode = '';
+			updated.wardCode = '';
+			updated.provinceName = selectedProvince ? selectedProvince.name : '';
+			const newDistricts = getDistricts(value);
+			setDistricts(newDistricts);
+			setWards([]);
+		} else if (name === 'districtCode') {
+			const selectedDistrict = districts.find(d => d.code === value);
+			updated.wardCode = '';
+			updated.districtName = selectedDistrict ? selectedDistrict.name : '';
+			const newWards = getWards(updated.provinceCode, value);
+			setWards(newWards);
+		} else if (name === 'wardCode') {
+			const selectedWard = wards.find(w => w.code === value);
+			updated.wardName = selectedWard ? selectedWard.name : '';
+		}
+
+		if (editingAddress) {
+			setEditingAddress(updated);
+		} else {
+			setNewAddress(updated);
+		}
 	};
 
-	const handleSubmit = async (e) => {
+	const handleAddOrUpdateAddress = async (e) => {
 		e.preventDefault();
-		const shippingInfo = alternativeShipping ? altShippingInfo : userInfo;
-		
-		console.log('Shipping info being sent:', shippingInfo);
-		
-		if (!isUserInfoComplete(shippingInfo)) {
-			alert('Vui lòng điền đầy đủ thông tin địa chỉ giao hàng');
-			return;
-		}
-
 		try {
-			if (!alternativeShipping) {
-				const updatedUser = await updateUserInfo(shippingInfo);
-				console.log('Updated user info:', updatedUser);
+			let updatedAddress;
+			const addressData = editingAddress || newAddress;
+			console.log('Dữ liệu địa chỉ trước khi gửi:', addressData);
+			
+			if (!addressData.streetAddress) {
+				throw new Error('Địa chỉ đường không được để trống');
 			}
-			setIsEditing(false);
-			// Proceed to payment or order confirmation
-			console.log('Shipping info being sent:', shippingInfo);
+			
+			if (editingAddress) {
+				updatedAddress = await updateShippingAddress(editingAddress._id, addressData);
+			} else {
+				updatedAddress = await addShippingAddress(addressData);
+			}
+			await fetchShippingAddresses();
+			setSelectedAddressId(updatedAddress._id);
+			setIsAddingNewAddress(false);
+			setEditingAddress(null);
+			setNewAddress({
+				fullName: '',
+				phone: '',
+				streetAddress: '',
+				provinceCode: '',
+				districtCode: '',
+				wardCode: '',
+				provinceName: '',
+				districtName: '',
+				wardName: ''
+			});
 		} catch (error) {
-			console.error('Error processing order:', error);
-			alert('Có lỗi xảy ra khi xử lý đơn hàng. Vui lòng thử lại.');
+			console.error('Error adding/updating address:', error);
+			alert('Có lỗi xảy ra khi thêm/cập nhật địa chỉ. Vui lòng thử lại.');
 		}
+	};
+
+	const handleDeleteAddress = async (addressId) => {
+		if (window.confirm('Bạn có chắc chắn muốn xóa địa chỉ này?')) {
+			try {
+				await deleteShippingAddress(addressId);
+				await fetchShippingAddresses();
+				if (selectedAddressId === addressId) {
+					setSelectedAddressId(null);
+				}
+			} catch (error) {
+				console.error('Error deleting address:', error);
+				alert('Có lỗi xảy ra khi xóa địa chỉ. Vui lòng thử lại.');
+			}
+		}
+	};
+
+	const handleEditAddress = (address) => {
+		setEditingAddress(address);
+		setIsAddingNewAddress(true);
 	};
 
 	const shippingFee = 26000;
@@ -124,46 +148,36 @@ const Checkout = () => {
 		return <div className={styles.emptyCart}>Giỏ hàng trống</div>;
 	}
 
-	const renderAddressFields = (info, isAltShipping = false) => (
+	const renderAddressFields = (address) => (
 		<>
 			<input
 				type="text"
 				name="fullName"
-				value={info.fullName}
-				onChange={(e) => handleInputChange(e, isAltShipping)}
+				value={address.fullName}
+				onChange={handleInputChange}
 				placeholder="Họ và tên"
 				required
 			/>
-			{!isAltShipping && (
-				<input
-					type="email"
-					name="email"
-					value={info.email}
-					onChange={(e) => handleInputChange(e, isAltShipping)}
-					placeholder="Email"
-					required
-				/>
-			)}
 			<input
 				type="tel"
 				name="phone"
-				value={info.phone}
-				onChange={(e) => handleInputChange(e, isAltShipping)}
+				value={address.phone}
+				onChange={handleInputChange}
 				placeholder="Số điện thoại"
 				required
 			/>
 			<input
 				type="text"
 				name="streetAddress"
-				value={info.streetAddress}
-				onChange={(e) => handleInputChange(e, isAltShipping)}
+				value={address.streetAddress}
+				onChange={handleInputChange}
 				placeholder="Địa chỉ"
 				required
-				/>
+			/>
 			<select
 				name="provinceCode"
-				value={info.provinceCode}
-				onChange={(e) => handleInputChange(e, isAltShipping)}
+				value={address.provinceCode}
+				onChange={handleInputChange}
 				required
 			>
 				<option value="">Chọn Tỉnh/Thành phố</option>
@@ -173,8 +187,8 @@ const Checkout = () => {
 			</select>
 			<select
 				name="districtCode"
-				value={info.districtCode}
-				onChange={(e) => handleInputChange(e, isAltShipping)}
+				value={address.districtCode}
+				onChange={handleInputChange}
 				required
 			>
 				<option value="">Chọn Quận/Huyện</option>
@@ -184,8 +198,8 @@ const Checkout = () => {
 			</select>
 			<select
 				name="wardCode"
-				value={info.wardCode}
-				onChange={(e) => handleInputChange(e, isAltShipping)}
+				value={address.wardCode}
+				onChange={handleInputChange}
 				required
 			>
 				<option value="">Chọn Phường/Xã</option>
@@ -200,40 +214,38 @@ const Checkout = () => {
 		<div className={styles.checkoutContainer}>
 			<div className={styles.shippingInfo}>
 				<h2>Thông tin giao hàng</h2>
-				{isEditing ? (
-					<form onSubmit={handleSubmit}>
-						{renderAddressFields(userInfo)}
-						<button type="submit">Lưu thông tin</button>
-					</form>
-				) : (
-					<div>
-						<p>{userInfo.fullName}</p>
-						<p>{userInfo.email}</p>
-						<p>{userInfo.phone}</p>
-						<p>{userInfo.streetAddress}</p>
-						<p>
-							{userInfo.wardName && `${userInfo.wardName}, `}
-							{userInfo.districtName && `${userInfo.districtName}, `}
-							{userInfo.provinceName}
-						</p>
-						<button onClick={() => setIsEditing(true)}>Chỉnh sửa</button>
+				{shippingAddresses.length > 0 && (
+					<div className={styles.savedAddresses}>
+						<h3>Địa chỉ đã lưu</h3>
+						{shippingAddresses.map(address => (
+							<div key={address._id} className={styles.addressItem}>
+								<input
+									type="radio"
+									id={address._id}
+									name="selectedAddress"
+									value={address._id}
+									checked={selectedAddressId === address._id}
+									onChange={() => setSelectedAddressId(address._id)}
+								/>
+								<label htmlFor={address._id}>
+									{address.fullName}, {address.phone}, {address.address}, {address.wardName}, {address.districtName}, {address.provinceName}
+								</label>
+								<button onClick={() => handleEditAddress(address)}>Sửa</button>
+								<button onClick={() => handleDeleteAddress(address._id)}>Xóa</button>
+							</div>
+						))}
 					</div>
 				)}
-				
-				<div className={styles.alternativeShipping}>
-					<label>
-						<input
-								type="checkbox"
-								checked={alternativeShipping}
-								onChange={() => setAlternativeShipping(!alternativeShipping)}
-							/>
-							Giao hàng tới địa chỉ khác
-					</label>
-				</div>
-
-				{alternativeShipping && (
-					<form className={styles.altShippingForm}>
-						{renderAddressFields(altShippingInfo, true)}
+				<button onClick={() => {
+					setIsAddingNewAddress(!isAddingNewAddress);
+					setEditingAddress(null);
+				}}>
+					{isAddingNewAddress ? 'Hủy' : 'Thêm địa chỉ mới'}
+				</button>
+				{isAddingNewAddress && (
+					<form onSubmit={handleAddOrUpdateAddress} className={styles.newAddressForm}>
+						{renderAddressFields(editingAddress || newAddress)}
+						<button type="submit">{editingAddress ? 'Cập nhật địa chỉ' : 'Lưu địa chỉ mới'}</button>
 					</form>
 				)}
 			</div>
@@ -255,7 +267,14 @@ const Checkout = () => {
 					<h3>Tổng cộng: {totalWithShipping.toLocaleString('vi-VN')} đ</h3>
 				</div>
 			</div>
-			{!isEditing && <PayPalCheckout amount={totalWithShipping} shippingInfo={alternativeShipping ? altShippingInfo : userInfo} />}
+			{selectedAddressId && (
+				<>
+				<PayPalCheckout 
+						amount={totalWithShipping} 
+						shippingInfo={shippingAddresses.find(addr => addr._id === selectedAddressId)} 
+					/>
+				</>
+			)}
 		</div>
 	);
 };

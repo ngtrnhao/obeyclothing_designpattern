@@ -14,21 +14,26 @@ exports.getProfile = async (req, res) => {
 exports.updateProfile = async (req, res) => {
   try {
     const userId = req.user._id;
-    const updates = req.body;
+    const { profileUpdates, shippingInfoUpdates } = req.body;
 
-    // Cập nhật thông tin người dùng
-    const updatedUser = await User.findByIdAndUpdate(userId, updates, { new: true });
+    const updatedUser = await User.findByIdAndUpdate(userId, profileUpdates, { new: true });
 
-    // Cập nhật hoặc tạo mới thông tin giao hàng
     let shippingInfo = await ShippingInfo.findOne({ user: userId });
-    if (shippingInfo) {
-      Object.assign(shippingInfo, updates);
-    } else {
-      shippingInfo = new ShippingInfo({
-        ...updates,
-        user: userId // Đảm bảo trường user được gán giá trị
-      });
+    if (!shippingInfo) {
+      shippingInfo = new ShippingInfo({ user: userId, addresses: [] });
     }
+
+    if (shippingInfoUpdates) {
+      if (shippingInfoUpdates.isNew) {
+        shippingInfo.addresses.push(shippingInfoUpdates);
+      } else {
+        const index = shippingInfo.addresses.findIndex(addr => addr._id.toString() === shippingInfoUpdates._id);
+        if (index !== -1) {
+          shippingInfo.addresses[index] = { ...shippingInfo.addresses[index], ...shippingInfoUpdates };
+        }
+      }
+    }
+
     await shippingInfo.save();
 
     res.json({
@@ -49,5 +54,83 @@ exports.getUserOrders = async (req, res) => {
     res.json(orders);
   } catch (error) {
     res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
+};
+
+exports.getShippingAddresses = async (req, res) => {
+  try {
+    const shippingInfo = await ShippingInfo.findOne({ user: req.user._id });
+    res.json(shippingInfo ? shippingInfo.addresses : []);
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi khi lấy địa chỉ giao hàng', error: error.message });
+  }
+};
+
+exports.addShippingAddress = async (req, res) => {
+  try {
+    let shippingInfo = await ShippingInfo.findOne({ user: req.user._id });
+    if (!shippingInfo) {
+      shippingInfo = new ShippingInfo({ user: req.user._id, addresses: [] });
+    }
+    const newAddress = {
+      ...req.body,
+      address: req.body.streetAddress // Sử dụng streetAddress làm địa chỉ
+    };
+    if (!newAddress.address) {
+      return res.status(400).json({ message: 'Địa chỉ đường không được để trống' });
+    }
+    shippingInfo.addresses.push(newAddress);
+    await shippingInfo.save();
+    res.json(shippingInfo.addresses);
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi khi thêm địa chỉ giao hàng', error: error.message });
+  }
+};
+
+exports.updateShippingAddress = async (req, res) => {
+  try {
+    const shippingInfo = await ShippingInfo.findOne({ user: req.user._id });
+    if (!shippingInfo) {
+      return res.status(404).json({ message: 'Không tìm thấy thông tin giao hàng' });
+    }
+    const addressIndex = shippingInfo.addresses.findIndex(addr => addr._id.toString() === req.params.id);
+    if (addressIndex === -1) {
+      return res.status(404).json({ message: 'Không tìm thấy địa chỉ giao hàng' });
+    }
+    shippingInfo.addresses[addressIndex] = { ...shippingInfo.addresses[addressIndex], ...req.body };
+    await shippingInfo.save();
+    res.json(shippingInfo.addresses);
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi khi cập nhật địa chỉ giao hàng', error: error.message });
+  }
+};
+
+exports.deleteShippingAddress = async (req, res) => {
+  try {
+    const shippingInfo = await ShippingInfo.findOne({ user: req.user._id });
+    if (!shippingInfo) {
+      return res.status(404).json({ message: 'Không tìm thấy thông tin giao hàng' });
+    }
+    shippingInfo.addresses = shippingInfo.addresses.filter(addr => addr._id.toString() !== req.params.id);
+    await shippingInfo.save();
+    res.json(shippingInfo.addresses);
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi khi xóa địa chỉ giao hàng', error: error.message });
+  }
+};
+
+exports.setDefaultShippingAddress = async (req, res) => {
+  try {
+    const shippingInfo = await ShippingInfo.findOne({ user: req.user._id });
+    if (!shippingInfo) {
+      return res.status(404).json({ message: 'Không tìm thấy thông tin giao hàng' });
+    }
+    shippingInfo.addresses.forEach(addr => {
+      addr.isDefault = addr._id.toString() === req.params.id;
+    });
+    await shippingInfo.save();
+    res.json(shippingInfo.addresses);
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi khi đặt địa chỉ mặc định', error: error.message });
   }
 };

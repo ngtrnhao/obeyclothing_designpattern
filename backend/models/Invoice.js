@@ -6,6 +6,20 @@ const invoiceSchema = new mongoose.Schema({
     ref: 'Order',
     required: true
   },
+  customer: {
+    name: {
+      type: String,
+      required: true
+    },
+    address: {
+      type: String,
+      required: true
+    },
+    phone: {
+      type: String,
+      required: true
+    }
+  },
   invoiceNumber: {
     type: String,
     required: true,
@@ -33,12 +47,7 @@ const invoiceSchema = new mongoose.Schema({
       type: Number,
       required: true
     }
-  }],
-  customer: {
-    name: String,
-    address: String,
-    phone: String
-  }
+  }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('Invoice', invoiceSchema);

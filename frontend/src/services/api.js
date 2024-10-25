@@ -208,9 +208,15 @@ export const createOrder = async (cartItems, shippingInfo, totalAmount) => {
 
     console.log('Sending order data:', { cartItems: formattedCartItems, shippingInfo, totalAmount });
 
+    // Đảm bảo shippingInfo bao gồm streetAddress
+    const formattedShippingInfo = {
+      ...shippingInfo,
+      streetAddress: shippingInfo.streetAddress || shippingInfo.address
+    };
+
     const response = await api.post('/orders', {
       cartItems: formattedCartItems,
-      shippingInfo,
+      shippingInfo: formattedShippingInfo,
       totalAmount
     });
     return response.data;
@@ -449,13 +455,10 @@ export const createPaypalOrder = async () => {
 };
 
 export const completePaypalOrder = async (orderData) => {
-  try {
-    const response = await api.post('/orders/complete-paypal-order', orderData);
-    return response.data;
-  } catch (error) {
-    console.error('Error completing PayPal order:', error);
-    throw error;
-  }
+  console.log('completePaypalOrder called with data:', orderData);
+  const response = await api.post('/orders/complete-paypal-order', orderData);
+  console.log('completePaypalOrder response:', response.data);
+  return response.data;
 };
 
 export const getDeliveries = () => api.get('/admin/deliveries');
@@ -575,4 +578,11 @@ export const downloadInvoice = async (orderId) => {
   }
 };
 
+export const getShippingAddresses = () => api.get('/user/shipping-addresses');
+export const addShippingAddress = (address) => api.post('/user/shipping-addresses', address);
+export const updateShippingAddress = (id, address) => api.put(`/user/shipping-addresses/${id}`, address);
+export const deleteShippingAddress = (id) => api.delete(`/user/shipping-addresses/${id}`);
+export const setDefaultShippingAddress = (id) => api.put(`/user/shipping-addresses/${id}/set-default`);
+
 export default api;
+

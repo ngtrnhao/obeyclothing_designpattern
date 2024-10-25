@@ -8,5 +8,10 @@ router.use(authMiddleware);
 router.get('/profile', userController.getProfile);
 router.put('/profile', userController.updateProfile);
 router.get('/orders', userController.getUserOrders);
+router.get('/shipping-addresses', userController.getShippingAddresses);
+router.post('/shipping-addresses', userController.addShippingAddress);
+router.put('/shipping-addresses/:id', userController.updateShippingAddress);
+router.delete('/shipping-addresses/:id', userController.deleteShippingAddress);
+router.put('/shipping-addresses/:id/set-default', userController.setDefaultShippingAddress);
 
 module.exports = router;

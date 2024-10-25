@@ -1,23 +1,31 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { PayPalButtons } from "@paypal/react-paypal-js";
 import { useNavigate } from 'react-router-dom';
 import { completePaypalOrder } from '../services/api';
 import { useCart } from '../contexts/CartContext';
 
 const PayPalCheckout = ({ amount, shippingInfo }) => {
+  const shippingInfoRef = useRef(shippingInfo);
+
+  useEffect(() => {
+    shippingInfoRef.current = shippingInfo;
+  }, [shippingInfo]);
+
   const navigate = useNavigate();
   const { fetchCart } = useCart();
 
   const handleApprove = async (data, actions) => {
     const order = await actions.order.capture();
     console.log("PayPal order:", order);
+    console.log('Shipping info about to be sent to backend:', shippingInfoRef.current);
 
     try {
-      await completePaypalOrder({
+      const response = await completePaypalOrder({
         orderId: order.id,
         paypalDetails: order,
-        shippingInfo: shippingInfo
+        shippingInfo: shippingInfoRef.current
       });
+      console.log('Backend response:', response);
       await fetchCart();
       navigate('/order-success');
     } catch (error) {

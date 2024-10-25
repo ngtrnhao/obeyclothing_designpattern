@@ -8,7 +8,10 @@ const { createInvoicePDF } = require('../utils/pdfGenerator');
 router.use(authMiddleware);
 
 router.post('/create-paypal-order', orderController.createPaypalOrder);
-router.post('/complete-paypal-order', authMiddleware, orderController.completePaypalOrder);
+router.post('/complete-paypal-order', authMiddleware, (req, res, next) => {
+  console.log('Received request body:', req.body);
+  next();
+}, orderController.completePaypalOrder);
 
 router.post('/', async (req, res) => {
   try {

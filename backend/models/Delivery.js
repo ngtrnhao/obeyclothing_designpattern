@@ -2,13 +2,22 @@ const mongoose = require('mongoose');
 
 const deliverySchema = new mongoose.Schema({
   order: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true },
-  shippingInfo: { type: mongoose.Schema.Types.ObjectId,ref: 'ShippingInfo',require:true},
+  shippingInfo: { // Define shippingInfo as an embedded object
+    fullName: String,
+    phone: String,
+    address: String,
+    provinceCode: String,
+    districtCode: String,
+    wardCode: String,
+    provinceName: String,
+    districtName: String,
+    wardName: String
+  },
   status: {
     type: String,
-    enum: ['pending', 'processing', 'shipped', 'delivered'],
+    enum: ['pending', 'shipped', 'delivered', 'cancelled'],
     default: 'pending'
-  },
-  createdAt: { type: Date, default: Date.now }
-});
+  }
+}, { timestamps: true });
 
 module.exports = mongoose.model('Delivery', deliverySchema);
