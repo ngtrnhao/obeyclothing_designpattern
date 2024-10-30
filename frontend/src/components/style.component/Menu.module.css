@@ -81,3 +81,10 @@
 .categoryTitle[data-category="SALE"] {
     color: red;
 }
+
+@media (max-width: 768px) {
+  .menuWrapper {
+    width: 100%;
+    top: 50px;
+  }
+}

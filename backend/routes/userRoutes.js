@@ -10,7 +10,7 @@ router.put('/profile', userController.updateProfile);
 router.get('/orders', userController.getUserOrders);
 router.get('/shipping-addresses', userController.getShippingAddresses);
 router.post('/shipping-addresses', userController.addShippingAddress);
-router.put('/shipping-addresses/:id', userController.updateShippingAddress);
+router.post('/shipping-addresses', authMiddleware, userController.addShippingAddress);
 router.delete('/shipping-addresses/:id', userController.deleteShippingAddress);
 router.put('/shipping-addresses/:id/set-default', userController.setDefaultShippingAddress);
 

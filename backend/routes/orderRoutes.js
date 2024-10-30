@@ -17,11 +17,11 @@ router.post('/', async (req, res) => {
   try {
     const { items, shippingAddress, paymentMethod } = req.body;
     
-    if (!shippingAddress || !shippingAddress.address || !shippingAddress.ward || !shippingAddress.district || !shippingAddress.province) {
+    if (!shippingAddress || !shippingAddress.streetAddress || !shippingAddress.ward || !shippingAddress.district || !shippingAddress.province) {
       return res.status(400).json({ message: 'Thông tin địa chỉ giao hàng không đầy đủ' });
     }
 
-    const formattedAddress = `${shippingAddress.address}, ${shippingAddress.ward}, ${shippingAddress.district}, ${shippingAddress.province}`;
+    const formattedAddress = `${shippingAddress.streetAddress}, ${shippingAddress.wardName}, ${shippingAddress.districtName}, ${shippingAddress.provinceName}`;
 
     const newOrder = new Order({
       user: req.user._id,
@@ -66,5 +66,8 @@ router.get('/invoice/:id', authMiddleware, async (req, res) => {
 });
 
 router.get('/:id', authMiddleware, orderController.getOrderById);
+
+// Thêm route để lấy danh sách phương thức thanh toán
+router.get('/payment-methods', orderController.getPaymentMethods);
 
 module.exports = router;

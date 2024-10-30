@@ -207,4 +207,32 @@
     /* Thêm margin dưới */
     margin-bottom: 1rem;
   }
+
+  .container {
+    padding: 1rem 10px;
+  }
+
+  .header .container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .navList {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: 1rem;
+  }
+
+  .navLink {
+    margin: 0.5rem 0;
+  }
+
+  .footerContent {
+    flex-direction: column;
+  }
+
+  .footerSection {
+    margin-right: 0;
+    margin-bottom: 1rem;
+  }
 }

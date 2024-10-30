@@ -375,3 +375,39 @@
     font-weight: bold;
     color: #e53935;
   }
+  
+  @media (max-width: 768px) {
+    .productMain {
+      flex-direction: column;
+    }
+  
+    .imageSection {
+      margin-bottom: 20px;
+    }
+  
+    .thumbnails {
+      flex-direction: row;
+      overflow-x: auto;
+      margin-right: 0;
+      margin-bottom: 10px;
+    }
+  
+    .thumbnail {
+      width: 80px;
+      height: 60px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .productName {
+      font-size: 20px;
+    }
+  
+    .price {
+      font-size: 18px;
+    }
+  
+    .sizeButton {
+      padding: 8px 12px;
+    }
+  }

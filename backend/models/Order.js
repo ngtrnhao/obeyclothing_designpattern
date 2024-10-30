@@ -30,14 +30,14 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  createdAt: {
-    type: Date,
-    default: Date.now
+  finalAmount: {  
+    type: Number,
+    required: true
   },
-  shippingInfo: { // Store shipping info directly
+  shippingInfo: {
     fullName: String,
     phone: String,
-    address: String,
+    streetAddress: String,
     provinceCode: String,
     districtCode: String,
     wardCode: String,
@@ -54,7 +54,13 @@ const orderSchema = new mongoose.Schema({
     default: 0
   },
   invoice: { type: mongoose.Schema.Types.ObjectId, ref: 'Invoice' },
-  delivery: { type: mongoose.Schema.Types.ObjectId, ref: 'Delivery' }
+  delivery: { type: mongoose.Schema.Types.ObjectId, ref: 'Delivery' },
+  paymentMethod: {
+    type: String,
+    required: true,
+    enum: ['cod', 'paypal', 'banking'],
+    default: 'cod'
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Order', orderSchema);

@@ -234,3 +234,59 @@
 .bagCount {
   margin-left: 5px;
 }
+/*reponsive*/
+
+@media (max-width: 768px) {
+  .header {
+    height: 50px;
+  }
+
+  .headerWrapper {
+    padding: 0 10px;
+  }
+
+  .logo {
+    width: 100px;
+  }
+
+  .rightLinks {
+    display: none;
+  }
+
+  .menuButton {
+    width: 40px;
+    height: 40px;
+  }
+
+  .mobileMenu {
+    display: block;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    width: 80px;
+  }
+}
+
+.mobileMenu {
+  display: none;
+  position: fixed;
+  top: 50px;
+  left: 0;
+  right: 0;
+  background-color: #f5f5f5;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.mobileMenu.open {
+  display: block;
+}
+
+.mobileMenu .navLink,
+.mobileMenu .bagLink {
+  display: block;
+  margin: 10px 0;
+  font-size: 1.1rem;
+}

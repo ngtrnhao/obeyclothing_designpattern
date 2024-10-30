@@ -2,11 +2,12 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getProductById, addToCart, getProducts, getCategoryPath, getProductBySlug } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
-
+import SizeGuideModal from './SizeGuideModal'
 import styles from './style.component/ProductDetail.module.css';
 import ProductReviews from './ProductReviews';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import placeholderImage from '../components/placeholder.png';
+
 
 const ProductDetail = () => {
   const [product, setProduct] = useState(null);
@@ -21,7 +22,7 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const [categoryPath, setCategoryPath] = useState([]);
   const [showModal, setShowModal] = useState(false);
-
+  const [showSizeGuide, setShowSizeGuide] = useState(false);
   useEffect(() => {
     const fetchProductAndRelated = async () => {
       try {
@@ -192,7 +193,22 @@ const ProductDetail = () => {
             </div>
           )}
 
-          <button className={styles.viewSizeGuide}>VIEW SIZE GUIDE</button>
+          {product.sizeGuideType && (
+            <>
+              <button 
+                className={styles.viewSizeGuide}
+                onClick={() => setShowSizeGuide(true)}
+              >
+                XEM HƯỚNG DẪN CHỌN SIZE
+              </button>
+              
+              <SizeGuideModal 
+                isOpen={showSizeGuide}
+                onClose={() => setShowSizeGuide(false)}
+                guideType={product.sizeGuideType}
+              />
+            </>
+          )}
 
           {product.stock === 0 ? (
             <div className={styles.outOfStock}>

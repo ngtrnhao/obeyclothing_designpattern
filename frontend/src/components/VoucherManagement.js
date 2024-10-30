@@ -27,12 +27,24 @@ const VoucherManagement = () => {
   }, [vouchers]);
 
   const fetchVouchers = async () => {
+    console.log('Đang lấy danh sách voucher');
     try {
       setLoading(true);
       const response = await getVouchers();
       console.log('Dữ liệu voucher nhận được:', response);
+      
       if (response && response.data && Array.isArray(response.data)) {
-        setVouchers(response.data);
+        // Format dữ liệu trước khi cập nhật state
+        const formattedVouchers = response.data.map(voucher => ({
+          ...voucher,
+          startDate: new Date(voucher.startDate).toLocaleDateString(),
+          endDate: new Date(voucher.endDate).toLocaleDateString(),
+          discountType: voucher.discountType === 'percentage' ? 'Phần trăm' : 'Cố định',
+          isActive: voucher.isActive ? 'Hoạt động' : 'Không hoạt động'
+        }));
+        
+        setVouchers(formattedVouchers);
+        console.log('Đã cập nhật state vouchers:', formattedVouchers);
       } else {
         console.error('Định dạng dữ liệu không mong đợi:', response);
         setVouchers([]);
@@ -48,9 +60,32 @@ const VoucherManagement = () => {
 
   const handleCreateVoucher = async (e) => {
     e.preventDefault();
+    console.log('Đang tạo voucher mới:', newVoucher);
     try {
-      const createdVoucher = await createVoucher(newVoucher);
-      setVouchers(prevVouchers => [...prevVouchers, createdVoucher]);
+      // Gọi API tạo voucher
+      const response = await createVoucher(newVoucher);
+      console.log('Response từ server:', response);
+      
+      // Đảm bảo response.data có đầy đủ thông tin
+      const createdVoucher = response.data;
+      
+      // Cập nhật state với dữ liệu đầy đủ
+      setVouchers(prevVouchers => {
+        // Chuyển đổi ngày thành định dạng phù hợp
+        const formattedVoucher = {
+          ...createdVoucher,
+          startDate: new Date(createdVoucher.startDate).toLocaleDateString(),
+          endDate: new Date(createdVoucher.endDate).toLocaleDateString(),
+          // Đảm bảo các trường khác được định dạng đúng
+          discountType: createdVoucher.discountType === 'percentage' ? 'Phần trăm' : 'Cố định',
+          isActive: createdVoucher.isActive ? 'Hoạt động' : 'Không hoạt động'
+        };
+        
+        console.log('Voucher đã được format:', formattedVoucher);
+        return [...prevVouchers, formattedVoucher];
+      });
+
+      // Reset form
       setNewVoucher({
         code: '',
         discountType: 'percentage',
@@ -62,7 +97,10 @@ const VoucherManagement = () => {
         usageLimit: 1,
         isActive: true
       });
-      // Không cần gọi fetchVouchers() ở đây
+      
+      // Gọi lại API để lấy danh sách mới nhất
+      await fetchVouchers();
+
     } catch (error) {
       console.error('Lỗi khi tạo voucher:', error);
       setError('Không thể tạo voucher. Vui lòng thử lại sau.');
@@ -165,33 +203,25 @@ const VoucherManagement = () => {
           </tr>
         </thead>
         <tbody>
-          {loading ? (
-            <tr><td colSpan="10">Đang tải...</td></tr>
-          ) : error ? (
-            <tr><td colSpan="10">{error}</td></tr>
-          ) : vouchers.length > 0 ? (
-            vouchers.map((voucher) => (
-              <tr key={voucher._id}>
-                <td>{voucher.code}</td>
-                <td>{voucher.discountType === 'percentage' ? 'Phần trăm' : 'Cố định'}</td>
-                <td>{voucher.discountValue}</td>
-                <td>{voucher.maxDiscount}</td>
-                <td>{voucher.minPurchase}</td>
-                <td>{new Date(voucher.startDate).toLocaleDateString()}</td>
-                <td>{new Date(voucher.endDate).toLocaleDateString()}</td>
-                <td>{voucher.usageLimit}</td>
-                <td>{voucher.isActive ? 'Hoạt động' : 'Không hoạt động'}</td>
-                <td>
-                  <button onClick={() => handleUpdateVoucher(voucher._id, { isActive: !voucher.isActive })}>
-                    {voucher.isActive ? 'Vô hiệu hóa' : 'Kích hoạt'}
-                  </button>
-                  <button onClick={() => handleDeleteVoucher(voucher._id)}>Xóa</button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr><td colSpan="10">Không có voucher nào.</td></tr>
-          )}
+          {vouchers.map((voucher) => (
+            <tr key={voucher._id}>
+              <td>{voucher.code}</td>
+              <td>{voucher.discountType === 'percentage' ? 'Phần trăm' : 'Cố định'}</td>
+              <td>{voucher.discountValue}</td>
+              <td>{voucher.maxDiscount}</td>
+              <td>{voucher.minPurchase}</td>
+              <td>{new Date(voucher.startDate).toLocaleDateString()}</td>
+              <td>{new Date(voucher.endDate).toLocaleDateString()}</td>
+              <td>{voucher.usageLimit}</td>
+              <td>{voucher.isActive ? 'Hoạt động' : 'Không hoạt động'}</td>
+              <td>
+                <button onClick={() => handleUpdateVoucher(voucher._id, { isActive: !voucher.isActive })}>
+                  {voucher.isActive ? 'Vô hiệu hóa' : 'Kích hoạt'}
+                </button>
+                <button onClick={() => handleDeleteVoucher(voucher._id)}>Xóa</button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
       {/* Add this debug information */}

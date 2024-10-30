@@ -264,22 +264,27 @@ exports.getDashboardData = async (req, res) => {
 };
 
 exports.createVoucher = async (req, res) => {
+  console.log('Đang xử lý yêu cầu tạo voucher:', req.body);
   try {
     const newVoucher = new Voucher(req.body);
+    console.log('Voucher mới trước khi lưu:', newVoucher);
     await newVoucher.save();
+    console.log('Voucher đã được lưu vào database:', newVoucher);
     res.status(201).json(newVoucher);
   } catch (error) {
+    console.error('Lỗi khi tạo voucher:', error);
     res.status(400).json({ message: 'Lỗi khi tạo voucher', error: error.message });
   }
 };
 
 exports.getAllVouchers = async (req, res) => {
+  console.log('Đang xử lý yêu cầu lấy tất cả voucher');
   try {
     const vouchers = await Voucher.find();
-    console.log('Vouchers from database:', vouchers); // Thêm dòng này
+    console.log('Vouchers từ database:', vouchers);
     res.json(vouchers);
   } catch (error) {
-    console.error('Error fetching vouchers:', error); // Thêm dòng này
+    console.error('Lỗi khi lấy danh sách voucher:', error);
     res.status(500).json({ message: 'Lỗi khi lấy danh sách voucher', error: error.message });
   }
 };
@@ -307,3 +312,4 @@ exports.deleteVoucher = async (req, res) => {
     res.status(500).json({ message: 'Lỗi khi xóa voucher', error: error.message });
   }
 };
+

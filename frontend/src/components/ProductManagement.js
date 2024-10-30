@@ -36,12 +36,23 @@ const ProductManagement = () => {
     try {
       const response = await getCategories();
       const categoryMap = {};
-      response.forEach(cat => {
-        categoryMap[cat._id] = cat.name;
+      // Đệ quy để xử lý danh mục con
+      const processCategoryTree = (category, prefix = '') => {
+        categoryMap[category._id] = prefix + category.name;
+        if (category.children && category.children.length > 0) {
+          category.children.forEach(child => {
+            processCategoryTree(child, `${prefix}${category.name} > `);
+          });
+        }
+      };
+      
+      response.forEach(category => {
+        processCategoryTree(category);
       });
       setCategories(categoryMap);
     } catch (error) {
       console.error('Error fetching categories:', error);
+      setError('Không thể tải danh mục sản phẩm');
     }
   };
 
@@ -148,7 +159,24 @@ const ProductManagement = () => {
                   onChange={(e) => setEditingProduct({...editingProduct, price: e.target.value})}
                 /> : `${product.price.toLocaleString('vi-VN')} đ`}
               </td>
-              <td>{categories[product.category] || 'N/A'}</td>
+              <td>
+                {editingProduct && editingProduct._id === product._id ? (
+                  <>
+                    <select
+                      value={editingProduct.category}
+                      onChange={(e) => setEditingProduct({...editingProduct, category: e.target.value})}
+                    >
+                      {Object.entries(categories).map(([id, name]) => (
+                        <option key={id} value={id}>
+                          {name}
+                        </option>
+                      ))}
+                    </select>
+                  </>
+                ) : (
+                  categories[product.category] || 'N/A'
+                )}
+              </td>
               <td>
                 {editingProduct && editingProduct._id === product._id ? (
                   <>

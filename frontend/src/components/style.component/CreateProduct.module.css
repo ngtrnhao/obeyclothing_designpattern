@@ -123,3 +123,19 @@
   .categoryList button {
     margin-left: 10px;
   }
+
+  .formGroup {
+    margin-bottom: 1rem;
+  }
+
+  .sizeGuidePreview {
+    margin-top: 1rem;
+    max-width: 300px;
+    border: 1px solid #ddd;
+    padding: 0.5rem;
+  }
+
+  .sizeGuidePreview img {
+    width: 100%;
+    height: auto;
+  }

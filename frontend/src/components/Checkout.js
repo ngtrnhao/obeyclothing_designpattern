@@ -4,9 +4,12 @@ import { getShippingAddresses, addShippingAddress, updateShippingAddress, delete
 import PayPalCheckout from './PayPalCheckout1';
 import styles from './style.component/Checkout.module.css';
 import { provinces, getDistricts, getWards } from '../data/vietnamData';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import AddressSection from './AddressSection';
 
 const Checkout = () => {
-	const { cartItems, total } = useCart();
+	const { cartItems, total, voucher, discountAmount, finalAmount, clearVoucher } = useCart();
 	const [shippingAddresses, setShippingAddresses] = useState([]);
 	const [selectedAddressId, setSelectedAddressId] = useState(null);
 	const [editingAddress, setEditingAddress] = useState(null);
@@ -24,6 +27,35 @@ const Checkout = () => {
 	const [isAddingNewAddress, setIsAddingNewAddress] = useState(false);
 	const [districts, setDistricts] = useState([]);
 	const [wards, setWards] = useState([]);
+	const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cod');
+	const navigate = useNavigate();
+
+	const paymentMethods = [
+		{
+			id: 'cod',
+			name: 'Thanh toán khi nhận hàng',
+			description: 'Thanh toán bằng tiền mặt khi nhận hàng',
+			icon: 'cash-icon.png'
+		},
+		{
+			id: 'paypal',
+			name: 'PayPal',
+			description: 'Thanh toán qua PayPal',
+			icon: 'paypal-icon.png'
+		},
+		{
+			id: 'banking',
+			name: 'Chuyển khoản ngân hàng',
+			description: 'Chuyển khoản qua ngân hàng nội địa',
+			icon: 'bank-icon.png',
+			bankInfo: {
+				bankName: 'VietcomBank',
+				accountNumber: '1234567890',
+				accountName: 'SHOP NAME',
+				branch: 'Chi nhánh HCM'
+			}
+		}
+	];
 
 	const fetchShippingAddresses = useCallback(async () => {
 		try {
@@ -89,17 +121,32 @@ const Checkout = () => {
 		try {
 			let updatedAddress;
 			const addressData = editingAddress || newAddress;
-			console.log('Dữ liệu địa chỉ trước khi gửi:', addressData);
 			
-			if (!addressData.streetAddress) {
-				throw new Error('Địa chỉ đường không được để trống');
+			if (!addressData.fullName || !addressData.phone || !addressData.streetAddress || 
+				!addressData.provinceCode || !addressData.districtCode || !addressData.wardCode) {
+				throw new Error('Vui lòng điền đầy đủ thông tin địa chỉ');
 			}
-			
+
+			console.log('Dữ liệu địa chỉ gửi đi:', {
+				fullName: addressData.fullName,
+				phone: addressData.phone,
+				streetAddress: addressData.streetAddress,
+				provinceCode: addressData.provinceCode,
+				provinceName: addressData.provinceName,
+				districtCode: addressData.districtCode,
+				districtName: addressData.districtName,
+				wardCode: addressData.wardCode,
+				wardName: addressData.wardName
+			});
+
 			if (editingAddress) {
 				updatedAddress = await updateShippingAddress(editingAddress._id, addressData);
 			} else {
 				updatedAddress = await addShippingAddress(addressData);
 			}
+
+			console.log('Response từ server:', updatedAddress);
+
 			await fetchShippingAddresses();
 			setSelectedAddressId(updatedAddress._id);
 			setIsAddingNewAddress(false);
@@ -116,8 +163,8 @@ const Checkout = () => {
 				wardName: ''
 			});
 		} catch (error) {
-			console.error('Error adding/updating address:', error);
-			alert('Có lỗi xảy ra khi thêm/cập nhật địa chỉ. Vui lòng thử lại.');
+			console.error('Chi tiết lỗi:', error);
+			alert(error.message || 'Có lỗi xảy ra khi thêm/cập nhật địa chỉ');
 		}
 	};
 
@@ -141,8 +188,8 @@ const Checkout = () => {
 		setIsAddingNewAddress(true);
 	};
 
-	const shippingFee = 26000;
-	const totalWithShipping = total + shippingFee;
+	const shippingFee = 30000;
+	const totalWithShipping = finalAmount + shippingFee;
 
 	if (cartItems.length === 0) {
 		return <div className={styles.emptyCart}>Giỏ hàng trống</div>;
@@ -169,7 +216,7 @@ const Checkout = () => {
 			<input
 				type="text"
 				name="streetAddress"
-				value={address.streetAddress}
+				value={address.address}
 				onChange={handleInputChange}
 				placeholder="Địa chỉ"
 				required
@@ -210,45 +257,71 @@ const Checkout = () => {
 		</>
 	);
 
+	const handleCheckout = async () => {
+		try {
+			if (!selectedAddressId) {
+				alert('Vui lòng chọn địa chỉ giao hàng');
+				return;
+			}
+
+			const orderData = {
+				shippingInfo: shippingAddresses.find(addr => addr._id === selectedAddressId),
+				paymentMethod: selectedPaymentMethod,
+				cartItems,
+				voucher: voucher ? voucher._id : null,
+				totalAmount: total,
+				shippingFee,
+				discountAmount,
+				finalAmount: totalWithShipping
+			};
+
+			if (selectedPaymentMethod === 'banking') {
+				// Hiển thị thông tin chuyển khoản
+				const bankInfo = paymentMethods.find(m => m.id === 'banking').bankInfo;
+				alert(
+					`Vui lòng chuyển khoản theo thông tin sau:\n\n` +
+					`Ngân hàng: ${bankInfo.bankName}\n` +
+					`Số tài khoản: ${bankInfo.accountNumber}\n` +
+					`Chủ tài khoản: ${bankInfo.accountName}\n` +
+					`Số tiền: ${totalWithShipping.toLocaleString('vi-VN')} đ\n` +
+					`Nội dung: Thanh toan don hang ${Date.now()}`
+				);
+			}
+
+			const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/cart/checkout`, orderData);
+			
+			// Clear voucher sau khi đặt hàng thành công
+			await clearVoucher();
+			
+			navigate(`/order-confirmation/${response.data.order._id}`);
+		} catch (error) {
+			console.error('Lỗi khi đặt hàng:', error);
+			alert('Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.');
+		}
+	};
+
 	return (
 		<div className={styles.checkoutContainer}>
-			<div className={styles.shippingInfo}>
-				<h2>Thông tin giao hàng</h2>
-				{shippingAddresses.length > 0 && (
-					<div className={styles.savedAddresses}>
-						<h3>Địa chỉ đã lưu</h3>
-						{shippingAddresses.map(address => (
-							<div key={address._id} className={styles.addressItem}>
-								<input
-									type="radio"
-									id={address._id}
-									name="selectedAddress"
-									value={address._id}
-									checked={selectedAddressId === address._id}
-									onChange={() => setSelectedAddressId(address._id)}
-								/>
-								<label htmlFor={address._id}>
-									{address.fullName}, {address.phone}, {address.address}, {address.wardName}, {address.districtName}, {address.provinceName}
-								</label>
-								<button onClick={() => handleEditAddress(address)}>Sửa</button>
-								<button onClick={() => handleDeleteAddress(address._id)}>Xóa</button>
-							</div>
-						))}
-					</div>
-				)}
-				<button onClick={() => {
-					setIsAddingNewAddress(!isAddingNewAddress);
-					setEditingAddress(null);
-				}}>
-					{isAddingNewAddress ? 'Hủy' : 'Thêm địa chỉ mới'}
-				</button>
-				{isAddingNewAddress && (
-					<form onSubmit={handleAddOrUpdateAddress} className={styles.newAddressForm}>
-						{renderAddressFields(editingAddress || newAddress)}
-						<button type="submit">{editingAddress ? 'Cập nhật địa chỉ' : 'Lưu địa chỉ mới'}</button>
-					</form>
-				)}
-			</div>
+			<AddressSection 
+				shippingAddresses={shippingAddresses}
+				selectedAddressId={selectedAddressId}
+				setSelectedAddressId={setSelectedAddressId}
+				handleEditAddress={handleEditAddress}
+				handleDeleteAddress={handleDeleteAddress}
+				setIsAddingNewAddress={setIsAddingNewAddress}
+				isAddingNewAddress={isAddingNewAddress}
+				newAddress={newAddress}
+				handleAddOrUpdateAddress={handleAddOrUpdateAddress}
+				renderAddressFields={renderAddressFields}
+			/>
+			{isAddingNewAddress && (
+				<form onSubmit={handleAddOrUpdateAddress} className={styles.newAddressForm}>
+					{renderAddressFields(editingAddress || newAddress)}
+					<button type="submit">
+						{editingAddress ? 'Cập nhật địa chỉ' : 'Lưu địa chỉ mới'}
+					</button>
+				</form>
+			)}
 			<div className={styles.orderSummary}>
 				<h2>Thông tin đơn hàng</h2>
 				{cartItems.map(item => (
@@ -263,17 +336,65 @@ const Checkout = () => {
 				))}
 				<div className={styles.orderTotal}>
 					<p>Tạm tính: {total.toLocaleString('vi-VN')} đ</p>
+					{voucher && (
+						<p className={styles.discount}>
+							Giảm giá (Mã: {voucher.code}): -{discountAmount.toLocaleString('vi-VN')} đ
+						</p>
+					)}
 					<p>Phí vận chuyển: {shippingFee.toLocaleString('vi-VN')} đ</p>
 					<h3>Tổng cộng: {totalWithShipping.toLocaleString('vi-VN')} đ</h3>
 				</div>
 			</div>
+			<div className={styles.paymentSection}>
+				<h2>Phương thức thanh toán</h2>
+				<div className={styles.paymentMethods}>
+					{paymentMethods.map(method => (
+						<div
+							key={method.id}
+							className={`${styles.paymentMethod} ${selectedPaymentMethod === method.id ? styles.selected : ''}`}
+							onClick={() => setSelectedPaymentMethod(method.id)}
+						>
+							<div className={styles.methodInfo}>
+								<img 
+									src={`/images/${method.icon}`} 
+									alt={method.name} 
+									className={styles.methodIcon}
+								/>
+								<div>
+									<h3>{method.name}</h3>
+									<p>{method.description}</p>
+								</div>
+							</div>
+							{method.id === 'banking' && selectedPaymentMethod === 'banking' && (
+								<div className={styles.bankingInfo}>
+									<p><strong>Thông tin chuyển khoản:</strong></p>
+									<p>Ngân hàng: {method.bankInfo.bankName}</p>
+									<p>Số tài khoản: {method.bankInfo.accountNumber}</p>
+									<p>Chủ tài khoản: {method.bankInfo.accountName}</p>
+									<p>Chi nhánh: {method.bankInfo.branch}</p>
+								</div>
+							)}
+						</div>
+					))}
+				</div>
+			</div>
 			{selectedAddressId && (
-				<>
-				<PayPalCheckout 
-						amount={totalWithShipping} 
-						shippingInfo={shippingAddresses.find(addr => addr._id === selectedAddressId)} 
-					/>
-				</>
+				<div className={styles.checkoutActions}>
+					{selectedPaymentMethod === 'paypal' ? (
+						<PayPalCheckout 
+							amount={totalWithShipping} 
+							shippingInfo={shippingAddresses.find(addr => addr._id === selectedAddressId)} 
+						/>
+					) : (
+						<button 
+							className={styles.checkoutButton}
+							onClick={handleCheckout}
+							disabled={!selectedAddressId}
+						>
+							Đặt hàng ({totalWithShipping.toLocaleString('vi-VN')} đ)
+						</button>
+					)}
+				</div>
 			)}
 		</div>
 	);

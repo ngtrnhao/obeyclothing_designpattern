@@ -9,12 +9,12 @@ const shippingInfoSchema = new mongoose.Schema({
   addresses: [{
     fullName: String,
     phone: String,
-    address: String,
-    provinceId: String,
+    streetAddress: String,
+    provinceCode: String,
     provinceName: String,
-    districtId: String,
+    districtCode: String,
     districtName: String,
-    wardId: String,
+    wardCode: String,
     wardName: String,
     isDefault: {
       type: Boolean,

@@ -20,19 +20,27 @@ exports.getVouchers = async (req, res) => {
 };
 
 exports.applyVoucher = async (req, res) => {
+  console.log('Request body:', req.body);
   try {
-    const { code, totalAmount } = req.body;
-    const voucher = await Voucher.findOne({ code, isActive: true });
-
-    if (!voucher || !voucher.isValid()) {
-      return res.status(400).json({ message: 'Voucher không hợp lệ hoặc đã hết hạn' });
+    const { voucherCode, totalAmount } = req.body;
+    
+    if (!voucherCode || !totalAmount) {
+      console.error('Thiếu thông tin:', { voucherCode, totalAmount });
+      return res.status(400).json({ 
+        message: 'Thiếu thông tin voucher hoặc giá trị đơn hàng' 
+      });
     }
 
-    if (totalAmount < voucher.minPurchase) {
-      return res.status(400).json({ message: `Đơn hàng phải có giá trị tối thiểu ${voucher.minPurchase}đ để áp dụng voucher này` });
+    const voucher = await Voucher.findOne({ 
+      code: voucherCode.toUpperCase(),
+      isActive: true 
+    });
+    
+    if (!voucher) {
+      return res.status(400).json({ message: 'Không tìm thấy voucher' });
     }
-
-    let discountAmount;
+    const shippingFee =30000;
+    let discountAmount = 0;
     if (voucher.discountType === 'percentage') {
       discountAmount = totalAmount * (voucher.discountValue / 100);
       if (voucher.maxDiscount) {
@@ -42,8 +50,23 @@ exports.applyVoucher = async (req, res) => {
       discountAmount = voucher.discountValue;
     }
 
-    res.json({ discountAmount, voucher: voucher._id });
+    const finalAmount = totalAmount + shippingFee - discountAmount ;
+
+    console.log('Calculated amounts:', {
+      totalAmount,
+      discountAmount,
+      finalAmount
+    });
+
+    res.json({
+      discountAmount,
+      finalAmount,
+      totalAfterDiscount: finalAmount,
+      voucher: voucher._id,
+      message: 'Áp dụng voucher thành công'
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Lỗi khi áp dụng voucher', error: error.message });
+    console.error('Lỗi server:', error);
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
   }
 };

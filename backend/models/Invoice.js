@@ -47,7 +47,36 @@ const invoiceSchema = new mongoose.Schema({
       type: Number,
       required: true
     }
-  }]
+  }],
+  shippingFee: {
+    type: Number,
+    default: 0
+  },
+  voucher: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Voucher',
+    required: false,
+    default: null
+  },
+  discountAmount: {
+    type: Number,
+    default: 0
+  },
+  finalAmount: {
+    type: Number,
+    required: true
+  },
+  paymentMethod: {
+    type: String,
+    required: true,
+    enum: ['paypal', 'cod','banking']
+  },
+  status: {
+    type: String,
+    required: true,
+    enum: ['issued', 'cancelled'],
+    default: 'issued'
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Invoice', invoiceSchema);

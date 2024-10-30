@@ -153,3 +153,27 @@
   /* Thêm margin trên */
   margin-top: 0.5rem;
 }
+
+@media (max-width: 768px) {
+  .homeContainer {
+    padding: 1rem;
+  }
+
+  .homeTitle {
+    font-size: 2rem;
+  }
+
+  .homeDescription {
+    font-size: 1rem;
+  }
+
+  .categoryGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .categoryGrid {
+    grid-template-columns: 1fr;
+  }
+}

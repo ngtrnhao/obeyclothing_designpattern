@@ -1,0 +1,182 @@
+.deliveryManagement {
+  padding: 20px;
+}
+
+.deliveryTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.deliveryTable th {
+  background: #f8f9fa;
+  padding: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.headerCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.headerCell:hover {
+  color: #4a90e2;
+}
+
+.active {
+  color: #4a90e2;
+}
+
+.tableRow {
+  transition: background-color 0.2s;
+}
+
+.tableRow:hover {
+  background-color: #f5f8ff;
+}
+
+.deliveryTable td {
+  padding: 16px;
+  border-bottom: 1px solid #e0e0e0;
+  color: #4a4a4a;
+}
+
+.userCell {
+  max-width: 200px;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.addressCell {
+  max-width: 300px;
+}
+
+.address {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.pending {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.shipping {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.delivered {
+  background: #e8f5e9;
+  color: #388e3c;
+}
+
+.cancelled {
+  background: #fbe9e7;
+  color: #d32f2f;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.statusSelect {
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: white;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.statusSelect:hover:not(:disabled) {
+  border-color: #4a90e2;
+}
+
+.statusSelect:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #f5f5f5;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+}
+
+.error {
+  color: red;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Styles cho search và filter */
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 8px;
+  background-color: #f4f4f4;
+  border-radius: 4px;
+}
+
+.searchBar input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* Styles cho pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.pagination button {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination button.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.tableWrapper {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+}

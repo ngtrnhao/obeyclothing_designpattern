@@ -134,3 +134,21 @@
     padding:30px;
 }
 }
+
+@media (max-width: 480px) {
+  .loginForm {
+    padding: 20px;
+  }
+
+  .loginTitle {
+    font-size: 24px;
+  }
+
+  .loginInput {
+    font-size: 14px;
+  }
+
+  .loginButton {
+    font-size: 16px;
+  }
+}

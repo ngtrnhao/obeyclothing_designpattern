@@ -68,22 +68,50 @@ exports.getShippingAddresses = async (req, res) => {
 
 exports.addShippingAddress = async (req, res) => {
   try {
+    const {
+      fullName,
+      phone,
+      streetAddress,
+      provinceCode,
+      provinceName,
+      districtCode,
+      districtName,
+      wardCode,
+      wardName
+    } = req.body;
+
+    if (!fullName || !phone || !streetAddress || !provinceCode || !districtCode || !wardCode) {
+      return res.status(400).json({ message: 'Thiếu thông tin địa chỉ bắt buộc' });
+    }
+
     let shippingInfo = await ShippingInfo.findOne({ user: req.user._id });
+    
     if (!shippingInfo) {
-      shippingInfo = new ShippingInfo({ user: req.user._id, addresses: [] });
+      shippingInfo = new ShippingInfo({
+        user: req.user._id,
+        addresses: []
+      });
     }
+
     const newAddress = {
-      ...req.body,
-      address: req.body.streetAddress // Sử dụng streetAddress làm địa chỉ
+      fullName,
+      phone,
+      streetAddress,
+      provinceCode,
+      provinceName,
+      districtCode,
+      districtName,
+      wardCode,
+      wardName,
+      isDefault: shippingInfo.addresses.length === 0
     };
-    if (!newAddress.address) {
-      return res.status(400).json({ message: 'Địa chỉ đường không được để trống' });
-    }
+
     shippingInfo.addresses.push(newAddress);
     await shippingInfo.save();
-    res.json(shippingInfo.addresses);
+
+    res.status(201).json(newAddress);
   } catch (error) {
-    res.status(500).json({ message: 'Lỗi khi thêm địa chỉ giao hàng', error: error.message });
+    res.status(500).json({ message: 'Lỗi khi thêm địa chỉ', error: error.message });
   }
 };
 

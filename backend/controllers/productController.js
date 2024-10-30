@@ -27,7 +27,7 @@ exports.getProductById = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   try {
-    const { name, description, price, categoryId, stock, sizes, colors } = req.body;
+    const { name, description, price, categoryId, stock, sizes, colors, sizeGuideType } = req.body;
     let image = '';
     let detailImages = [];
 
@@ -54,7 +54,8 @@ exports.createProduct = async (req, res) => {
       detailImages,
       stock,
       sizes: sizes ? sizes.split(',').map(size => size.trim()) : [],
-      colors: colors ? colors.split(',').map(color => color.trim()) : []
+      colors: colors ? colors.split(',').map(color => color.trim()) : [],
+      sizeGuideType
     });
 
     await newProduct.save();

@@ -163,3 +163,20 @@
       font-size: 12px;
     }
   }
+  
+  @media print {
+    .modal {
+      position: static;
+      background: white;
+    }
+  
+    .modalContent {
+      padding: 0;
+      max-width: none;
+      width: 100%;
+    }
+  
+    .modalActions {
+      display: none;
+    }
+  }

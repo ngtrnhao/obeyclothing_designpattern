@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { createProduct, getCategories } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './style.component/CreateProduct.module.css';
+import { SIZE_GUIDES } from '../constants/sizeGuides';
 
 const CreateProduct = () => {
   const [product, setProduct] = useState({
@@ -12,7 +13,8 @@ const CreateProduct = () => {
     categoryId: '',
     stock: '',
     sizes: '',
-    colors: ''
+    colors: '',
+    sizeGuideType: ''
   });
   const [image, setImage] = useState(null);
   const [detailImages, setDetailImages] = useState([]);
@@ -65,6 +67,7 @@ const CreateProduct = () => {
     formData.append('stock', product.stock);
     formData.append('sizes', product.sizes);
     formData.append('colors', product.colors);
+    formData.append('sizeGuideType', product.sizeGuideType);
 
     if (image) {
       formData.append('image', image);
@@ -124,6 +127,31 @@ const CreateProduct = () => {
         <input type="text" name="colors" placeholder="Màu sắc (cách nhau bằng dấu phẩy)" value={product.colors} onChange={handleProductChange} required />
         <input type="file" onChange={handleImageChange} accept="image/*" required />
         <input type="file" multiple onChange={handleDetailImagesChange} accept="image/*" />
+        <div className={styles.formGroup}>
+          <label>Size Guide:</label>
+          <select
+            name="sizeGuideType"
+            value={product.sizeGuideType}
+            onChange={handleProductChange}
+            required
+          >
+            <option value="">Select Size Guide</option>
+            {Object.entries(SIZE_GUIDES).map(([key, guide]) => (
+              <option key={key} value={key}>
+                {guide.name}
+              </option>
+            ))}
+          </select>
+          
+          {product.sizeGuideType && (
+            <div className={styles.sizeGuidePreview}>
+              <img 
+                src={SIZE_GUIDES[product.sizeGuideType].image} 
+                alt={SIZE_GUIDES[product.sizeGuideType].name} 
+              />
+            </div>
+          )}
+        </div>
         <button type="submit">Tạo sản phẩm</button>
       </form>
     </div>

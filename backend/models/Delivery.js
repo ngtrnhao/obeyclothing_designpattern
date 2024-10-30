@@ -5,7 +5,7 @@ const deliverySchema = new mongoose.Schema({
   shippingInfo: { // Define shippingInfo as an embedded object
     fullName: String,
     phone: String,
-    address: String,
+    streetAddress: String,
     provinceCode: String,
     districtCode: String,
     wardCode: String,

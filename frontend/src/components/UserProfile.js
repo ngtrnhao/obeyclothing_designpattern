@@ -69,8 +69,7 @@ const UserProfile = () => {
     e.preventDefault();
     try {
       const addressData = {
-        ...newAddress,
-        address: newAddress.streetAddress // Đảm bảo streetAddress được sử dụng làm địa chỉ
+        ...newAddress
       };
       if (!addressData.address) {
         throw new Error('Địa chỉ đường không được để trống');

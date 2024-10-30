@@ -12,6 +12,7 @@ const PurchaseOrderManagement = () => {
     product: '',
     suggestedQuantity: 0,
     supplier: '',
+    notes: '',
   });
   const [actualQuantities, setActualQuantities] = useState({});
 
@@ -136,13 +137,25 @@ const PurchaseOrderManagement = () => {
         product: newOrder.product,
         suggestedQuantity: parseInt(newOrder.suggestedQuantity),
         supplier: newOrder.supplier,
+        notes: newOrder.notes
       });
-      alert(`Đơn đặt hàng đã được tạo thành công với ID: ${response.data._id}`);
+
+      if (response && response.purchaseOrder && response.purchaseOrder._id) {
+        alert(`Đơn đặt hàng đã được tạo thành công với ID: ${response.purchaseOrder._id}`);
+      } else {
+        alert('Đơn đặt hàng đã được tạo thành công');
+      }
+      
       fetchPurchaseOrders();
-      setNewOrder({ product: '', suggestedQuantity: 0, supplier: '' });
+      setNewOrder({ 
+        product: '', 
+        suggestedQuantity: 0, 
+        supplier: '',
+        notes: '' 
+      });
     } catch (error) {
       console.error('Error creating purchase order:', error);
-      alert('Có lỗi xảy ra khi tạo đơn đặt hàng. Vui lòng thử lại.');
+      alert(`Có lỗi xảy ra khi tạo đơn đặt hàng: ${error.response?.data?.message || error.message}`);
     }
   };
 

@@ -32,6 +32,11 @@ const productSchema = new mongoose.Schema({
     type: Number, 
     default: 10 
   },
+  sizeGuideType: {
+    type: String,
+    enum: ['TSHIRT', 'PANTS', 'SHOES', 'HOODIE'],
+    required: true
+  },
   reviews: [reviewSchema],
   createdAt: { type: Date, default: Date.now },
   averageRating: { type: Number, default: 0 },

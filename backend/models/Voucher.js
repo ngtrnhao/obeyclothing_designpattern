@@ -5,8 +5,7 @@ const voucherSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    uppercase: true,
-    trim: true
+    uppercase: true
   },
   discountType: {
     type: String,
@@ -24,12 +23,12 @@ const voucherSchema = new mongoose.Schema({
   },
   minPurchase: {
     type: Number,
-    default: 0,
+    required: true,
     min: 0
   },
   startDate: {
     type: Date,
-    default: Date.now
+    required: true
   },
   endDate: {
     type: Date,
@@ -37,10 +36,10 @@ const voucherSchema = new mongoose.Schema({
   },
   usageLimit: {
     type: Number,
-    default: 1,
+    required: true,
     min: 1
   },
-  usedCount: {
+  usageCount: {
     type: Number,
     default: 0
   },
@@ -59,12 +58,24 @@ const voucherSchema = new mongoose.Schema({
   usedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 });
 
-voucherSchema.methods.isValid = function(userId, cartItems) {
+voucherSchema.methods.isValid = function() {
   const now = new Date();
-  return this.isActive &&
-         now >= this.startDate &&
-         now <= this.endDate &&
-         this.usageCount < this.usageLimit;
+  console.log('Kiểm tra voucher:', {
+    code: this.code,
+    startDate: this.startDate,
+    endDate: this.endDate,
+    now: now,
+    usageLimit: this.usageLimit,
+    usageCount: this.usageCount,
+    isActive: this.isActive
+  });
+
+  return (
+    this.isActive &&
+    this.startDate <= now &&
+    this.endDate >= now &&
+    this.usageCount < this.usageLimit
+  );
 };
 
 module.exports = mongoose.model('Voucher', voucherSchema);

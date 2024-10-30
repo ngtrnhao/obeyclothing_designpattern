@@ -2,12 +2,16 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { getCart, addToCart as apiAddToCart, removeFromCart as apiRemoveFromCart } from '../services/api';
 import { useAuth } from './AuthContext';
 import api from '../services/api';
+import axios from 'axios';
 
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [total, setTotal] = useState(0);
+  const [voucher, setVoucher] = useState(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [finalAmount, setFinalAmount] = useState(0);
   const { user } = useAuth();
 
   const fetchCart = useCallback(async () => {
@@ -15,7 +19,6 @@ export const CartProvider = ({ children }) => {
       try {
         const cart = await getCart();
         setCartItems(cart.items);
-        calculateTotal(cart.items);
       } catch (error) {
         console.error('Error fetching cart:', error);
       }
@@ -23,16 +26,20 @@ export const CartProvider = ({ children }) => {
       setCartItems([]);
       setTotal(0);
     }
-  }, [user]); // Add user as a dependency
+  }, [user]); 
 
   useEffect(() => {
     fetchCart();
-  }, [fetchCart]); // Now fetchCart is in the dependency array
+  }, [fetchCart]); 
 
-  const calculateTotal = (items) => {
-    const newTotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  // Calculate total whenever cartItems change
+  useEffect(() => {
+    const newTotal = cartItems.reduce((sum, item) => 
+      sum + (item.quantity * item.product.price), 0
+    );
     setTotal(newTotal);
-  };
+    setFinalAmount(newTotal - (discountAmount || 0));
+  }, [cartItems, discountAmount]);
 
   const addToCart = async (product, quantity, size, color) => {
     try {
@@ -70,8 +77,40 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  const applyVoucher = (newVoucher, newDiscountAmount, newFinalAmount) => {
+    setVoucher(newVoucher);
+    setDiscountAmount(newDiscountAmount);
+    setFinalAmount(newFinalAmount);
+  };
+
+  const clearVoucher = useCallback(async () => {
+    try {
+      await axios.post('/api/cart/clear-voucher');
+      setVoucher(null);
+      setDiscountAmount(0);
+      setFinalAmount(total);
+    } catch (error) {
+      console.error('Lỗi khi xóa voucher:', error);
+    }
+  }, [total]);
+
+  const value = {
+    cartItems,
+    setCartItems,
+    total,
+    voucher,
+    discountAmount,
+    finalAmount,
+    applyVoucher,
+    clearVoucher,
+    fetchCart,
+    removeFromCart,
+    updateCartItem,
+    addToCart
+  };
+
   return (
-    <CartContext.Provider value={{ cartItems, total, addToCart, removeFromCart, updateCartItem, fetchCart }}>
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   );

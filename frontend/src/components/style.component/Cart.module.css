@@ -199,3 +199,21 @@
     text-align: center;
   }
 }
+
+.cartSummary {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.discount {
+  color: #28a745;
+  font-weight: 500;
+}
+
+.finalAmount {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin: 15px 0;
+}
