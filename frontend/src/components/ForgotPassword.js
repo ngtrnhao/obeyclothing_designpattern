@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { forgotPassword } from '../services/api';
 import styles from './style.component/ForgotPassword.module.css';
-import { FaEnvelope, FaKey } from 'react-icons/fa';
+import { FaEnvelope, FaKey, FaArrowLeft } from 'react-icons/fa';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -21,32 +22,41 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className={styles.forgotPasswordContainer}>
-      <h2 className={styles.forgotPasswordTitle}>
-        <FaKey className={styles.titleIcon} /> Quên mật khẩu
-      </h2>
-      {message && <p className={styles.successMessage}>{message}</p>}
-      {error && <p className={styles.errorMessage}>{error}</p>}
-      <form onSubmit={handleSubmit} className={styles.forgotPasswordForm}>
-        <div className={styles.formGroup}>
-          <label className={styles.label}>
-            <FaEnvelope className={styles.inputIcon} /> Email:
-          </label>
-          <input
-            className={styles.input}
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            placeholder="Nhập email của bạn"
-          />
+    <div className={styles.forgotPasswordPage}>
+      <div className={styles.forgotPasswordContainer}>
+        <div className={styles.formHeader}>
+          <h1 className={styles.forgotPasswordTitle}>
+            <FaKey /> Quên mật khẩu
+          </h1>
+          <p className={styles.forgotPasswordSubtitle}>
+            Nhập email của bạn để nhận liên kết đặt lại mật khẩu
+          </p>
         </div>
-        <button className={styles.button} type="submit">
-          <FaKey /> Gửi yêu cầu đặt lại mật khẩu
-        </button>
-      </form>
-      <div className={styles.links}>
-        <a href="/login" className={styles.link}>Quay lại đăng nhập</a>
+
+        {message && <div className={styles.successMessage}>{message}</div>}
+        {error && <div className={styles.errorMessage}>{error}</div>}
+
+        <form onSubmit={handleSubmit}>
+          <div className={styles.inputGroup}>
+            <FaEnvelope className={styles.inputIcon} />
+            <input
+              type="email"
+              placeholder="Nhập email của bạn"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className={styles.input}
+            />
+          </div>
+
+          <button type="submit" className={styles.submitButton}>
+            <FaKey /> Gửi yêu cầu đặt lại mật khẩu
+          </button>
+        </form>
+
+        <Link to="/login" className={styles.backToLogin}>
+          <FaArrowLeft /> Quay lại đăng nhập
+        </Link>
       </div>
     </div>
   );

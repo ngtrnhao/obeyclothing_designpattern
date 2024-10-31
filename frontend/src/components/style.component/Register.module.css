@@ -1,66 +1,178 @@
+.registerPage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  font-family: 'Playfair Display', serif;
+}
+
 .registerContainer {
-    max-width: 400px;
-    margin: 40px auto;
+  display: flex;
+  width: 80%;
+  max-width: 1000px;
+  background-color: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.registerImage {
+  flex: 1;
+  background-image: url('https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=1470&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  min-height: 600px;
+  position: relative;
+}
+
+.registerImage::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.2),
+    rgba(0, 0, 0, 0.1)
+  );
+}
+
+.registerForm {
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.formHeader {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.registerTitle {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.registerSubtitle {
+  font-size: 1rem;
+  color: #666;
+}
+
+.titleIcon {
+  font-size: 2rem;
+}
+
+.inputGroup {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.input {
+  width: 100%;
+  padding: 12px 40px;
+  border: none;
+  border-bottom: 2px solid #ddd;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: transparent;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #4f46e5;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+}
+
+.errorText {
+  color: #dc2626;
+  font-size: 0.8rem;
+  margin-top: 5px;
+  display: block;
+}
+
+.errorMessage {
+  background-color: #fee2e2;
+  color: #dc2626;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.registerButton {
+  width: 100%;
+  padding: 12px;
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.3s ease;
+  margin-top: 20px;
+}
+
+.registerButton:hover {
+  background-color: #4338ca;
+}
+
+.registerFooter {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.footerLink {
+  color: #4f46e5;
+  text-decoration: none;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: color 0.3s ease;
+}
+
+.footerLink:hover {
+  color: #4338ca;
+}
+
+.buttonIcon {
+  font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+  .registerContainer {
+    width: 95%;
+    flex-direction: column;
+  }
+
+  .registerImage {
+    display: none;
+  }
+
+  .registerForm {
     padding: 30px;
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
   }
-  
-  .registerTitle {
-    text-align: center;
-    color: #333;
-    font-size: 24px;
-    margin-bottom: 20px;
-  }
-  
-  .formGroup {
-    margin-bottom: 20px;
-  }
-  
-  .label {
-    display: block;
-    margin-bottom: 5px;
-    color: #555;
-    font-weight: bold;
-  }
-  
-  .input, .select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 16px;
-  }
-  
-  .select {
-    background-color: white;
-  }
-  
-  .button {
-    width: 100%;
-    padding: 12px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .button:hover {
-    background-color: #45a049;
-  }
-  
-  .errorMessage {
-    color: #f44336;
-    text-align: center;
-    margin-top: 10px;
-  }
-  
-  .successMessage {
-    color: #4CAF50;
-    text-align: center;
-    margin-top: 10px;
-  }
+}

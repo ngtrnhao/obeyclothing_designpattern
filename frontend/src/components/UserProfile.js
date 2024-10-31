@@ -5,7 +5,7 @@ import styles from './style.component/UserProfile.module.css';
 import { provinces, getDistricts, getWards } from '../data/vietnamData';
 
 const UserProfile = () => {
-  const { user, login } = useAuth();
+  const { login } = useAuth();
   const [profile, setProfile] = useState(null);
   const [shippingAddresses, setShippingAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
