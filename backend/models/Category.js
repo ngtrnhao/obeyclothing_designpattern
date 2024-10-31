@@ -9,6 +9,6 @@ const categorySchema = new mongoose.Schema({
     children: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }]
 }, { timestamps: true });
 
-// Không cần pre-save hook để tự động tạo slug
+
 
 module.exports = mongoose.model('Category', categorySchema);

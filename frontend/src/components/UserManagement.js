@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getAdminUsers, toggleAdminUserStatus } from '../services/api';
+import { getAdminUsers, toggleAdminUserStatus, changeUserRole } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { FaSearch, FaSort, FaLock, FaLockOpen } from 'react-icons/fa';
 import styles from './style.component/UserManagement.module.css';
@@ -80,6 +80,17 @@ const UserManagement = () => {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+  const handleRoleChange = async (userId, newRole) => {
+    try {
+      await changeUserRole(userId, newRole);
+      fetchUsers(); // Tải lại danh sách người dùng
+      alert('Thay đổi vai trò người dùng thành công');
+    } catch (error) {
+      console.error('Error changing user role:', error);
+      alert('Không thể thay đổi vai trò người dùng. Vui lòng thử lại sau.');
+    }
+  };
+
   if (loading) return <div className={styles.loading}>Đang tải...</div>;
   if (error) return <div className={styles.error}>{error}</div>;
 
@@ -110,7 +121,16 @@ const UserManagement = () => {
             <tr key={user._id}>
               <td>{user.username}</td>
               <td>{user.email}</td>
-              <td>{user.role}</td>
+              <td>
+                <select
+                  value={user.role}
+                  onChange={(e) => handleRoleChange(user._id, e.target.value)}
+                  className={styles.roleSelect}
+                >
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </td>
               <td>
                 <span className={`${styles.status} ${user.isActive ? styles.active : styles.inactive}`}>
                   {user.isActive ? 'Hoạt động' : 'Bị khóa'}

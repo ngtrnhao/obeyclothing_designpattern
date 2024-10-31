@@ -584,5 +584,15 @@ export const updateShippingAddress = (id, address) => api.put(`/user/shipping-ad
 export const deleteShippingAddress = (id) => api.delete(`/user/shipping-addresses/${id}`);
 export const setDefaultShippingAddress = (id) => api.put(`/user/shipping-addresses/${id}/set-default`);
 
+export const changeUserRole = async (userId, role) => {
+  try {
+    const response = await api.put(`/admin/users/${userId}/role`, { role });
+    return response.data;
+  } catch (error) {
+    console.error('API change user role error:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
 export default api;
 

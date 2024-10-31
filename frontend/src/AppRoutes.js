@@ -29,6 +29,7 @@ import VoucherManagement from './components/VoucherManagement';
 import Lookbook from './components/Lookbook';
 import StoreLocator from './components/StoreLocator';
 import OrderDetails from './components/OrderDetails';
+import AboutPage from './pages/AboutPage';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user } = useAuth();
@@ -53,7 +54,7 @@ const AppRoutes = () => {
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/lookbook" element={<Lookbook />} />
       <Route path="/stores" element={<StoreLocator />} />
-      
+      <Route path="/about" element={<AboutPage />} />
       <Route 
         path="/user/*" 
         element={

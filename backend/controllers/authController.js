@@ -86,7 +86,7 @@ exports.forgotPassword = async (req, res) => {
     user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
     await user.save();
 
-    const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
+    const resetUrl = `http://ObeyClothing/reset-password/${resetToken}`;
     await sendResetPasswordEmail(email, resetUrl);
 
     res.json({ message: 'Liên kết đặt lại mật khẩu đã được gửi đến email của bạn' });

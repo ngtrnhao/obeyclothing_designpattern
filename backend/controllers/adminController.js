@@ -313,3 +313,29 @@ exports.deleteVoucher = async (req, res) => {
   }
 };
 
+exports.changeUserRole = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { role } = req.body;
+
+    if (!['user', 'admin'].includes(role)) {
+      return res.status(400).json({ message: 'Vai trò không hợp lệ' });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId, 
+      { role }, 
+      { new: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'Không tìm thấy người dùng' });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error('Error changing user role:', error);
+    res.status(500).json({ message: 'Lỗi khi thay đổi vai trò người dùng' });
+  }
+};
+

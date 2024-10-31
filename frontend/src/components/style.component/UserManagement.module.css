@@ -118,3 +118,23 @@
     border: 1px solid #f5c6cb;
     border-radius: 4px;
 }
+
+.roleSelect {
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.roleSelect:hover {
+    border-color: #666;
+}
+
+.roleSelect:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
