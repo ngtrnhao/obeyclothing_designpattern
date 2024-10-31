@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getUserProfile, updateUserProfile, getShippingAddresses, addShippingAddress, updateShippingAddress, deleteShippingAddress, setDefaultShippingAddress } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './style.component/UserProfile.module.css';
+import { provinces, getDistricts, getWards } from '../data/vietnamData';
 
 const UserProfile = () => {
   const { user, login } = useAuth();
@@ -11,8 +12,20 @@ const UserProfile = () => {
   const [error, setError] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [updatedProfile, setUpdatedProfile] = useState({});
-  const [newAddress, setNewAddress] = useState({});
+  const [newAddress, setNewAddress] = useState({
+    fullName: '',
+    phone: '',
+    streetAddress: '',
+    provinceCode: '',
+    districtCode: '',
+    wardCode: '',
+    provinceName: '',
+    districtName: '',
+    wardName: ''
+  });
   const [editingAddressId, setEditingAddressId] = useState(null);
+  const [districts, setDistricts] = useState([]);
+  const [wards, setWards] = useState([]);
 
   useEffect(() => {
     fetchUserProfile();
@@ -48,7 +61,38 @@ const UserProfile = () => {
 
   const handleAddressInputChange = (e) => {
     const { name, value } = e.target;
-    setNewAddress(prev => ({ ...prev, [name]: value }));
+    const updatedAddress = { ...newAddress };
+
+    if (name === 'provinceCode') {
+      const selectedProvince = provinces.find(p => p.code === value);
+      updatedAddress.provinceCode = value;
+      updatedAddress.provinceName = selectedProvince ? selectedProvince.name : '';
+      updatedAddress.districtCode = '';
+      updatedAddress.districtName = '';
+      updatedAddress.wardCode = '';
+      updatedAddress.wardName = '';
+      
+      const newDistricts = getDistricts(value);
+      setDistricts(newDistricts);
+      setWards([]);
+    } else if (name === 'districtCode') {
+      const selectedDistrict = districts.find(d => d.code === value);
+      updatedAddress.districtCode = value;
+      updatedAddress.districtName = selectedDistrict ? selectedDistrict.name : '';
+      updatedAddress.wardCode = '';
+      updatedAddress.wardName = '';
+      
+      const newWards = getWards(updatedAddress.provinceCode, value);
+      setWards(newWards);
+    } else if (name === 'wardCode') {
+      const selectedWard = wards.find(w => w.code === value);
+      updatedAddress.wardCode = value;
+      updatedAddress.wardName = selectedWard ? selectedWard.name : '';
+    } else {
+      updatedAddress[name] = value;
+    }
+
+    setNewAddress(updatedAddress);
   };
 
   const handleSubmit = async (e) => {
@@ -68,14 +112,25 @@ const UserProfile = () => {
   const handleAddAddress = async (e) => {
     e.preventDefault();
     try {
-      const addressData = {
-        ...newAddress
-      };
-      if (!addressData.address) {
-        throw new Error('Địa chỉ đường không được để trống');
+      if (!newAddress.fullName || !newAddress.phone || !newAddress.streetAddress || 
+          !newAddress.provinceCode || !newAddress.districtCode || !newAddress.wardCode) {
+        throw new Error('Vui lòng điền đầy đủ thông tin địa chỉ');
       }
+
+      const addressData = {
+        fullName: newAddress.fullName,
+        phone: newAddress.phone,
+        streetAddress: newAddress.streetAddress,
+        provinceCode: newAddress.provinceCode,
+        provinceName: newAddress.provinceName,
+        districtCode: newAddress.districtCode,
+        districtName: newAddress.districtName,
+        wardCode: newAddress.wardCode,
+        wardName: newAddress.wardName
+      };
+
       await addShippingAddress(addressData);
-      fetchShippingAddresses();
+      await fetchShippingAddresses();
       setNewAddress({
         fullName: '',
         phone: '',
@@ -199,103 +254,166 @@ const UserProfile = () => {
         </div>
       )}
 
-      {/* Shipping Addresses Section */}
-      <h3 className={styles.subtitle}>Shipping Addresses</h3>
-      {shippingAddresses.map(address => (
-        <div key={address._id} className={styles.addressItem}>
-          <p><strong>{address.fullName}</strong></p>
-          <p>{address.phone}</p>
-          <p>{`${address.address}, ${address.wardName}, ${address.districtName}, ${address.provinceName}`}</p>
-          {address.isDefault && <p className={styles.defaultAddress}>Default Address</p>}
-          <button onClick={() => handleSetDefaultAddress(address._id)} className={styles.defaultButton}>
-            {address.isDefault ? 'Default' : 'Set as Default'}
-          </button>
-          <button onClick={() => {
-            setEditingAddressId(address._id);
-            setNewAddress(address);
-          }} className={styles.editButton}>Edit</button>
-          <button onClick={() => handleDeleteAddress(address._id)} className={styles.deleteButton}>Delete</button>
-        </div>
-      ))}
+      {/* Updated Shipping Addresses Section */}
+      <h3 className={styles.subtitle}>Địa chỉ giao hàng</h3>
+      <div className={styles.addressList}>
+        {shippingAddresses.map(address => (
+          <div key={address._id} className={styles.addressCard}>
+            <div className={styles.addressContent}>
+              <div className={styles.addressHeader}>
+                <h3>{address.fullName}</h3>
+                {address.isDefault && <span className={styles.defaultBadge}>Mặc định</span>}
+              </div>
+              <p className={styles.phone}>{address.phone}</p>
+              <p className={styles.address}>
+                {address.streetAddress}, {address.wardName}, 
+                {address.districtName}, {address.provinceName}
+              </p>
+            </div>
+            <div className={styles.addressActions}>
+              <button 
+                onClick={() => handleSetDefaultAddress(address._id)}
+                className={`${styles.actionButton} ${address.isDefault ? styles.defaultButton : ''}`}
+              >
+                {address.isDefault ? 'Địa chỉ mặc định' : 'Đặt làm mặc định'}
+              </button>
+              <button 
+                onClick={() => {
+                  setEditingAddressId(address._id);
+                  setNewAddress(address);
+                }} 
+                className={styles.editButton}
+              >
+                Sửa
+              </button>
+              <button 
+                onClick={() => handleDeleteAddress(address._id)} 
+                className={styles.deleteButton}
+              >
+                Xóa
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
 
-      {/* Add/Edit Address Form */}
-      <h3 className={styles.subtitle}>{editingAddressId ? 'Edit Address' : 'Add New Address'}</h3>
-      <form onSubmit={editingAddressId ? handleUpdateAddress : handleAddAddress} className={styles.form}>
+      {/* Updated Add/Edit Address Form */}
+      <h3 className={styles.subtitle}>{editingAddressId ? 'Sửa địa chỉ' : 'Thêm địa chỉ mới'}</h3>
+      <form onSubmit={editingAddressId ? handleUpdateAddress : handleAddAddress} className={styles.addressForm}>
         <div className={styles.formGroup}>
-          <label htmlFor="fullName">Full Name:</label>
+          <label htmlFor="fullName">Họ và tên:</label>
           <input
             type="text"
             id="fullName"
             name="fullName"
-            value={newAddress.fullName || ''}
+            value={newAddress.fullName}
             onChange={handleAddressInputChange}
             required
           />
         </div>
         <div className={styles.formGroup}>
-          <label htmlFor="phone">Phone:</label>
+          <label htmlFor="phone">Số điện thoại:</label>
           <input
             type="tel"
             id="phone"
             name="phone"
-            value={newAddress.phone || ''}
+            value={newAddress.phone}
             onChange={handleAddressInputChange}
             required
           />
         </div>
         <div className={styles.formGroup}>
-          <label htmlFor="address">Address:</label>
+          <label htmlFor="streetAddress">Địa chỉ:</label>
           <input
             type="text"
-            id="address"
-            name="address"
-            value={newAddress.address || ''}
+            id="streetAddress"
+            name="streetAddress"
+            value={newAddress.streetAddress}
             onChange={handleAddressInputChange}
+            placeholder="Số nhà, tên đường"
             required
           />
         </div>
         <div className={styles.formGroup}>
-          <label htmlFor="provinceName">Province:</label>
-          <input
-            type="text"
-            id="provinceName"
-            name="provinceName"
-            value={newAddress.provinceName || ''}
+          <label htmlFor="provinceCode">Tỉnh/Thành phố:</label>
+          <select
+            id="provinceCode"
+            name="provinceCode"
+            value={newAddress.provinceCode}
             onChange={handleAddressInputChange}
             required
-          />
+          >
+            <option value="">Chọn Tỉnh/Thành phố</option>
+            {provinces.map(province => (
+              <option key={province.code} value={province.code}>
+                {province.name}
+              </option>
+            ))}
+          </select>
         </div>
         <div className={styles.formGroup}>
-          <label htmlFor="districtName">District:</label>
-          <input
-            type="text"
-            id="districtName"
-            name="districtName"
-            value={newAddress.districtName || ''}
+          <label htmlFor="districtCode">Quận/Huyện:</label>
+          <select
+            id="districtCode"
+            name="districtCode"
+            value={newAddress.districtCode}
             onChange={handleAddressInputChange}
             required
-          />
+            disabled={!newAddress.provinceCode}
+          >
+            <option value="">Chọn Quận/Huyện</option>
+            {districts.map(district => (
+              <option key={district.code} value={district.code}>
+                {district.name}
+              </option>
+            ))}
+          </select>
         </div>
         <div className={styles.formGroup}>
-          <label htmlFor="wardName">Ward:</label>
-          <input
-            type="text"
-            id="wardName"
-            name="wardName"
-            value={newAddress.wardName || ''}
+          <label htmlFor="wardCode">Phường/Xã:</label>
+          <select
+            id="wardCode"
+            name="wardCode"
+            value={newAddress.wardCode}
             onChange={handleAddressInputChange}
             required
-          />
+            disabled={!newAddress.districtCode}
+          >
+            <option value="">Chọn Phường/Xã</option>
+            {wards.map(ward => (
+              <option key={ward.code} value={ward.code}>
+                {ward.name}
+              </option>
+            ))}
+          </select>
         </div>
-        <button type="submit" className={styles.submitButton}>
-          {editingAddressId ? 'Update Address' : 'Add Address'}
-        </button>
-        {editingAddressId && (
-          <button type="button" onClick={() => {
-            setEditingAddressId(null);
-            setNewAddress({});
-          }} className={styles.cancelButton}>Cancel Edit</button>
-        )}
+        <div className={styles.formActions}>
+          <button type="submit" className={styles.submitButton}>
+            {editingAddressId ? 'Cập nhật địa chỉ' : 'Thêm địa chỉ'}
+          </button>
+          {editingAddressId && (
+            <button
+              type="button"
+              onClick={() => {
+                setEditingAddressId(null);
+                setNewAddress({
+                  fullName: '',
+                  phone: '',
+                  streetAddress: '',
+                  provinceCode: '',
+                  districtCode: '',
+                  wardCode: '',
+                  provinceName: '',
+                  districtName: '',
+                  wardName: ''
+                });
+              }}
+              className={styles.cancelButton}
+            >
+              Hủy
+            </button>
+          )}
+        </div>
       </form>
     </div>
   );
