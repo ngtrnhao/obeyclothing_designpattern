@@ -167,7 +167,7 @@ router.post('/checkout', async (req, res) => {
       }
     );
 
-    // Tr��� về response tùy theo phương thức thanh toán
+    // Tr về response tùy theo phương thức thanh toán
     if (paymentMethod === 'paypal') {
       // Chuyển hướng đến PayPal
       return res.json({
@@ -297,6 +297,25 @@ router.post('/clear-voucher', async (req, res) => {
     res.json(cart);
   } catch (error) {
     res.status(500).json({ message: 'Lỗi khi xóa voucher' });
+  }
+});
+
+// Clear cart
+router.post('/clear', async (req, res) => {
+  try {
+    await Cart.findOneAndUpdate(
+      { user: req.user._id },
+      { 
+        $set: { 
+          items: [],
+          voucher: null,
+          discountAmount: 0
+        }
+      }
+    );
+    res.json({ message: 'Cart cleared successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error clearing cart' });
   }
 });
 

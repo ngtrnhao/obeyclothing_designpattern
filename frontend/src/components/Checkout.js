@@ -4,12 +4,13 @@ import { getShippingAddresses, addShippingAddress, updateShippingAddress, delete
 import PayPalCheckout from './PayPalCheckout1';
 import styles from './style.component/Checkout.module.css';
 import { provinces, getDistricts, getWards } from '../data/vietnamData';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import AddressSection from './AddressSection';
 
+import { createCodOrder } from '../services/orderService';
+
 const Checkout = () => {
-	const { cartItems, total, voucher, discountAmount, finalAmount, clearVoucher } = useCart();
+	const { cartItems, total, voucher, discountAmount, finalAmount, clearCart } = useCart();
 	const [shippingAddresses, setShippingAddresses] = useState([]);
 	const [selectedAddressId, setSelectedAddressId] = useState(null);
 	const [editingAddress, setEditingAddress] = useState(null);
@@ -266,7 +267,6 @@ const Checkout = () => {
 
 			const orderData = {
 				shippingInfo: shippingAddresses.find(addr => addr._id === selectedAddressId),
-				paymentMethod: selectedPaymentMethod,
 				cartItems,
 				voucher: voucher ? voucher._id : null,
 				totalAmount: total,
@@ -275,27 +275,26 @@ const Checkout = () => {
 				finalAmount: totalWithShipping
 			};
 
-			if (selectedPaymentMethod === 'banking') {
-				// Hiển thị thông tin chuyển khoản
-				const bankInfo = paymentMethods.find(m => m.id === 'banking').bankInfo;
-				alert(
-					`Vui lòng chuyển khoản theo thông tin sau:\n\n` +
-					`Ngân hàng: ${bankInfo.bankName}\n` +
-					`Số tài khoản: ${bankInfo.accountNumber}\n` +
-					`Chủ tài khoản: ${bankInfo.accountName}\n` +
-					`Số tiền: ${totalWithShipping.toLocaleString('vi-VN')} đ\n` +
-					`Nội dung: Thanh toan don hang ${Date.now()}`
-				);
-			}
+			console.log('Sending order data:', orderData);
 
-			const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/cart/checkout`, orderData);
-			
-			// Clear voucher sau khi đặt hàng thành công
-			await clearVoucher();
-			
-			navigate(`/order-confirmation/${response.data.order._id}`);
+			if (selectedPaymentMethod === 'cod') {
+				try {
+					const response = await createCodOrder(orderData);
+					console.log('COD order response:', response);
+
+					if (response && response.order && response.order._id) {
+						await clearCart();
+						window.location.href = `/order-success/${response.order._id}`;
+					} else {
+						throw new Error('Invalid response from server');
+					}
+				} catch (error) {
+					console.error('Error in COD order:', error);
+					alert('Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.');
+				}
+			}
 		} catch (error) {
-			console.error('Lỗi khi đặt hàng:', error);
+			console.error('Checkout error:', error);
 			alert('Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.');
 		}
 	};

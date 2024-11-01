@@ -57,9 +57,19 @@ const orderSchema = new mongoose.Schema({
   delivery: { type: mongoose.Schema.Types.ObjectId, ref: 'Delivery' },
   paymentMethod: {
     type: String,
-    required: true,
     enum: ['cod', 'paypal', 'banking'],
-    default: 'cod'
+    required: true
+  },
+  codStatus: {
+    type: String,
+    enum: ['pending', 'collected', 'failed'],
+    default: 'pending'
+  },
+  codAmount: {
+    type: Number,
+    required: function() {
+      return this.paymentMethod === 'cod';
+    }
   }
 }, { timestamps: true });
 

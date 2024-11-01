@@ -1,4 +1,5 @@
 const Voucher = require('../models/Voucher');
+const Cart = require('../models/Cart');
 
 exports.createVoucher = async (req, res) => {
   try {
@@ -20,53 +21,74 @@ exports.getVouchers = async (req, res) => {
 };
 
 exports.applyVoucher = async (req, res) => {
-  console.log('Request body:', req.body);
   try {
-    const { voucherCode, totalAmount } = req.body;
+    const { voucherCode } = req.body;
+    const userId = req.user._id;
+
+    // Tìm giỏ hàng của user
+    const cart = await Cart.findOne({ user: userId })
+      .populate('items.product');
     
-    if (!voucherCode || !totalAmount) {
-      console.error('Thiếu thông tin:', { voucherCode, totalAmount });
-      return res.status(400).json({ 
-        message: 'Thiếu thông tin voucher hoặc giá trị đơn hàng' 
+    if (!cart || cart.items.length === 0) {
+      return res.status(400).json({
+        message: 'Giỏ hàng trống'
       });
     }
 
-    const voucher = await Voucher.findOne({ 
-      code: voucherCode.toUpperCase(),
-      isActive: true 
+    const voucher = await Voucher.findOne({
+      code: voucherCode.toUpperCase()
     });
-    
+
     if (!voucher) {
-      return res.status(400).json({ message: 'Không tìm thấy voucher' });
-    }
-    const shippingFee =30000;
-    let discountAmount = 0;
-    if (voucher.discountType === 'percentage') {
-      discountAmount = totalAmount * (voucher.discountValue / 100);
-      if (voucher.maxDiscount) {
-        discountAmount = Math.min(discountAmount, voucher.maxDiscount);
-      }
-    } else {
-      discountAmount = voucher.discountValue;
+      return res.status(400).json({
+        message: 'Không tìm thấy voucher'
+      });
     }
 
-    const finalAmount = totalAmount + shippingFee - discountAmount ;
+    // Kiểm tra tính hợp lệ của voucher
+    if (!voucher.isValid()) {
+      return res.status(400).json({
+        message: 'Voucher đã hết hạn hoặc hết lượt sử dụng'
+      });
+    }
 
-    console.log('Calculated amounts:', {
-      totalAmount,
-      discountAmount,
-      finalAmount
-    });
+    // Kiểm tra user đã sử dụng voucher chưa
+    if (voucher.hasUserUsed(userId)) {
+      return res.status(400).json({
+        message: 'Bạn đã sử dụng voucher này'
+      });
+    }
+
+    // Kiểm tra điều kiện áp dụng
+    const canApply = voucher.canApplyToCart(cart);
+    if (!canApply.valid) {
+      return res.status(400).json({
+        message: canApply.message
+      });
+    }
+
+    // Tính toán giảm giá
+    const totalAmount = cart.items.reduce((sum, item) => 
+      sum + (item.price * item.quantity), 0
+    );
+    const discountAmount = voucher.calculateDiscount(totalAmount);
+
+    // Cập nhật giỏ hàng
+    cart.voucher = voucher._id;
+    cart.discountAmount = discountAmount;
+    cart.finalAmount = totalAmount + 30000 - discountAmount;
+    await cart.save();
 
     res.json({
       discountAmount,
-      finalAmount,
-      totalAfterDiscount: finalAmount,
-      voucher: voucher._id,
+      finalAmount: cart.finalAmount,
       message: 'Áp dụng voucher thành công'
     });
+
   } catch (error) {
-    console.error('Lỗi server:', error);
-    res.status(500).json({ message: 'Lỗi server', error: error.message });
+    console.error('Lỗi khi áp dụng voucher:', error);
+    res.status(500).json({
+      message: 'Lỗi server'
+    });
   }
 };

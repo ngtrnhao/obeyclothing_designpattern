@@ -55,27 +55,77 @@ const voucherSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   }],
-  usedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+  usedBy: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    usedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
 });
 
-voucherSchema.methods.isValid = function() {
-  const now = new Date();
-  console.log('Kiểm tra voucher:', {
-    code: this.code,
-    startDate: this.startDate,
-    endDate: this.endDate,
-    now: now,
-    usageLimit: this.usageLimit,
-    usageCount: this.usageCount,
-    isActive: this.isActive
-  });
+voucherSchema.methods = {
+  isValid() {
+    const now = new Date();
+    return (
+      this.isActive &&
+      this.startDate <= now &&
+      this.endDate >= now &&
+      this.usageCount < this.usageLimit
+    );
+  },
 
-  return (
-    this.isActive &&
-    this.startDate <= now &&
-    this.endDate >= now &&
-    this.usageCount < this.usageLimit
-  );
+  hasUserUsed(userId) {
+    return this.usedBy.some(usage => 
+      usage.user.toString() === userId.toString()
+    );
+  },
+
+  canApplyToCart(cart) {
+    // Kiểm tra giá trị đơn hàng tối thiểu
+    const cartTotal = cart.items.reduce((sum, item) => 
+      sum + (item.price * item.quantity), 0
+    );
+    
+    if (cartTotal < this.minPurchase) {
+      return {
+        valid: false,
+        message: `Giá trị đơn hàng tối thiểu là ${this.minPurchase.toLocaleString('vi-VN')}đ`
+      };
+    }
+
+    // Kiểm tra danh mục sản phẩm áp dụng
+    if (this.applicableCategories?.length > 0) {
+      const hasValidProduct = cart.items.some(item =>
+        this.applicableCategories.includes(item.product.category)
+      );
+      
+      if (!hasValidProduct) {
+        return {
+          valid: false,
+          message: 'Voucher không áp dụng cho các sản phẩm trong giỏ hàng'
+        };
+      }
+    }
+
+    return { valid: true };
+  },
+
+  calculateDiscount(totalAmount) {
+    let discount = 0;
+    if (this.discountType === 'percentage') {
+      discount = totalAmount * (this.discountValue / 100);
+      if (this.maxDiscount) {
+        discount = Math.min(discount, this.maxDiscount);
+      }
+    } else {
+      discount = Math.min(this.discountValue, totalAmount);
+    }
+    return discount;
+  }
 };
 
 module.exports = mongoose.model('Voucher', voucherSchema);

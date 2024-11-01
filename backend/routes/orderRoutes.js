@@ -70,4 +70,6 @@ router.get('/:id', authMiddleware, orderController.getOrderById);
 // Thêm route để lấy danh sách phương thức thanh toán
 router.get('/payment-methods', orderController.getPaymentMethods);
 
+router.post('/cod', authMiddleware, orderController.createCodOrder);
+
 module.exports = router;

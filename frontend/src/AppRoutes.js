@@ -93,7 +93,7 @@ const AppRoutes = () => {
         <Route path="deliveries" element={<DeliveryManagement />} />
       </Route>
       
-      <Route path="/order-success" element={<OrderSuccess />} />
+      <Route path="/order-success/:id" element={<OrderSuccess />} />
       
       {/* Catch-all route for 404 Not Found */}
       <Route path="*" element={<Navigate to="/" replace />} />

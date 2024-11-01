@@ -94,6 +94,17 @@ export const CartProvider = ({ children }) => {
     }
   }, [total]);
 
+  const clearCart = useCallback(async () => {
+    try {
+      await api.post('/cart/clear');
+      setCartItems([]);
+      setTotal(0);
+      clearVoucher();
+    } catch (error) {
+      console.error('Lỗi khi xóa giỏ hàng:', error);
+    }
+  }, [clearVoucher]);
+
   const value = {
     cartItems,
     setCartItems,
@@ -106,7 +117,8 @@ export const CartProvider = ({ children }) => {
     fetchCart,
     removeFromCart,
     updateCartItem,
-    addToCart
+    addToCart,
+    clearCart
   };
 
   return (

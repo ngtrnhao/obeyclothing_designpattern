@@ -7,6 +7,7 @@ const User = require('../models/User');
 const Voucher = require('../models/Voucher');
 const ShippingInfo = require('../models/ShippingInfo');
 const { createInvoiceFromOrder } = require('./invoiceController');
+const { sendOrderConfirmationEmail } = require('../utils/emailService');
 
 let environment = new paypal.core.SandboxEnvironment(process.env.PAYPAL_CLIENT_ID, process.env.PAYPAL_CLIENT_SECRET);
 let client = new paypal.core.PayPalHttpClient(environment);
@@ -93,15 +94,32 @@ exports.completePaypalOrder = async (req, res) => {
       paypalOrderId: orderId,
       paypalDetails: paypalDetails,
       shippingInfo: shippingInfo,
+      paymentMethod: 'paypal',
       status: 'paid'
     });
 
     await newOrder.save();
 
-    // Tạo hóa đơn
+    // Populate order with full details
+    const populatedOrder = await Order.findById(newOrder._id)
+      .populate({
+        path: 'items.product',
+        select: 'name price'
+      })
+      .populate('user', 'email')
+      .lean();
+
+    // Đảm bảo các thông tin quan trọng được giữ nguyên
+    populatedOrder.shippingFee = newOrder.shippingFee;
+    populatedOrder.totalAmount = newOrder.totalAmount;
+    populatedOrder.discountAmount = newOrder.discountAmount;
+    populatedOrder.finalAmount = newOrder.finalAmount;
+    populatedOrder.shippingInfo = newOrder.shippingInfo;
+
+    // Create invoice
     const invoice = await createInvoiceFromOrder(newOrder);
 
-    // Create a new delivery record
+    // Create delivery record
     const newDelivery = new Delivery({
       order: newOrder._id,
       shippingInfo: { ...newOrder.shippingInfo },
@@ -109,12 +127,16 @@ exports.completePaypalOrder = async (req, res) => {
     });
     await newDelivery.save();
 
-    // Clear the user's cart after successful payment
+    // Clear cart
     await Cart.findByIdAndDelete(cart._id);
+
+    // Send email with populated order data
+    const user = await User.findById(userId);
+    await sendOrderConfirmationEmail(user.email, populatedOrder, invoice);
 
     res.status(200).json({ 
       message: 'Đơn hàng đã được tạo và thanh toán thành công', 
-      order: newOrder,
+      order: populatedOrder,
       invoiceId: invoice._id
     });
   } catch (error) {
@@ -176,9 +198,18 @@ exports.createOrder = async (req, res) => {
 
     // Cập nhật số lần sử dụng voucher
     if (voucherId) {
-      await Voucher.findByIdAndUpdate(voucherId, {
-        $inc: { usageCount: 1 }
-      });
+      await Voucher.findByIdAndUpdate(
+        voucherId,
+        {
+          $inc: { usageCount: 1 },
+          $push: { 
+            usedBy: {
+              user: req.user._id,
+              usedAt: new Date()
+            }
+          }
+        }
+      );
     }
 
     res.status(201).json({
@@ -248,5 +279,78 @@ exports.getPaymentMethods = async (req, res) => {
     res.json(paymentMethods);
   } catch (error) {
     res.status(500).json({ message: 'Lỗi server' });
+  }
+};
+
+exports.createCodOrder = async (req, res) => {
+  try {
+    const { shippingInfo, cartItems, voucher, totalAmount, shippingFee, discountAmount, finalAmount } = req.body;
+
+    if (!shippingInfo || !cartItems || !finalAmount) {
+      return res.status(400).json({ message: 'Thiếu thông tin đơn hàng' });
+    }
+
+    const order = new Order({
+      user: req.user._id,
+      items: cartItems.map(item => ({
+        product: item.product._id,
+        quantity: item.quantity,
+        price: item.product.price,
+        size: item.size,
+        color: item.color
+      })),
+      shippingInfo,
+      paymentMethod: 'cod',
+      totalAmount,
+      shippingFee:30000,
+      voucher: voucher ? voucher._id : null,
+      discountAmount,
+      finalAmount,
+      codAmount: finalAmount,
+      status: 'pending',
+      codStatus: 'pending'
+    });
+
+    await order.save();
+
+    // Populate và tạo hóa đơn song song
+    const [populatedOrder, invoice] = await Promise.all([
+      Order.findById(order._id)
+        .populate({
+          path: 'items.product',
+          select: 'name price'
+        })
+        .populate('user', 'email')
+        .lean(),
+      createInvoiceFromOrder(order)
+    ]);
+
+    // Clear cart ngay sau khi có order
+    Cart.findOneAndUpdate(
+      { user: req.user._id },
+      { 
+        $set: { 
+          items: [],
+          voucher: null,
+          discountAmount: 0
+        }
+      }
+    ).exec(); // Không cần await
+
+    // Gửi email bất đồng bộ
+    const user = await User.findById(req.user._id);
+    sendOrderConfirmationEmail(user.email, populatedOrder, invoice)
+      .catch(err => console.error('Error sending email:', err));
+
+    // Trả response ngay
+    res.status(201).json({
+      message: 'Đặt hàng thành công',
+      order: populatedOrder,
+      invoiceId: invoice._id
+    });
+
+  } catch (error) {
+    console.error('Lỗi khi tạo đơn hàng COD:', error);
+    res.status(500).json({ message: 'Lỗi khi tạo đơn hàng' });
   }
 };
