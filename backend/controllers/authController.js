@@ -39,16 +39,38 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
-  console.log('Login attempt:', { email, password: '******' });
   try {
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: 'Tài khoản không tồn tại' });
     }
 
+    if (!user.isActive) {
+      return res.status(403).json({ 
+        message: 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ admin để được hỗ trợ.',
+        status: 'locked'
+      });
+    }
+
+    if (user.isLocked) {
+      const remainingTime = Math.ceil((user.lockUntil - Date.now()) / (60 * 1000));
+      return res.status(403).json({
+        message: `Tài khoản tạm thời bị khóa. Vui lòng thử lại sau ${remainingTime} phút.`,
+        status: 'temporary_locked',
+        remainingTime
+      });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+      await user.incrementLoginAttempts();
       return res.status(400).json({ message: 'Mật khẩu không đúng' });
+    }
+
+    if (user.loginAttempts > 0) {
+      user.loginAttempts = 0;
+      user.lockUntil = undefined;
+      await user.save();
     }
 
     const token = jwt.sign(
@@ -56,15 +78,15 @@ exports.login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
-    console.log('Generated token:', token);
-    console.log('Login successful for user:', user.email);
+
     res.json({
       token,
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        isActive: user.isActive
       }
     });
   } catch (error) {

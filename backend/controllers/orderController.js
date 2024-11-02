@@ -8,6 +8,7 @@ const Voucher = require('../models/Voucher');
 const ShippingInfo = require('../models/ShippingInfo');
 const { createInvoiceFromOrder } = require('./invoiceController');
 const { sendOrderConfirmationEmail } = require('../utils/emailService');
+const mongoose = require('mongoose');
 
 let environment = new paypal.core.SandboxEnvironment(process.env.PAYPAL_CLIENT_ID, process.env.PAYPAL_CLIENT_SECRET);
 let client = new paypal.core.PayPalHttpClient(environment);
@@ -73,6 +74,26 @@ exports.completePaypalOrder = async (req, res) => {
       return res.status(404).json({ message: 'Không tìm thấy giỏ hàng' });
     }
 
+    // Kiểm tra và cập nhật số lượng tồn kho
+    for (const item of cart.items) {
+      const product = await Product.findById(item.product._id);
+      if (!product) {
+        return res.status(404).json({ 
+          message: `Không tìm thấy sản phẩm với ID: ${item.product._id}` 
+        });
+      }
+
+      // Kiểm tra số lượng tồn kho
+      if (product.stock < item.quantity) {
+        return res.status(400).json({
+          message: `Sản phẩm ${product.name} chỉ còn ${product.stock} trong kho`
+        });
+      }
+
+      // Cập nhật số lượng tồn kho
+      await product.updateStock(-item.quantity);
+    }
+
     const newOrder = new Order({
       user: userId,
       items: cart.items.map(item => ({
@@ -99,6 +120,35 @@ exports.completePaypalOrder = async (req, res) => {
     });
 
     await newOrder.save();
+
+    if (cart.voucher) {
+      const voucher = await Voucher.findById(cart.voucher._id);
+      if (voucher && voucher.isActive) {
+        if (!voucher.hasUserUsed(userId)) {
+          const updatedVoucher = await Voucher.findByIdAndUpdate(
+            cart.voucher._id,
+            {
+              $inc: { usedCount: 1 },
+              $push: {
+                usedBy: {
+                  user: userId,
+                  usedAt: new Date()
+                }
+              }
+            },
+            { new: true }
+          );
+
+          // Kiểm tra và vô hiệu hóa nếu đã hết lượt
+          if (updatedVoucher.usedCount >= updatedVoucher.usageLimit) {
+            await Voucher.findByIdAndUpdate(
+              cart.voucher._id,
+              { isActive: false }
+            );
+          }
+        }
+      }
+    }
 
     // Populate order with full details
     const populatedOrder = await Order.findById(newOrder._id)
@@ -127,8 +177,16 @@ exports.completePaypalOrder = async (req, res) => {
     });
     await newDelivery.save();
 
-    // Clear cart
+    // Xóa giỏ hàng cũ và tạo giỏ hàng mới
     await Cart.findByIdAndDelete(cart._id);
+    const newCart = new Cart({
+      user: userId,
+      items: [],
+      voucher: null,
+      discountAmount: 0,
+      finalAmount: 0
+    });
+    await newCart.save();
 
     // Send email with populated order data
     const user = await User.findById(userId);
@@ -196,30 +254,75 @@ exports.createOrder = async (req, res) => {
 
     await order.save();
 
-    // Cập nhật số lần sử dụng voucher
+    // Xóa giỏ hàng cũ và tạo giỏ hàng mới
+    const oldCart = await Cart.findOne({ user: req.user._id });
+    if (oldCart) {
+      await Cart.findByIdAndDelete(oldCart._id);
+      const newCart = new Cart({
+        user: req.user._id,
+        items: [],
+        voucher: null,
+        discountAmount: 0,
+        finalAmount: 0
+      });
+      await newCart.save();
+    }
+
+    
     if (voucherId) {
-      await Voucher.findByIdAndUpdate(
-        voucherId,
-        {
-          $inc: { usageCount: 1 },
-          $push: { 
-            usedBy: {
-              user: req.user._id,
-              usedAt: new Date()
-            }
+      const voucher = await Voucher.findById(voucherId);
+      if (voucher && voucher.isActive) {
+        if (!voucher.hasUserUsed(req.user._id)) {
+          const updatedVoucher = await Voucher.findByIdAndUpdate(
+            voucherId,
+            {
+              $inc: { usedCount: 1 },
+              $push: {
+                usedBy: {
+                  user: req.user._id,
+                  usedAt: new Date()
+                }
+              }
+            },
+            { new: true }
+          );
+
+          // Kiểm tra và vô hiệu hóa nếu đã hết lượt
+          if (updatedVoucher.usedCount >= updatedVoucher.usageLimit) {
+            await Voucher.findByIdAndUpdate(
+              voucherId,
+              { isActive: false }
+            );
           }
         }
-      );
+      }
+    }
+
+    // Giảm số lượng tồn kho cho từng sản phẩm
+    for (const item of cart.items) {
+      const product = await Product.findById(item.product);
+      if (!product) {
+        throw new Error(`Không tìm thấy sản phẩm với ID: ${item.product}`);
+      }
+      
+      // Kiểm tra số lượng tồn kho
+      if (product.stock < item.quantity) {
+        throw new Error(`Sản phẩm ${product.name} chỉ còn ${product.stock} sản phẩm trong kho`);
+      }
+      
+      // Cập nhật số lượng tồn kho
+      await product.updateStock(-item.quantity);
     }
 
     res.status(201).json({
       message: 'Đặt hàng thành công',
-      order
+      order: order
     });
 
   } catch (error) {
-    console.error('Lỗi khi tạo đơn hàng:', error);
-    res.status(500).json({ message: 'Lỗi khi tạo đơn hàng' });
+    res.status(400).json({
+      message: error.message || 'Có lỗi xảy ra khi tạo đơn hàng'
+    });
   }
 };
 
@@ -248,7 +351,7 @@ exports.getPaymentMethods = async (req, res) => {
       {
         id: 'cod',
         name: 'Thanh toán khi nhận hàng',
-        description: 'Thanh toán bằng tiền mặt khi nhận hàng',
+        description: 'Thanh toán bằng tiền mặt khi nhn hàng',
         icon: 'cash-icon',
         additionalInfo: 'Phí thu hộ: Miễn phí'
       },
@@ -290,6 +393,26 @@ exports.createCodOrder = async (req, res) => {
       return res.status(400).json({ message: 'Thiếu thông tin đơn hàng' });
     }
 
+    // Kiểm tra và cập nhật số lượng tồn kho
+    for (const item of cartItems) {
+      const product = await Product.findById(item.product._id);
+      if (!product) {
+        return res.status(404).json({ 
+          message: `Không tìm thấy sản phẩm với ID: ${item.product._id}` 
+        });
+      }
+
+      // Kiểm tra số lượng tồn kho
+      if (product.stock < item.quantity) {
+        return res.status(400).json({
+          message: `Sản phẩm ${product.name} chỉ còn ${product.stock} trong kho`
+        });
+      }
+
+      // Cập nhật số lượng tồn kho
+      await product.updateStock(-item.quantity);
+    }
+
     const order = new Order({
       user: req.user._id,
       items: cartItems.map(item => ({
@@ -302,7 +425,7 @@ exports.createCodOrder = async (req, res) => {
       shippingInfo,
       paymentMethod: 'cod',
       totalAmount,
-      shippingFee:30000,
+      shippingFee: 30000,
       voucher: voucher ? voucher._id : null,
       discountAmount,
       finalAmount,

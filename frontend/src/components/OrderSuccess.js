@@ -1,10 +1,8 @@
 import React from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import styles from './style.component/OrderSuccess.module.css';
 
 const OrderSuccess = () => {
-  const { orderId } = useParams();
-
   return (
     <div className={styles.successContainer}>
       <div className={styles.successContent}>
@@ -12,9 +10,12 @@ const OrderSuccess = () => {
           <i className="fas fa-check-circle"></i>
         </div>
         <h1>Đặt hàng thành công!</h1>
-        <p>Cảm ơn bạn đã đặt hàng. Mã đơn hàng của bạn là:</p>
-        <div className={styles.orderId}>{orderId}</div>
+        <p>Cảm ơn bạn đã đặt hàng.</p>
         <p>Chúng tôi sẽ sớm liên hệ với bạn để xác nhận đơn hàng.</p>
+        <p className={styles.emailNotice}>
+          <i className="fas fa-envelope"></i>
+          Vui lòng kiểm tra email của bạn để xem chi tiết đơn hàng và hóa đơn.
+        </p>
         <div className={styles.actions}>
           <Link to="/user/orders" className={styles.viewOrderButton}>
             Xem đơn hàng

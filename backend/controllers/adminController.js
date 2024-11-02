@@ -191,59 +191,96 @@ async function getTopProducts(start, end, limit = 5) {
 }
 
 async function getSalesData(start, end, period) {
-  let groupBy;
-  let dateFormat;
+  try {
+    let groupBy;
+    let dateFormat;
 
-  switch (period) {
-    case 'day':
-      groupBy = { $dateToString: { format: "%Y-%m-%d", date: "$updatedAt" } };
-      dateFormat = 'YYYY-MM-DD';
-      break;
-    case 'week':
-      groupBy = { 
-        year: { $year: "$updatedAt" },
-        week: { $week: "$updatedAt" }
+    switch (period) {
+      case 'day':
+        groupBy = {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$updatedAt" } }
+        };
+        dateFormat = 'YYYY-MM-DD';
+        break;
+      case 'week':
+        groupBy = {
+          _id: {
+            week: { $week: "$updatedAt" },
+            year: { $year: "$updatedAt" }
+          }
+        };
+        dateFormat = '[W]WW-YYYY';
+        break;
+      case 'month':
+      default:
+        groupBy = {
+          _id: { $dateToString: { format: "%Y-%m", date: "$updatedAt" } }
+        };
+        dateFormat = 'YYYY-MM';
+    }
+
+    const result = await Order.aggregate([
+      {
+        $match: {
+          status: 'delivered',
+          updatedAt: { $gte: start.toDate(), $lte: end.toDate() }
+        }
+      },
+      {
+        $group: {
+          ...groupBy,
+          revenue: { $sum: '$totalAmount' },
+          orders: { $sum: 1 }
+        }
+      },
+      { $sort: { "_id": 1 } }
+    ]);
+
+    // Format dữ liệu theo period
+    const formattedData = result.map(item => {
+      let date;
+      if (period === 'week') {
+        date = `W${item._id.week}-${item._id.year}`;
+      } else {
+        date = item._id;
+      }
+
+      return {
+        date,
+        revenue: item.revenue || 0,
+        orders: item.orders || 0
       };
-      dateFormat = 'YYYY-[W]WW';
-      break;
-    case 'month':
-    default:
-      groupBy = { $dateToString: { format: "%Y-%m", date: "$updatedAt" } };
-      dateFormat = 'YYYY-MM';
-  }
-
-  const result = await Order.aggregate([
-    {
-      $match: {
-        status: 'delivered',
-        updatedAt: { $gte: start.toDate(), $lte: end.toDate() }
-      }
-    },
-    {
-      $group: {
-        _id: groupBy,
-        revenue: { $sum: '$totalAmount' },
-        orders: { $sum: 1 }
-      }
-    },
-    { $sort: { _id: 1 } }
-  ]);
-
-  // Fill in missing dates
-  const filledData = [];
-  let current = moment(start);
-  while (current.isSameOrBefore(end)) {
-    const key = current.format(dateFormat);
-    const existingData = result.find(item => item._id === key);
-    filledData.push({
-      date: key,
-      revenue: existingData ? existingData.revenue : 0,
-      orders: existingData ? existingData.orders : 0
     });
-    current.add(1, period);
-  }
 
-  return filledData;
+    // Fill missing dates
+    const filledData = [];
+    let current = moment(start);
+    const endMoment = moment(end);
+
+    while (current.isSameOrBefore(endMoment)) {
+      let key;
+      if (period === 'week') {
+        key = `W${current.week()}-${current.year()}`;
+      } else {
+        key = current.format(dateFormat);
+      }
+
+      const existingData = formattedData.find(d => d.date === key);
+      filledData.push({
+        date: key,
+        revenue: existingData ? existingData.revenue : 0,
+        orders: existingData ? existingData.orders : 0
+      });
+
+      // Increment by period
+      current.add(1, period === 'week' ? 'weeks' : period);
+    }
+
+    return filledData;
+  } catch (error) {
+    console.error('Error in getSalesData:', error);
+    throw error;
+  }
 }
 
 exports.getDashboardData = async (req, res) => {
@@ -336,6 +373,43 @@ exports.changeUserRole = async (req, res) => {
   } catch (error) {
     console.error('Error changing user role:', error);
     res.status(500).json({ message: 'Lỗi khi thay đổi vai trò người dùng' });
+  }
+};
+
+exports.toggleUserStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'Không tìm thấy người dùng' });
+    }
+
+    // Đảm bảo admin không thể tự khóa tài khoản của mình
+    if (user._id.toString() === req.user._id.toString()) {
+      return res.status(400).json({ 
+        message: 'Không thể khóa tài khoản của chính mình' 
+      });
+    }
+
+    user.isActive = !user.isActive;
+    await user.save();
+
+    res.json({
+      message: `Tài khoản đã được ${user.isActive ? 'mở khóa' : 'khóa'} thành công`,
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        isActive: user.isActive
+      }
+    });
+  } catch (error) {
+    console.error('Error toggling user status:', error);
+    res.status(500).json({ 
+      message: 'Lỗi khi thay đổi trạng thái người dùng' 
+    });
   }
 };
 

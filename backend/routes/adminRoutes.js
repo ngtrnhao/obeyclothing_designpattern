@@ -29,6 +29,7 @@ router.put('/orders/:id', adminController.updateOrderStatus);
 router.get('/users', adminController.getAllUsers);
 router.put('/users/:id', adminController.updateUserStatus);
 router.put('/users/:userId/role', adminController.changeUserRole);
+router.patch('/users/:id/toggle-status', adminController.toggleUserStatus);
 
 // Thống kê
 router.get('/statistics', adminController.getStatistics);

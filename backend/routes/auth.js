@@ -12,11 +12,9 @@ router.post('/reset-password/:token', authController.resetPassword);
 
 // Protected routes
 router.use(authMiddleware);
-router.use(adminMiddleware);
 
 // Admin routes
-router.get('/users', authController.getAllUsers);
-router.patch('/users/:userId', authController.changeUserRole);
+router.use('/admin', adminMiddleware);
 
 // Route test
 router.get('/test', (req, res) => {

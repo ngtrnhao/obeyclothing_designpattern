@@ -65,7 +65,10 @@ productSchema.methods.isLowStock = function() {
 };
 
 // Thêm phương thức để cập nhật số lượng tồn kho
-productSchema.methods.updateStock = function(quantity) {
+productSchema.methods.updateStock = async function(quantity) {
+  if (this.stock + quantity < 0) {
+    throw new Error('Số lượng trong kho không đủ');
+  }
   this.stock += quantity;
   return this.save();
 };

@@ -34,4 +34,12 @@ const cartSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+cartSchema.pre('save', function(next) {
+  if (this.isModified('items')) {
+    this.voucher = null;
+    this.discountAmount = 0;
+  }
+  next();
+});
+
 module.exports = mongoose.model('Cart', cartSchema);

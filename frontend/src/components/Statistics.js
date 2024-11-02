@@ -150,8 +150,8 @@ const SalesChart = ({ data, period, formatCurrency }) => (
             dataKey="date" 
             tickFormatter={(tick) => {
               if (period === 'week') {
-                const [, week] = tick.split('-W');
-                return `Tuần ${week}`;
+                const [week, year] = tick.split('-');
+                return `Tuần ${week.substring(1)} (${year})`;
               }
               return tick;
             }}
@@ -170,12 +170,17 @@ const SalesChart = ({ data, period, formatCurrency }) => (
           <Tooltip 
             labelFormatter={(label) => {
               if (period === 'week') {
-                const [, week] = label.split('-W');
-                return `Tuần ${week}`;
+                const [week, year] = label.split('-');
+                return `Tuần ${week.substring(1)} năm ${year}`;
               }
               return label;
             }}
-            formatter={(value, name) => [formatCurrency(value), name]}
+            formatter={(value, name) => {
+              if (name === "revenue") {
+                return [formatCurrency(value), "Doanh thu"];
+              }
+              return [value, "Số đơn hàng"];
+            }}
           />
           <Legend />
           <Bar yAxisId="left" dataKey="revenue" fill="#8884d8" name="Doanh thu" />

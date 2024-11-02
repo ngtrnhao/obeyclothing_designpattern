@@ -47,10 +47,12 @@ const userSchema = new mongoose.Schema({
   resetPasswordToken: String,
   resetPasswordExpires: Date,
   loginAttempts: { type: Number, required: true, default: 0 },
-  lockUntil: { type: Number },
+  lockUntil: { type: Date },
   isActive: { type: Boolean, default: true },
   shippingInfo: { type: mongoose.Schema.Types.ObjectId, ref: 'ShippingInfo' }
-});
+}, { timestamps: true });
+
+userSchema.index({ lockUntil: 1 });
 
 userSchema.pre('save', function(next) {
   if (this.isModified('lockUntil') && this.lockUntil && this.lockUntil < Date.now()) {
@@ -72,7 +74,7 @@ userSchema.methods.incrementLoginAttempts = function() {
   const updates = { $inc: { loginAttempts: 1 } };
   // Khóa tài khoản nếu đạt đến số lần thử tối đa
   if (this.loginAttempts + 1 >= 5 && !this.isLocked) {
-    updates.$set = { lockUntil: Date.now() + 2 * 60 * 60 * 1000 };
+    updates.$set = { lockUntil: Date.now() + 5 * 60 * 1000 };
   }
   return this.updateOne(updates);
 };

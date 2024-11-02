@@ -25,6 +25,39 @@ exports.applyVoucher = async (req, res) => {
     const { voucherCode } = req.body;
     const userId = req.user._id;
 
+    const voucher = await Voucher.findOne({
+      code: voucherCode.toUpperCase(),
+      isActive: true,
+      endDate: { $gte: new Date() },
+      startDate: { $lte: new Date() }
+    });
+
+    if (!voucher) {
+      return res.status(400).json({
+        message: 'Mã giảm giá không tồn tại hoặc đã hết hạn'
+      });
+    }
+
+    // Kiểm tra số lần sử dụng
+    if (voucher.usedCount >= voucher.usageLimit) {
+      voucher.isActive = false;
+      await voucher.save();
+      return res.status(400).json({
+        message: 'Voucher đã hết lượt sử dụng'
+      });
+    }
+
+    // Kiểm tra người dùng đã sử dụng
+    const hasUsed = voucher.usedBy.some(usage => 
+      usage.user.toString() === userId.toString()
+    );
+
+    if (hasUsed) {
+      return res.status(400).json({
+        message: 'Bạn đã sử dụng voucher này'
+      });
+    }
+
     // Tìm giỏ hàng của user
     const cart = await Cart.findOne({ user: userId })
       .populate('items.product');
@@ -35,60 +68,76 @@ exports.applyVoucher = async (req, res) => {
       });
     }
 
-    const voucher = await Voucher.findOne({
-      code: voucherCode.toUpperCase()
-    });
+    // Tính tổng giá trị đơn hàng
+    const totalAmount = cart.items.reduce((sum, item) => 
+      sum + (item.product.price * item.quantity), 0
+    );
 
-    if (!voucher) {
+    if (totalAmount < voucher.minPurchase) {
       return res.status(400).json({
-        message: 'Không tìm thấy voucher'
-      });
-    }
-
-    // Kiểm tra tính hợp lệ của voucher
-    if (!voucher.isValid()) {
-      return res.status(400).json({
-        message: 'Voucher đã hết hạn hoặc hết lượt sử dụng'
-      });
-    }
-
-    // Kiểm tra user đã sử dụng voucher chưa
-    if (voucher.hasUserUsed(userId)) {
-      return res.status(400).json({
-        message: 'Bạn đã sử dụng voucher này'
-      });
-    }
-
-    // Kiểm tra điều kiện áp dụng
-    const canApply = voucher.canApplyToCart(cart);
-    if (!canApply.valid) {
-      return res.status(400).json({
-        message: canApply.message
+        message: `Giá trị đơn hàng tối thiểu để sử dụng mã là ${voucher.minPurchase.toLocaleString('vi-VN')}đ`
       });
     }
 
     // Tính toán giảm giá
-    const totalAmount = cart.items.reduce((sum, item) => 
-      sum + (item.price * item.quantity), 0
-    );
     const discountAmount = voucher.calculateDiscount(totalAmount);
 
-    // Cập nhật giỏ hàng
-    cart.voucher = voucher._id;
-    cart.discountAmount = discountAmount;
-    cart.finalAmount = totalAmount + 30000 - discountAmount;
-    await cart.save();
+    // Chỉ cập nhật cart
+    const updatedCart = await Cart.findOneAndUpdate(
+      { user: userId },
+      {
+        voucher: voucher._id,
+        discountAmount: discountAmount,
+        finalAmount: totalAmount + 30000 - discountAmount
+      },
+      { new: true }
+    );
 
     res.json({
+      success: true,
       discountAmount,
-      finalAmount: cart.finalAmount,
-      message: 'Áp dụng voucher thành công'
+      finalAmount: updatedCart.finalAmount,
+      message: 'Áp dụng mã giảm giá thành công'
     });
 
   } catch (error) {
     console.error('Lỗi khi áp dụng voucher:', error);
     res.status(500).json({
-      message: 'Lỗi server'
+      message: 'Đã có lỗi xảy ra'
+    });
+  }
+};
+
+exports.removeVoucher = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const cart = await Cart.findOne({ user: userId });
+
+    if (!cart) {
+      return res.status(404).json({
+        message: 'Không tìm thấy giỏ hàng'
+      });
+    }
+
+    // Reset voucher information
+    cart.voucher = null;
+    cart.discountAmount = 0;
+    cart.finalAmount = cart.items.reduce((sum, item) => 
+      sum + (item.product.price * item.quantity), 0
+    ) + 30000; // Cộng phí ship
+
+    await cart.save();
+
+    res.json({
+      success: true,
+      message: 'Đã xóa mã giảm giá',
+      finalAmount: cart.finalAmount
+    });
+
+  } catch (error) {
+    console.error('Lỗi khi xóa voucher:', error);
+    res.status(500).json({
+      message: 'Đã có lỗi xảy ra'
     });
   }
 };

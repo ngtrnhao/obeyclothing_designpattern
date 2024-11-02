@@ -309,13 +309,20 @@ export const getAdminUsers = () => {
   });
 };
 
-export const toggleAdminUserStatus = (userId, isActive) => {
-  const token = localStorage.getItem('token');
-  return api.put(`/admin/users/${userId}`, { isActive }, {
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
-  });
+export const toggleAdminUserStatus = async (userId, isActive) => {
+  try {
+    const response = await api.patch(`/admin/users/${userId}/toggle-status`, { isActive });
+    return response;
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Lỗi khi thay đổi trạng thái người dùng';
+    const customError = new Error(errorMessage);
+    customError.response = {
+      data: {
+        message: errorMessage
+      }
+    };
+    throw customError;
+  }
 };
 
 export const getAdminStatistics = async (startDate, endDate, period) => {
@@ -591,6 +598,15 @@ export const changeUserRole = async (userId, role) => {
   } catch (error) {
     console.error('API change user role error:', error.response?.data || error.message);
     throw error;
+  }
+};
+
+export const toggleUserStatus = async (userId) => {
+  try {
+    const response = await api.patch(`/admin/users/${userId}/toggle-status`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Có lỗi xảy ra khi thay đổi trạng thái người dùng' };
   }
 };
 

@@ -130,4 +130,7 @@ app.use('/api', adminRoutes);
 // Add route for delivery management
 app.use('/api/admin/deliveries', require('./routes/deliveryRoutes'));
 
+// Import cronJobs
+require('./utils/cronJobs');
+
 module.exports = app;

@@ -3,6 +3,36 @@ import { getAdminUsers, toggleAdminUserStatus, changeUserRole } from '../service
 import { useAuth } from '../contexts/AuthContext';
 import { FaSearch, FaSort, FaLock, FaLockOpen } from 'react-icons/fa';
 import styles from './style.component/UserManagement.module.css';
+import { toast } from 'react-toastify';
+
+const StatusBadge = ({ isActive, isLocked }) => {
+  const getStatusInfo = () => {
+    if (!isActive) {
+      return {
+        text: 'Bị khóa',
+        className: styles.statusInactive
+      };
+    } 
+    if (isLocked) {
+      return {
+        text: 'Tạm khóa',
+        className: styles.statusLocked
+      };
+    }
+    return {
+      text: 'Hoạt động',
+      className: styles.statusActive
+    };
+  };
+
+  const { text, className } = getStatusInfo();
+
+  return (
+    <span className={`${styles.statusBadge} ${className}`}>
+      {text}
+    </span>
+  );
+};
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -12,7 +42,7 @@ const UserManagement = () => {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
   const [currentPage, setCurrentPage] = useState(1);
   const [usersPerPage] = useState(10);
-  const { user } = useAuth();
+  const { user, user: currentUser } = useAuth();
 
   useEffect(() => {
     if (user && user.role === 'admin') {
@@ -35,11 +65,15 @@ const UserManagement = () => {
 
   const toggleUserStatus = async (userId, isActive) => {
     try {
-      await toggleAdminUserStatus(userId, !isActive);
-      fetchUsers();
+      const response = await toggleAdminUserStatus(userId, !isActive);
+      if (response && response.data) {
+        await fetchUsers();
+        return response.data;
+      }
+      throw new Error('Không nhận được phản hồi từ server');
     } catch (error) {
       console.error('Error toggling user status:', error);
-      setError('Không thể thay đổi trạng thái người dùng. Vui lòng thử lại sau.');
+      throw error;
     }
   };
 
@@ -91,6 +125,22 @@ const UserManagement = () => {
     }
   };
 
+  const handleToggleStatus = async (userId, currentStatus) => {
+    try {
+      const result = await toggleUserStatus(userId, currentStatus);
+      setUsers(users.map(user => 
+        user._id === userId 
+          ? { ...user, isActive: !currentStatus }
+          : user
+      ));
+      toast.success(result.message || 'Thay đổi trạng thái người dùng thành công');
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message || 'Có lỗi xảy ra khi thay đổi trạng thái người dùng';
+      toast.error(errorMessage);
+      console.error('Error toggling user status:', error);
+    }
+  };
+
   if (loading) return <div className={styles.loading}>Đang tải...</div>;
   if (error) return <div className={styles.error}>{error}</div>;
 
@@ -132,14 +182,14 @@ const UserManagement = () => {
                 </select>
               </td>
               <td>
-                <span className={`${styles.status} ${user.isActive ? styles.active : styles.inactive}`}>
-                  {user.isActive ? 'Hoạt động' : 'Bị khóa'}
-                </span>
+                <StatusBadge isActive={user.isActive} isLocked={user.isLocked} />
               </td>
               <td>
                 <button 
-                  onClick={() => toggleUserStatus(user._id, user.isActive)}
+                  onClick={() => handleToggleStatus(user._id, user.isActive)}
                   className={`${styles.actionButton} ${user.isActive ? styles.lockButton : styles.unlockButton}`}
+                  disabled={user._id === currentUser?._id}
+                  title={user._id === currentUser?._id ? 'Không thể khóa tài khoản của chính mình' : ''}
                 >
                   {user.isActive ? <FaLock /> : <FaLockOpen />}
                   {user.isActive ? 'Khóa' : 'Mở khóa'}

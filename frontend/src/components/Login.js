@@ -4,6 +4,7 @@ import { login as apiLogin, loginWithGoogle, loginWithFacebook } from '../servic
 import { useAuth } from '../contexts/AuthContext';
 import styles from './style.component/Login.module.css';
 import { FaEnvelope, FaLock, FaSignInAlt, FaUserPlus, FaKey, FaGoogle, FaFacebook } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -16,6 +17,17 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await apiLogin(email, password);
+      if (response.status === 'locked' || response.status === 'temporary_locked') {
+        toast.error(response.message, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        return;
+      }
       if (response.data.token) {
         const userData = {
           ...response.data.user,
@@ -25,7 +37,7 @@ const Login = () => {
         navigate('/dashboard');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Đăng nhập thất bại');
+      toast.error(err.response?.data?.message || 'Đăng nhập thất bại');
     }
   };
 
