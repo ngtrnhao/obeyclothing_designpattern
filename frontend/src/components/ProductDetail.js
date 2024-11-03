@@ -274,7 +274,11 @@ const ProductDetail = () => {
           <h2>Sản phẩm liên quan</h2>
           <div className={styles.relatedProductsGrid}>
             {relatedProducts.map((product) => (
-              <div key={product._id} className={styles.relatedProductCard}>
+              <Link 
+                to={`/product/${product.slug}`} 
+                key={product._id} 
+                className={styles.relatedProductCard}
+              >
                 <img 
                   src={imageUrl(product.image)} 
                   alt={product.name} 
@@ -286,7 +290,7 @@ const ProductDetail = () => {
                     {formatPrice(product.price)}
                   </p>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

@@ -30,6 +30,7 @@ import Lookbook from './components/Lookbook';
 import StoreLocator from './components/StoreLocator';
 import OrderDetails from './components/OrderDetails';
 import AboutPage from './pages/AboutPage';
+import SearchResults from './pages/SearchResults';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user } = useAuth();
@@ -94,6 +95,7 @@ const AppRoutes = () => {
       </Route>
       
       <Route path="/order-success/:id" element={<OrderSuccess />} />
+      <Route path="/search" element={<SearchResults />} />
       
       {/* Catch-all route for 404 Not Found */}
       <Route path="*" element={<Navigate to="/" replace />} />

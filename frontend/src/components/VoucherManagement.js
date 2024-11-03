@@ -197,6 +197,7 @@ const VoucherManagement = () => {
             <th>Đơn hàng tối thiểu</th>
             <th>Ngày bắt đầu</th>
             <th>Ngày kết thúc</th>
+            <th>Đã sử dụng</th>
             <th>Giới hạn sử dụng</th>
             <th>Trạng thái</th>
             <th>Hành động</th>
@@ -212,13 +213,28 @@ const VoucherManagement = () => {
               <td>{voucher.minPurchase}</td>
               <td>{new Date(voucher.startDate).toLocaleDateString()}</td>
               <td>{new Date(voucher.endDate).toLocaleDateString()}</td>
+              <td>{voucher.usedCount || 0}</td>
               <td>{voucher.usageLimit}</td>
-              <td>{voucher.isActive ? 'Hoạt động' : 'Không hoạt động'}</td>
               <td>
-                <button onClick={() => handleUpdateVoucher(voucher._id, { isActive: !voucher.isActive })}>
+                {voucher.isActive ? 
+                  <span style={{ color: 'green' }}>Hoạt động</span> : 
+                  <span style={{ color: 'red' }}>Không hoạt động</span>
+                }
+              </td>
+              <td>
+                <button 
+                  onClick={() => handleUpdateVoucher(voucher._id, { isActive: !voucher.isActive })}
+                  className={voucher.isActive ? styles.deactivateBtn : styles.activateBtn}
+                  disabled={voucher.usedCount >= voucher.usageLimit}
+                >
                   {voucher.isActive ? 'Vô hiệu hóa' : 'Kích hoạt'}
                 </button>
-                <button onClick={() => handleDeleteVoucher(voucher._id)}>Xóa</button>
+                <button 
+                  onClick={() => handleDeleteVoucher(voucher._id)}
+                  className={styles.deleteBtn}
+                >
+                  Xóa
+                </button>
               </td>
             </tr>
           ))}

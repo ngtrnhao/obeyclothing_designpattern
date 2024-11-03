@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './style.component/Header.module.css';
 import Menu from './Menu';
+import SearchBar from './SearchBar';
 import { useAuth } from '../contexts/AuthContext';
 
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { user, logout } = useAuth();
 
   const toggleMenu = () => {
@@ -52,7 +54,11 @@ const Header = () => {
             </div>
           </div>
           <div className={styles.rightSection}>
-            <button className={styles.searchButton}>
+            <button 
+              className={styles.searchButton}
+              onClick={() => setIsSearchOpen(true)}
+              aria-label="Search"
+            >
               <svg 
                 className={styles.searchIcon} 
                 width="24" 
@@ -101,6 +107,12 @@ const Header = () => {
             </div>
           </div>
         </div>
+
+        {isSearchOpen && (
+          <div className={styles.searchOverlay}>
+            <SearchBar onClose={() => setIsSearchOpen(false)} />
+          </div>
+        )}
       </header>
       <Menu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
     </>

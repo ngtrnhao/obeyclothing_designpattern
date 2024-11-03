@@ -15,36 +15,31 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Các route không cần xác thực
-router.get('/', productController.getAllProducts);
+router.get('/search/suggestions', productController.getSearchSuggestions);
 router.get('/search', productController.searchProducts);
-router.get('/:id', productController.getProductById);
-router.get('/:id/reviews', productController.getProductReviews);
+router.get('/category/:categoryId/all', productController.getProductsByParentCategory);
 router.get('/category/:categoryId', productController.getProductsByCategory);
-router.get('/', productController.getAllProducts);
 router.get('/slug/:slug', productController.getProductBySlug);
-
-
+router.get('/:id/reviews', productController.getProductReviews);
+router.get('/:id', productController.getProductById);
+router.get('/', productController.getAllProducts);
 
 // Các route cần xác thực
 router.use(authMiddleware);
-
 router.post('/:id/reviews', productController.addProductReview);
 
 // Các route cần xác thực admin
-router.post('/', adminMiddleware, upload.fields([
+router.use(adminMiddleware);
+router.post('/', upload.fields([
   { name: 'image', maxCount: 1 },
   { name: 'detailImages', maxCount: 5 }
 ]), productController.createProduct);
 
-router.put('/:id', adminMiddleware, upload.fields([
+router.put('/:id', upload.fields([
   { name: 'image', maxCount: 1 },
   { name: 'detailImages', maxCount: 5 }
 ]), productController.updateProduct);
 
-router.delete('/:id', adminMiddleware, productController.deleteProduct);
-router.post('/', authMiddleware, productController.createProduct);
-
-// New route to fetch products for parent categories
-router.get('/category/:categoryId/all', productController.getProductsByParentCategory);
+router.delete('/:id', productController.deleteProduct);
 
 module.exports = router;

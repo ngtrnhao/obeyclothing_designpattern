@@ -290,3 +290,59 @@
   margin: 10px 0;
   font-size: 1.1rem;
 }
+
+.searchOverlay {
+  position: absolute;
+  top: 60px; /* Chiều cao của header */
+  left: 0;
+  width: 100%;
+  background: white;
+  border-bottom: 1px solid #eee;
+  z-index: 999;
+}
+
+.searchButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.searchButton:hover {
+  opacity: 0.7;
+}
+
+.searchIcon {
+  width: 24px;
+  height: 24px;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .searchOverlay {
+    padding: 10px;
+  }
+  
+  .searchButton {
+    padding: 6px;
+  }
+  
+  .searchIcon {
+    width: 20px;
+    height: 20px;
+  }
+}

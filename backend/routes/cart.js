@@ -183,28 +183,51 @@ router.post('/checkout', async (req, res) => {
     if (cart.voucher) {
       try {
         const voucher = await Voucher.findById(cart.voucher._id);
-        if (voucher) {
+        if (voucher && voucher.isActive) {
           // Kiểm tra lại một lần nữa trước khi cập nhật
-          if (voucher.usedCount < voucher.usageLimit && 
-              !voucher.usedBy.some(usage => usage.user.toString() === req.user._id.toString())) {
-            
-            await Voucher.findByIdAndUpdate(
+          const userHasUsed = voucher.usedBy.some(
+            usage => usage.user.toString() === req.user._id.toString()
+          );
+
+          if (!userHasUsed && voucher.usedCount < voucher.usageLimit) {
+            // Cập nhật voucher
+            const updatedVoucher = await Voucher.findByIdAndUpdate(
               voucher._id,
               {
                 $inc: { usedCount: 1 },
                 $push: {
                   usedBy: {
                     user: req.user._id,
+                    orderId: order._id, // Thêm orderId để theo dõi
                     usedAt: new Date()
                   }
                 }
               },
               { new: true }
             );
+
+            // Kiểm tra và vô hiệu hóa nếu đã hết lượt
+            if (updatedVoucher.usedCount >= updatedVoucher.usageLimit) {
+              await Voucher.findByIdAndUpdate(
+                voucher._id,
+                { isActive: false }
+              );
+            }
+
+            // Cập nhật lại order với thông tin voucher đã sử dụng
+            await Order.findByIdAndUpdate(
+              order._id,
+              {
+                voucher: voucher._id,
+                discountAmount: cart.discountAmount,
+                finalAmount: cart.finalAmount
+              }
+            );
           }
         }
       } catch (error) {
         console.error('Lỗi khi cập nhật voucher:', error);
+        // Không throw error để không ảnh hưởng đến việc tạo đơn hàng
       }
     }
 
@@ -266,18 +289,33 @@ router.put('/update/:itemId', async (req, res) => {
       return res.status(404).json({ message: 'Không tìm thấy giỏ hàng' });
     }
 
+    const itemIndex = cart.items.findIndex(item => item._id.toString() === itemId);
+    if (itemIndex === -1) {
+      return res.status(404).json({ message: 'Không tìm thấy sản phẩm trong giỏ hàng' });
+    }
+
+    // Kiểm tra số lượng tồn kho
+    const product = await Product.findById(cart.items[itemIndex].product._id);
+    if (!product) {
+      return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
+    }
+
+    if (quantity && quantity > product.stock) {
+      return res.status(400).json({ 
+        message: `Chỉ còn ${product.stock} sản phẩm trong kho`,
+        availableStock: product.stock
+      });
+    }
+
     // Reset voucher khi cập nhật số lượng
     cart.voucher = null;
     cart.discountAmount = 0;
 
-    const itemIndex = cart.items.findIndex(item => item._id.toString() === itemId);
-    if (itemIndex > -1) {
-      if (quantity) cart.items[itemIndex].quantity = quantity;
-      if (size) cart.items[itemIndex].size = size;
-      if (color) cart.items[itemIndex].color = color;
-    }
+    if (quantity) cart.items[itemIndex].quantity = quantity;
+    if (size) cart.items[itemIndex].size = size;
+    if (color) cart.items[itemIndex].color = color;
 
-    // Tính lại finalAmount không bao gồm voucher
+    // Tính lại finalAmount
     cart.finalAmount = cart.items.reduce((sum, item) => 
       sum + (item.product.price * item.quantity), 0
     ) + 30000;
@@ -290,7 +328,8 @@ router.put('/update/:itemId', async (req, res) => {
         items: cart.items,
         finalAmount: cart.finalAmount,
         discountAmount: 0,
-        voucher: null
+        voucher: null,
+        availableStock: product.stock
       }
     });
   } catch (error) {

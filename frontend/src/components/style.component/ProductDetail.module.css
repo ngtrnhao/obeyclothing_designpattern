@@ -118,27 +118,41 @@
   }
   
   .description {
-    margin-top: 30px;
+    margin: 40px 0;
   }
   
   .description h2 {
-    font-size: 18px;
-    margin-bottom: 10px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+  
+  .description p {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.8;
+    white-space: pre-line; /* Quan trọng: cho phép xuống dòng */
+    color: #333;
+    max-width: 800px;
   }
   
   .description ul {
-    list-style-type: none;
-    padding-left: 0;
+    margin: 20px 0;
+    padding-left: 20px;
   }
   
   .description li {
-    margin-bottom: 5px;
+    font-size: 14px;
+    line-height: 1.8;
+    color: #333;
   }
   
   .sku {
-    margin-top: 20px;
-    font-size: 14px;
+    font-size: 12px;
     color: #666;
+    margin: 20px 0;
   }
   
   .category, .description {
@@ -350,10 +364,16 @@
     border-radius: 8px;
     overflow: hidden;
     transition: box-shadow 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    display: block;
   }
   
   .relatedProductCard:hover {
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transform: translateY(-5px);
   }
   
   .relatedProductImage {

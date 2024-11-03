@@ -34,7 +34,7 @@ const productSchema = new mongoose.Schema({
   },
   sizeGuideType: {
     type: String,
-    enum: ['TSHIRT', 'PANTS', 'SHOES', 'HOODIE'],
+    enum: ['TSHIRT', 'PANTS', 'SHOES', 'HOODIE','MENSHIRT'],
     required: true
   },
   reviews: [reviewSchema],

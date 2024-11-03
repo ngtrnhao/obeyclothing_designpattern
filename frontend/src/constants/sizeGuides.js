@@ -3,6 +3,10 @@ export const SIZE_GUIDES = {
     name: "T-Shirt Size Guide",
     image: "/images/size-guides/tshirt-size-guide.png"
   },
+  MENSHIRT: {
+    name: "Men-Shirt Size Guide",
+    image: "/images/size-guides/men_shirt_size.png"
+  },
   PANTS: {
     name: "Pants Size Guide",
     image: "/images/size-guides/pants-size-guide.jpg"

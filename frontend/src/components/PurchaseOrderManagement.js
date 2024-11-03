@@ -77,6 +77,20 @@ const PurchaseOrderManagement = () => {
           alert('Vui lòng nhập số lượng thực tế hợp lệ');
           return;
         }
+
+        // Tìm đơn đặt hàng hiện tại
+        const currentOrder = purchaseOrders.find(order => order._id === orderId);
+        if (!currentOrder) {
+          alert('Không tìm thấy thông tin đơn đặt hàng');
+          return;
+        }
+
+        // Kiểm tra số lượng thực nhận
+        if (parseInt(actualQuantity) > currentOrder.suggestedQuantity) {
+          alert(`Số lượng thực nhận (${actualQuantity}) không thể lớn hơn số lượng đề xuất (${currentOrder.suggestedQuantity})`);
+          return;
+        }
+
         await confirmReceiptAndUpdateInventory(orderId, parseInt(actualQuantity));
       } else {
         await updatePurchaseOrder(orderId, { status });
@@ -160,6 +174,11 @@ const PurchaseOrderManagement = () => {
   };
 
   const handleActualQuantityChange = (orderId, quantity) => {
+    const currentOrder = purchaseOrders.find(order => order._id === orderId);
+    if (currentOrder && parseInt(quantity) > currentOrder.suggestedQuantity) {
+      alert(`Số lượng thực nhận không thể lớn hơn số lượng đề xuất (${currentOrder.suggestedQuantity})`);
+      return;
+    }
     setActualQuantities(prev => ({
       ...prev,
       [orderId]: quantity
@@ -236,7 +255,10 @@ const PurchaseOrderManagement = () => {
                     type="number"
                     value={actualQuantities[order._id] || ''}
                     onChange={(e) => handleActualQuantityChange(order._id, e.target.value)}
-                    min="0"
+                    min="1"
+                    max={order.suggestedQuantity}
+                    placeholder="Nhập số lượng thực nhận"
+                    className={styles.quantityInput}
                   />
                 ) : (
                   order.actualQuantity || order.suggestedQuantity

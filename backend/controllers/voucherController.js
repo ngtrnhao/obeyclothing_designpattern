@@ -58,6 +58,20 @@ exports.applyVoucher = async (req, res) => {
       });
     }
 
+    // Tăng số lần sử dụng và thêm người dùng vào danh sách đã sử dụng
+    voucher.usedCount += 1;
+    voucher.usedBy.push({
+      user: userId,
+      usedAt: new Date()
+    });
+
+    // Nếu đạt giới hạn thì vô hiệu hóa voucher
+    if (voucher.usedCount >= voucher.usageLimit) {
+      voucher.isActive = false;
+    }
+
+    await voucher.save();
+
     // Tìm giỏ hàng của user
     const cart = await Cart.findOne({ user: userId })
       .populate('items.product');
@@ -97,6 +111,7 @@ exports.applyVoucher = async (req, res) => {
       success: true,
       discountAmount,
       finalAmount: updatedCart.finalAmount,
+      remainingUses: voucher.usageLimit - voucher.usedCount,
       message: 'Áp dụng mã giảm giá thành công'
     });
 

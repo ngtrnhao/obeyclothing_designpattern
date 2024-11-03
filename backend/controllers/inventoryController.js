@@ -193,6 +193,12 @@ exports.confirmReceiptAndUpdateInventory = async (req, res) => {
       return res.status(400).json({ message: 'Đơn đặt hàng chưa được phê duyệt' });
     }
 
+    if (actualQuantity > purchaseOrder.suggestedQuantity) {
+      return res.status(400).json({ 
+        message: `Số lượng thực nhận (${actualQuantity}) không thể lớn hơn số lượng đề xuất (${purchaseOrder.suggestedQuantity})`
+      });
+    }
+
     purchaseOrder.actualQuantity = actualQuantity;
     purchaseOrder.receiptDate = new Date();
     purchaseOrder.status = 'received';

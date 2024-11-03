@@ -1,0 +1,42 @@
+.deactivateBtn {
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+.activateBtn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+.deleteBtn {
+  background-color: #ff0000;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.deactivateBtn:disabled,
+.activateBtn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* Thêm style cho các trạng thái */
+.active {
+  color: green;
+  font-weight: bold;
+}
+
+.inactive {
+  color: red;
+  font-weight: bold;
+}

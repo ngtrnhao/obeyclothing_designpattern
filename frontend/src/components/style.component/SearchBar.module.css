@@ -1,157 +1,102 @@
-.searchBarContainer {
+.searchBar {
   position: relative;
   width: 100%;
-  max-width: 600px;
+  max-width: 1200px;
   margin: 0 auto;
-}
-
-.searchBar {
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-  position: relative; /* Add this */
+  padding: 20px;
+  background: white;
 }
 
 .searchInputWrapper {
   display: flex;
-  width: 100%;
   align-items: center;
-  background-color: #fff;
-  border-radius: 25px;
-  overflow: hidden;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  border: none;
+  border-bottom: 1px solid #ddd;
+  padding: 10px 0;
+}
+
+.searchIcon {
+  color: #000;
+  font-size: 20px;
+  margin-right: 15px;
 }
 
 .searchInput {
-  flex-grow: 1;
-  padding: 10px 15px;
+  flex: 1;
   border: none;
-  font-size: 16px;
-}
-
-.searchInput:focus {
   outline: none;
+  font-size: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background: transparent;
 }
 
-.searchButton, .closeButton {
+.searchInput::placeholder {
+  color: #999;
+}
+
+.clearButton,
+.closeButton {
   background: none;
   border: none;
-  padding: 10px 15px;
+  color: #000;
   cursor: pointer;
-  font-size: 18px;
-  color: #333;
-  transition: color 0.3s ease;
-}
-
-.searchButton:hover, .closeButton:hover {
-  color: #007bff;
-}
-
-.searchButton, .filterButton {
-  padding: 10px 15px;
-  font-size: 16px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.searchButton {
-  border-radius: 0 20px 20px 0;
-}
-
-.filterButton {
-  border-radius: 20px;
-  margin-left: 10px;
-}
-
-.searchButton:hover, .filterButton:hover {
-  background-color: #0056b3;
-}
-
-.filterContainer {
-  position: relative;
-}
-
-.filters {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 15px;
-  margin-top: 10px;
-  z-index: 1000;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  min-width: 200px;
-}
-
-.categorySelect, .priceInput {
-  padding: 8px 12px;
-  font-size: 14px;
-  border: 1px solid #ddd;
-  border-radius: 15px;
-  outline: none;
+  padding: 5px;
+  font-size: 20px;
 }
 
 .suggestions {
   position: absolute;
-  top: calc(100% + 5px);
+  top: 100%;
   left: 0;
   right: 0;
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 20px;
-  list-style-type: none;
-  padding: 0;
-  margin-top: 5px;
-  max-height: 300px;
+  background: white;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  max-height: 400px;
   overflow-y: auto;
-  z-index: 1000;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 0 20px;
 }
 
 .suggestions li {
   display: flex;
   align-items: center;
-  padding: 10px 15px;
+  padding: 15px 0;
   cursor: pointer;
-  transition: background-color 0.3s;
+  border-bottom: 1px solid #eee;
 }
 
 .suggestions li:hover {
-  background-color: #f0f0f0;
+  background: #f9f9f9;
 }
 
-.suggestionImage {
-  width: 50px;
-  height: 50px;
+.suggestions img {
+  width: 60px;
+  height: 60px;
   object-fit: cover;
-  margin-right: 15px;
-  border-radius: 5px;
+  margin-right: 20px;
 }
 
-.suggestionInfo {
+.suggestions div {
   display: flex;
   flex-direction: column;
+  gap: 5px;
 }
 
-.suggestionName {
-  font-weight: bold;
-  margin-bottom: 3px;
-}
-
-.suggestionPrice {
-  color: #007bff;
+.suggestions span:first-child {
   font-size: 14px;
+  color: #000;
 }
 
-.suggestionCategory {
-  color: #6c757d;
-  font-size: 12px;
+.suggestions span:last-child {
+  font-size: 13px;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .searchBar {
+    padding: 15px;
+  }
+  
+  .suggestions {
+    padding: 0 15px;
+  }
 }

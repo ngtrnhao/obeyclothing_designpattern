@@ -275,12 +275,12 @@ const Checkout = () => {
 				finalAmount: totalWithShipping
 			};
 
-			console.log('Sending order data:', orderData);
-
 			if (selectedPaymentMethod === 'cod') {
 				try {
-					const response = await createCodOrder(orderData);
-					console.log('COD order response:', response);
+					const response = await createCodOrder({
+						...orderData,
+						createDelivery: true
+					});
 
 					if (response && response.order && response.order._id) {
 						await clearCart();
@@ -295,7 +295,7 @@ const Checkout = () => {
 			}
 		} catch (error) {
 			console.error('Checkout error:', error);
-			alert('Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.');
+				alert('Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.');
 		}
 	};
 

@@ -1,4 +1,4 @@
-﻿import React, { useContext, useEffect } from 'react';
+﻿import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CartContext } from '../contexts/CartContext';
 import styles from './style.component/Cart.module.css';
@@ -16,12 +16,24 @@ const Cart = () => {
     finalAmount 
   } = useContext(CartContext);
 
+  const [stockErrors, setStockErrors] = useState({});
+
   useEffect(() => {
     fetchCart();
   }, [fetchCart]);
 
-  const handleQuantityChange = (itemId, newQuantity) => {
-    updateCartItem(itemId, { quantity: newQuantity });
+  const handleQuantityChange = async (itemId, newQuantity) => {
+    try {
+      await updateCartItem(itemId, { quantity: newQuantity });
+      setStockErrors(prev => ({...prev, [itemId]: null}));
+    } catch (error) {
+      if (error.response?.data?.availableStock) {
+        setStockErrors(prev => ({
+          ...prev, 
+          [itemId]: `Chỉ còn ${error.response.data.availableStock} sản phẩm trong kho`
+        }));
+      }
+    }
   };
 
   const handleSizeChange = (itemId, newSize) => {
@@ -83,14 +95,31 @@ const Cart = () => {
             </div>
             <div className={styles.quantityControl}>
               <button 
-                onClick={() => handleQuantityChange(item._id, item.quantity - 1)} 
-                disabled={item.quantity === 1}
-              >-</button>
-              <span>{item.quantity}</span>
+                onClick={() => handleQuantityChange(item._id, Math.max(1, item.quantity - 1))}
+                disabled={item.quantity <= 1}
+              >
+                -
+              </button>
+              <input
+                type="number"
+                min="1"
+                max={item.product.stock}
+                value={item.quantity}
+                onChange={(e) => handleQuantityChange(item._id, parseInt(e.target.value) || 1)}
+              />
               <button 
                 onClick={() => handleQuantityChange(item._id, item.quantity + 1)}
-              >+</button>
+                disabled={item.quantity >= item.product.stock}
+              >
+                +
+              </button>
             </div>
+            {stockErrors[item._id] && (
+              <p className={styles.errorMessage}>{stockErrors[item._id]}</p>
+            )}
+            <p className={styles.stockInfo}>
+              Còn lại: {item.product.stock} sản phẩm
+            </p>
             <button 
               onClick={() => removeFromCart(item.product._id)} 
               className={styles.removeButton}
