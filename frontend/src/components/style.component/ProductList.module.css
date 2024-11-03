@@ -200,7 +200,9 @@
 
 .actionButton {
   width: 100%;
-  padding: 12px;
+  max-width: 300px;
+  margin: 0 auto;
+  padding: 12px 20px;
   border-radius: 6px;
   font-size: 14px;
   font-weight: 500;
@@ -216,7 +218,8 @@
 .addToCart {
   background-color: #fff;
   color: #000;
-  border: 2px solid #000;
+  border: 1px solid #000;
+  width: 200px;
 }
 
 .addToCart:hover {
@@ -228,6 +231,7 @@
   background-color: #000;
   color: #fff;
   border: none;
+  width: 200px;
 }
 
 .buyNow:hover {

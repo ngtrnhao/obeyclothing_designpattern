@@ -12,11 +12,11 @@ const api = axios.create({
   withCredentials: true
 });
 
-// Add this interceptor
+// Chỉ giữ một interceptor request
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
-    if (token) {
+    if (token && !publicEndpoints.some(endpoint => config.url.includes(endpoint))) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
     return config;
@@ -26,7 +26,20 @@ api.interceptors.request.use(
   }
 );
 
-// Danh sách các endpoint không cần xác thực
+// Thêm interceptor response để xử lý lỗi authentication
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Danh sách c��c endpoint không cần xác thực
 const publicEndpoints = ['/products', '/categories', '/products/category'];
 
 // Hàm để set token vào header của mọi request
@@ -40,24 +53,6 @@ export const setAuthToken = (token) => {
   }
 };
 
-// Interceptor để thêm token vào header của mỗi request
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
-    }
-    // Chỉ thêm token nếu endpoint không nằm trong danh sách public
-    if (token && !publicEndpoints.some(endpoint => config.url.includes(endpoint))) {
-      config.headers['Authorization'] = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
 // Authentication
 export const login = async (email, password) => {
   try {
@@ -65,7 +60,7 @@ export const login = async (email, password) => {
     if (response.data.token) {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
-      setAuthToken(response.data.token);
+      api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
     }
     return response;
   } catch (error) {

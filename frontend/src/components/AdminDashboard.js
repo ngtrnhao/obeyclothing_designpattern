@@ -1,11 +1,24 @@
-import React from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { FaChartLine, FaShoppingCart, FaUsers, FaBox, FaPlus, FaTags, FaUser, FaWarehouse, FaFileInvoiceDollar, FaUserTie, FaTruck, FaTicketAlt } from 'react-icons/fa';
 import styles from './style.component/AdminDashboard.module.css';
+import { useAuth } from '../contexts/AuthContext';
 
 
 const AdminDashboard = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    if (!user || user.role !== 'admin') {
+      navigate('/login');
+    }
+  }, [user, navigate]);
+
+  if (!user || user.role !== 'admin') {
+    return null;
+  }
 
   const navItems = [
     { path: '/admin/statistics', icon: <FaChartLine />, text: 'Thống kê' },

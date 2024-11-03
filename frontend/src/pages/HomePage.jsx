@@ -69,14 +69,14 @@ const HomePage = () => {
           <img src="/assets/3_PRINTABLES.jpg" alt="Áo Thun Họa Tiết" />
           <div className={styles.categoryOverlay}>
             <h2>Áo Thun Họa Tiết</h2>
-            <Link to="/graphic-tees" className={styles.categoryLink}>Khám Phá</Link>
+            <Link to="/category/graphic-tees" className={styles.categoryLink}>Khám Phá</Link>
           </div>
         </div>
         <div className={`${styles.categoryItem} ${styles.small}`}>
           <img src="/assets/4_SHEPARD_COLLECTION.jpg" alt="Bộ Sưu Tập Shepard Fairey" />
           <div className={styles.categoryOverlay}>
             <h2>Bộ Sưu Tập Shepard Fairey</h2>
-            <Link to="/shepard-fairey" className={styles.categoryLink}>Khám Phá</Link>
+            <Link to="/category/shepard-fairey" className={styles.categoryLink}>Khám Phá</Link>
           </div>
         </div>
       </section>

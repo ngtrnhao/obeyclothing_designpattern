@@ -48,11 +48,11 @@ const Checkout = () => {
 			id: 'banking',
 			name: 'Chuyển khoản ngân hàng',
 			description: 'Chuyển khoản qua ngân hàng nội địa',
-			icon: 'bank-icon.png',
+			icon: 'bank-icon.jpg',
 			bankInfo: {
-				bankName: 'VietcomBank',
-				accountNumber: '1234567890',
-				accountName: 'SHOP NAME',
+				bankName: 'Techcombank',
+				accountNumber: '167199999999',
+				accountName: 'OBEY CLOTHING',
 				branch: 'Chi nhánh HCM'
 			}
 		}
@@ -301,89 +301,94 @@ const Checkout = () => {
 
 	return (
 		<div className={styles.checkoutContainer}>
-			<AddressSection 
-				shippingAddresses={shippingAddresses}
-				selectedAddressId={selectedAddressId}
-				setSelectedAddressId={setSelectedAddressId}
-				handleEditAddress={handleEditAddress}
-				handleDeleteAddress={handleDeleteAddress}
-				setIsAddingNewAddress={setIsAddingNewAddress}
-				isAddingNewAddress={isAddingNewAddress}
-				newAddress={newAddress}
-				handleAddOrUpdateAddress={handleAddOrUpdateAddress}
-				renderAddressFields={renderAddressFields}
-			/>
-			{isAddingNewAddress && (
-				<form onSubmit={handleAddOrUpdateAddress} className={styles.newAddressForm}>
-					{renderAddressFields(editingAddress || newAddress)}
-					<button type="submit">
-						{editingAddress ? 'Cập nhật địa chỉ' : 'Lưu địa chỉ mới'}
-					</button>
-				</form>
-			)}
-			<div className={styles.orderSummary}>
-				<h2>Thông tin đơn hàng</h2>
-				{cartItems.map(item => (
-					<div key={item._id} className={styles.orderItem}>
-						<img src={`${process.env.REACT_APP_API_URL}/uploads/${item.product.image}`} alt={item.product.name} />
-						<div>
-							<h3>{item.product.name}</h3>
-							<p>Số lượng: {item.quantity}</p>
-							<p>Giá: {item.product.price.toLocaleString('vi-VN')} đ</p>
-						</div>
-					</div>
-				))}
-				<div className={styles.orderTotal}>
-					<p>Tạm tính: {total.toLocaleString('vi-VN')} đ</p>
-					{voucher && (
-						<p className={styles.discount}>
-							Giảm giá (Mã: {voucher.code}): -{discountAmount.toLocaleString('vi-VN')} đ
-						</p>
-					)}
-					<p>Phí vận chuyển: {shippingFee.toLocaleString('vi-VN')} đ</p>
-					<h3>Tổng cộng: {totalWithShipping.toLocaleString('vi-VN')} đ</h3>
-				</div>
-			</div>
-			<div className={styles.paymentSection}>
-				<h2>Phương thức thanh toán</h2>
-				<div className={styles.paymentMethods}>
-					{paymentMethods.map(method => (
-						<div
-							key={method.id}
-							className={`${styles.paymentMethod} ${selectedPaymentMethod === method.id ? styles.selected : ''}`}
-							onClick={() => setSelectedPaymentMethod(method.id)}
-						>
-							<div className={styles.methodInfo}>
-								<img 
-									src={`/images/${method.icon}`} 
-									alt={method.name} 
-									className={styles.methodIcon}
-								/>
-								<div>
-									<h3>{method.name}</h3>
-									<p>{method.description}</p>
-								</div>
+			<div className={styles.mainContent}>
+				<AddressSection 
+					shippingAddresses={shippingAddresses}
+					selectedAddressId={selectedAddressId}
+					setSelectedAddressId={setSelectedAddressId}
+					handleEditAddress={handleEditAddress}
+					handleDeleteAddress={handleDeleteAddress}
+					setIsAddingNewAddress={setIsAddingNewAddress}
+					isAddingNewAddress={isAddingNewAddress}
+					newAddress={newAddress}
+					handleAddOrUpdateAddress={handleAddOrUpdateAddress}
+					renderAddressFields={renderAddressFields}
+				/>
+				{isAddingNewAddress && (
+					<form onSubmit={handleAddOrUpdateAddress} className={styles.newAddressForm}>
+						{renderAddressFields(editingAddress || newAddress)}
+						<button type="submit">
+							{editingAddress ? 'Cập nhật địa chỉ' : 'Lưu địa chỉ mới'}
+						</button>
+					</form>
+				)}
+				<div className={styles.orderSummary}>
+					<h2>Thông tin đơn hàng</h2>
+					{cartItems.map(item => (
+						<div key={item._id} className={styles.orderItem}>
+							<img src={`${process.env.REACT_APP_API_URL}/uploads/${item.product.image}`} alt={item.product.name} />
+							<div>
+								<h3>{item.product.name}</h3>
+								<p>Số lượng: {item.quantity}</p>
+								<p>Giá: {item.product.price.toLocaleString('vi-VN')} đ</p>
 							</div>
-							{method.id === 'banking' && selectedPaymentMethod === 'banking' && (
-								<div className={styles.bankingInfo}>
-									<p><strong>Thông tin chuyển khoản:</strong></p>
-									<p>Ngân hàng: {method.bankInfo.bankName}</p>
-									<p>Số tài khoản: {method.bankInfo.accountNumber}</p>
-									<p>Chủ tài khoản: {method.bankInfo.accountName}</p>
-									<p>Chi nhánh: {method.bankInfo.branch}</p>
-								</div>
-							)}
 						</div>
 					))}
+					<div className={styles.orderTotal}>
+						<p>Tạm tính: {total.toLocaleString('vi-VN')} đ</p>
+						{voucher && (
+							<p className={styles.discount}>
+								Giảm giá (Mã: {voucher.code}): -{discountAmount.toLocaleString('vi-VN')} đ
+							</p>
+						)}
+						<p>Phí vận chuyển: {shippingFee.toLocaleString('vi-VN')} đ</p>
+						<h3>Tổng cộng: {totalWithShipping.toLocaleString('vi-VN')} đ</h3>
+					</div>
+				</div>
+				<div className={styles.paymentSection}>
+					<h2>Phương thức thanh toán</h2>
+					<div className={styles.paymentMethods}>
+						{paymentMethods.map(method => (
+							<div
+								key={method.id}
+								className={`${styles.paymentMethod} ${selectedPaymentMethod === method.id ? styles.selected : ''}`}
+								onClick={() => setSelectedPaymentMethod(method.id)}
+							>
+								<div className={styles.methodInfo}>
+									<img 
+										src={`/images/${method.icon}`} 
+										alt={method.name} 
+										className={styles.methodIcon}
+									/>
+									<div>
+										<h3>{method.name}</h3>
+										<p>{method.description}</p>
+									</div>
+								</div>
+								{method.id === 'banking' && selectedPaymentMethod === 'banking' && (
+									<div className={styles.bankingInfo}>
+										<p><strong>Thông tin chuyển khoản:</strong></p>
+										<p>Ngân hàng: {method.bankInfo.bankName}</p>
+										<p>Số tài khoản: {method.bankInfo.accountNumber}</p>
+										<p>Chủ tài khoản: {method.bankInfo.accountName}</p>
+										<p>Chi nhánh: {method.bankInfo.branch}</p>
+									</div>
+								)}
+							</div>
+						))}
+					</div>
 				</div>
 			</div>
+			
 			{selectedAddressId && (
 				<div className={styles.checkoutActions}>
 					{selectedPaymentMethod === 'paypal' ? (
-						<PayPalCheckout 
-							amount={totalWithShipping} 
-							shippingInfo={shippingAddresses.find(addr => addr._id === selectedAddressId)} 
-						/>
+						<div className={styles.paypalContainer}>
+							<PayPalCheckout 
+								amount={totalWithShipping} 
+								shippingInfo={shippingAddresses.find(addr => addr._id === selectedAddressId)} 
+							/>
+						</div>
 					) : (
 						<button 
 							className={styles.checkoutButton}

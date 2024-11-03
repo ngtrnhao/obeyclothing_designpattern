@@ -212,7 +212,7 @@ const ProductDetail = () => {
 
           {product.stock === 0 ? (
             <div className={styles.outOfStock}>
-              <p>EMAIL WHEN STOCK AVAILABLE</p>
+              <p>NHẬN THÔNG BÁO NGAY KHI CÓ HÀNG</p>
               <input type="text" placeholder="Nguyễn Trương Nhật Hào" className={styles.input} />
               <input type="email" placeholder="nguyentruongnhathao1922@gmail.com" className={styles.input} />
               <button className={styles.subscribeButton}>SUBSCRIBE NOW</button>
@@ -238,13 +238,13 @@ const ProductDetail = () => {
                 className={styles.addToBasket} 
                 onClick={handleAddToCart}
               >
-                ADD TO BASKET
+                THÊM VÀO GIỎ HÀNG
               </button>
             </>
           )}
 
           <div className={styles.description}>
-            <h2>DESCRIPTION</h2>
+            <h2>MÔ TẢ</h2>
             <p>{product.description}</p>
           </div>
 
@@ -261,8 +261,8 @@ const ProductDetail = () => {
           <p className={styles.sku}>SKU: {product._id}</p>
 
           <div className={styles.additionalInfo}>
-            <p className={styles.deliveryReturns}>DELIVERY & RETURNS</p>
-            <p className={styles.questions}>QUESTIONS?</p>
+            <p className={styles.deliveryReturns}>GIAO HÀNG & ĐỔI TRẢ</p>
+            <p className={styles.questions}>HỎI ĐÁP?</p>
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAdminOrders, updateAdminOrderStatus } from '../services/api';
-import { FaSearch, FaSort } from 'react-icons/fa';
+import { FaSearch, FaSort, FaEye } from 'react-icons/fa';
 import styles from './style.component/OrderManagement.module.css';
 import { Link } from 'react-router-dom';
 
@@ -77,6 +77,21 @@ const OrderManagement = () => {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+  // Thêm hằng số cho các trạng thái
+  const ORDER_STATUS = {
+    PENDING: 'pending',
+    PROCESSING: 'processing',
+    SHIPPED: 'shipped',
+    DELIVERED: 'delivered',
+    CANCELLED: 'cancelled'
+  };
+
+  // Trong component OrderManagement, thêm hàm kiểm tra trạng thái
+  const isStatusChangeDisabled = (currentStatus) => {
+    return currentStatus === ORDER_STATUS.DELIVERED || 
+           currentStatus === ORDER_STATUS.CANCELLED;
+  };
+
   if (loading) return <div className={styles.loading}>Đang tải...</div>;
   if (error) return <div className={styles.error}>{error}</div>;
 
@@ -116,20 +131,27 @@ const OrderManagement = () => {
               </td>
               <td>{order.paypalOrderId || 'N/A'}</td>
               <td>
-                <select
-                  value={order.status || ''}
-                  onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                  className={styles.statusSelect}
-                >
-                  <option value="pending">Đang xử lý</option>
-                  <option value="processing">Đang chuẩn bị</option>
-                  <option value="shipped">Đã gửi</option>
-                  <option value="delivered">Đã giao</option>
-                  <option value="cancelled">Đã hủy</option>
-                </select>
-                <Link to={`/admin/orders/${order._id}`} className={styles.viewDetailsButton}>
-                  Xem chi tiết
-                </Link>
+                <div className={styles.actionButtons}>
+                  <select
+                    value={order.status || ''}
+                    onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                    className={styles.statusSelect}
+                    disabled={isStatusChangeDisabled(order.status)}
+                  >
+                    <option value={ORDER_STATUS.PENDING}>Đang xử lý</option>
+                    <option value={ORDER_STATUS.PROCESSING}>Đang chuẩn bị</option>
+                    <option value={ORDER_STATUS.SHIPPED}>Đã gửi</option>
+                    <option value={ORDER_STATUS.DELIVERED}>Đã giao</option>
+                    <option value={ORDER_STATUS.CANCELLED}>Đã hủy</option>
+                  </select>
+                  <Link 
+                    to={`/admin/orders/${order._id}`} 
+                    className={`${styles.viewDetailsButton} ${isStatusChangeDisabled(order.status) ? styles.disabled : ''}`}
+                    onClick={(e) => isStatusChangeDisabled(order.status) && e.preventDefault()}
+                  >
+                    <FaEye /> Xem chi tiết
+                  </Link>
+                </div>
               </td>
             </tr>
           ))}

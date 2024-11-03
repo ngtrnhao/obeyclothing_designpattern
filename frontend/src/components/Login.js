@@ -17,27 +17,21 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await apiLogin(email, password);
-      if (response.status === 'locked' || response.status === 'temporary_locked') {
-        toast.error(response.message, {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-        return;
-      }
       if (response.data.token) {
         const userData = {
           ...response.data.user,
           token: response.data.token
         };
         await login(userData);
-        navigate('/dashboard');
+        if (userData.role === 'admin') {
+          navigate('/admin/statistics');
+        } else {
+          navigate('/dashboard');
+        }
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Đăng nhập thất bại');
+      const errorMessage = err.response?.data?.message || 'Đăng nhập thất bại';
+      toast.error(errorMessage);
     }
   };
 
@@ -77,7 +71,6 @@ const Login = () => {
     <div className={styles.loginPage}>
       <div className={styles.loginContainer}>
         <div className={styles.loginImage}>
-          {/* Hình ảnh thời trang sẽ được đặt ở đây */}
         </div>
         <div className={styles.loginForm}>
           <h1 className={styles.loginTitle}>Đăng nhập</h1>

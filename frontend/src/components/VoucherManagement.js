@@ -240,13 +240,6 @@ const VoucherManagement = () => {
           ))}
         </tbody>
       </table>
-      {/* Add this debug information */}
-      <div>
-        <h3>Debug Info:</h3>
-        <p>Vouchers count: {vouchers.length}</p>
-        <p>Loading: {loading.toString()}</p>
-        <p>Error: {error || 'No error'}</p>
-      </div>
     </div>
   );
 };

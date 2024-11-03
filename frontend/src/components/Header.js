@@ -87,11 +87,11 @@ const Header = () => {
               {user ? (
                 <>
                   <Link to={user.role === 'admin' ? "/admin/profile" : "/user/profile"} className={styles.navLink}>
-                    Profile
+                    Tài Khoản
                   </Link>
                   {user.role === 'admin' && (
                     <Link to="/admin" className={styles.navLink}>
-                      Admin Dashboard
+                      Quản Trị
                     </Link>
                   )}
                   <button onClick={logout} className={styles.navLink}>

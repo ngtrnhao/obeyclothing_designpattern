@@ -6,8 +6,14 @@
   border-radius: 8px;
   box-shadow: 0 0 20px rgba(0,0,0,0.1);
   display: flex;
+  flex-direction: column;
+}
+
+.mainContent {
+  display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
+  margin-bottom: 30px;
 }
 
 .shippingInfo, .orderSummary {
@@ -112,27 +118,34 @@
 }
 
 .paypalButtonContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 20px;
   width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
 }
 
-.paypalButtonContainer > div,
-.paypalButtonContainer > button {
-  width: 300px;
-  margin-bottom: 10px;
+.paypalButtonContainer > div {
+  width: 100% !important;
+  max-width: 400px !important;
+}
+
+.paypalButtonContainer iframe {
+  width: 100% !important;
+  min-width: unset !important;
 }
 
 @media (max-width: 768px) {
   .checkoutContainer {
-    flex-direction: column;
+    margin: 20px auto;
+    padding: 20px;
   }
 
-  .shippingInfo, .orderSummary {
-    width: 100%;
-    margin-bottom: 30px;
+  .checkoutActions {
+    padding: 15px;
+  }
+
+  .checkoutButton {
+    max-width: 100%;
+    font-size: 16px;
   }
 }
 
@@ -205,24 +218,28 @@
 }
 
 .checkoutActions {
-  margin-top: 20px;
+  width: 100%;
+  padding: 20px;
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
 }
 
 .checkoutButton {
+  width: 400px;
   background: #4CAF50;
   color: white;
   border: none;
   padding: 15px 30px;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 16px;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .checkoutButton:hover {
   background: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 175, 80, 0.2);
 }
 
 .checkoutButton:disabled {
@@ -432,4 +449,14 @@
   display: flex;
   flex-direction: column;
   gap: 15px;
+}
+
+/* Style cho container của PayPal */
+.paypalContainer {
+  width: 400px;
+}
+
+/* Đảm bảo nút PayPal có cùng kích thước */
+.paypalContainer > div {
+  width: 400px !important;
 }

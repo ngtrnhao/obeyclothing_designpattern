@@ -1,0 +1,44 @@
+.instagramSection {
+    padding: 40px 0;
+    text-align: center;
+  }
+  
+  .instagramHeader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+  }
+  
+  .instagramIcon {
+    font-size: 24px;
+  }
+  
+  .instagramEmbed {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+  }
+  
+  .followButton {
+    display: inline-block;
+    padding: 12px 24px;
+    background: #000;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+    margin-top: 20px;
+  }
+  
+  .followButton:hover {
+    background: #333;
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 540px) {
+    .instagramEmbed {
+      margin: 20px -15px;
+    }
+  }

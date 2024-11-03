@@ -42,6 +42,14 @@ const PayPalCheckout = ({ amount, shippingInfo }) => {
 
   return (
     <PayPalButtons
+      style={{
+        layout: "horizontal",
+        color: "blue",
+        shape: "rect",
+        label: "pay",
+        height: 40,
+        tagline: false
+      }}
       createOrder={(data, actions) => {
         return actions.order.create({
           purchase_units: [

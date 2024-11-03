@@ -4,19 +4,30 @@ import { getUserProfile, setAuthToken } from '../services/api';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
   const [loading, setLoading] = useState(true);
 
   const fetchUserProfile = async () => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No token found');
+      }
+      
       const response = await getUserProfile();
-      setUser(response.data);
-      localStorage.setItem('user', JSON.stringify(response.data));
+      if (!response.data) {
+        throw new Error('No user data received');
+      }
+      
+      return response.data;
     } catch (error) {
       console.error('Error fetching user profile:', error);
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      setUser(null);
+      throw new Error('Unauthorized');
     }
   };
 
