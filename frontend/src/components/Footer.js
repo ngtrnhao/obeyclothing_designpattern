@@ -9,7 +9,10 @@ const Footer = () => {
     <footer className={styles.footer}>
       <div className={styles.footerContent}>
         <div className={styles.footerColumn}>
-          <h3>OBEY CLOTHING VIỆT NAM</h3>
+          <h3>
+            OBEY CLOTHING<br />
+            VIỆT NAM
+          </h3>
           <Link to="/chinh-sach-giao-hang">Chính sách giao hàng</Link>
           <Link to="/chinh-sach-doi-tra">Chính sách đổi trả</Link>
           <Link to="/the-qua-tang">Thẻ quà tặng OBEY</Link>
@@ -26,17 +29,54 @@ const Footer = () => {
           <Link to="/dang-ky-nhan-tin">Đăng ký nhận tin mới nhất</Link>
         </div>
         <div className={styles.footerColumn}>
-          <h3>KẾT NỐI VỚI CHÚNG TÔI</h3>
-          <div className={styles.socialLinks}>
-            <a href="https://www.instagram.com/leaddistribution/" target="_blank" rel="noopener noreferrer">
-              <i className="fab fa-instagram"></i>
-            </a>
-            <a href="https://facebook.com/obeyclothing.vietnam" target="_blank" rel="noopener noreferrer">
-              <i className="fab fa-facebook-f"></i>
-            </a>
-            <a href="https://twitter.com/obey_vietnam" target="_blank" rel="noopener noreferrer">
-              <i className="fab fa-twitter"></i>
-            </a>
+          <div className={styles.socialLinksContainer}>
+            <h3>KẾT NỐI VỚI CHÚNG TÔI</h3>
+            <div className={styles.socialLinks}>
+              <a 
+                href="https://www.instagram.com/obeyclothing/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+              >
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Instagram_logo.svg/1280px-Instagram_logo.svg.png"
+                  alt="Instagram"
+                />
+              </a>
+              <a 
+                href="https://facebook.com/obeyclothing.vietnam" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+              >
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Facebook_Logo_%282019%29.svg/2560px-Facebook_Logo_%282019%29.svg.png"
+                  alt="Facebook"
+                />
+              </a>
+              <a 
+                href="https://twitter.com/obey_vietnam" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="X"
+              >
+                <img 
+                  src="https://cdn-icons-png.flaticon.com/512/5969/5969020.png"
+                  alt="X"
+                />
+              </a>
+              <a 
+                href="https://www.tiktok.com/@obeyclothing" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="TikTok"
+              >
+                <img 
+                  src="https://sf-tb-sg.ibytedtos.com/obj/eden-sg/uhtyvueh7nulogpoguhm/tiktok-icon2.png"
+                  alt="TikTok"
+                />
+              </a>
+            </div>
           </div>
         </div>
       </div>
