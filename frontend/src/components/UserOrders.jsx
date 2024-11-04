@@ -45,11 +45,17 @@ const UserOrders = () => {
           {orders.map(order => (
             <tr key={order._id}>
               <td>{order._id}</td>
-              <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-              <td>{order.totalAmount.toLocaleString('vi-VN')} đ</td>
-              <td>{order.status}</td>
+              <td>{new Date(order.createdAt).toLocaleDateString('vi-VN')}</td>
+              <td>{order.totalAmount.toLocaleString('vi-VN')}đ</td>
               <td>
-                <Link to={`/user/orders/${order._id}`}>Xem chi tiết</Link>
+                <span className={`${styles.orderStatus} ${styles[order.status]}`}>
+                  {order.status}
+                </span>
+              </td>
+              <td>
+                <Link to={`/user/orders/${order._id}`} className={styles.viewButton}>
+                  Xem chi tiết
+                </Link>
               </td>
             </tr>
           ))}

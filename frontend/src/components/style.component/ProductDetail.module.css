@@ -431,3 +431,185 @@
       padding: 8px 12px;
     }
   }
+  
+  /* Tablet & Mobile chung (max-width: 1024px) */
+  @media (max-width: 1024px) {
+    .productDetail {
+      padding: 15px;
+    }
+  
+    .productMain {
+      gap: 30px;
+    }
+  
+    .relatedProductsGrid {
+      gap: 15px;
+    }
+  
+    .relatedProductCard {
+      width: 180px;
+    }
+  }
+  
+  /* Tablet (max-width: 768px) */
+  @media (max-width: 768px) {
+    .productMain {
+      flex-direction: column;
+    }
+  
+    .imageSection {
+      margin-bottom: 30px;
+      width: 100%;
+    }
+  
+    .thumbnails {
+      flex-direction: row;
+      overflow-x: auto;
+      margin-right: 0;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      gap: 15px;
+    }
+  
+    .thumbnail {
+      width: 70px;
+      height: 90px;
+      flex-shrink: 0;
+    }
+  
+    .mainImageContainer {
+      width: 100%;
+    }
+  
+    .mainImage {
+      max-height: 500px;
+      object-fit: contain;
+    }
+  
+    .productInfo {
+      width: 100%;
+    }
+  
+    .modalContent {
+      width: 90%;
+      max-width: 400px;
+    }
+  
+    .modalButtons {
+      flex-direction: column;
+      gap: 10px;
+    }
+  
+    .relatedProductsGrid {
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+  }
+  
+  /* Mobile (max-width: 480px) */
+  @media (max-width: 480px) {
+    .productDetail {
+      padding: 10px;
+    }
+  
+    .productName {
+      font-size: 20px;
+    }
+  
+    .productColor {
+      font-size: 16px;
+    }
+  
+    .price {
+      font-size: 18px;
+    }
+  
+    .sizeButtons {
+      flex-wrap: wrap;
+      justify-content: flex-start;
+    }
+  
+    .sizeButton {
+      padding: 8px 12px;
+      font-size: 14px;
+      flex: 0 0 calc(33.333% - 10px);
+    }
+  
+    .quantityControl {
+      justify-content: flex-start;
+    }
+  
+    .quantityButton {
+      width: 35px;
+      height: 35px;
+    }
+  
+    .quantityInput {
+      width: 45px;
+      height: 35px;
+    }
+  
+    .description {
+      margin: 30px 0;
+    }
+  
+    .description h2 {
+      font-size: 18px;
+    }
+  
+    .description p {
+      font-size: 13px;
+      line-height: 1.6;
+    }
+  
+    .navButton {
+      font-size: 24px;
+      padding: 8px;
+    }
+  
+    .relatedProducts h2 {
+      font-size: 20px;
+    }
+  
+    .relatedProductCard {
+      width: 140px;
+    }
+  
+    .relatedProductImage {
+      height: 160px;
+    }
+  
+    .relatedProductName {
+      font-size: 13px;
+    }
+  
+    /* Điều chỉnh modal cho mobile */
+    .modalContent {
+      padding: 15px;
+    }
+  
+    .modalButtons button {
+      width: 100%;
+      padding: 12px;
+      font-size: 14px;
+    }
+  }
+  
+  /* Mobile nhỏ (max-width: 360px) */
+  @media (max-width: 360px) {
+    .thumbnail {
+      width: 60px;
+      height: 80px;
+    }
+  
+    .sizeButton {
+      flex: 0 0 calc(50% - 10px);
+    }
+  
+    .relatedProductCard {
+      width: 130px;
+    }
+  
+    .relatedProductImage {
+      height: 140px;
+    }
+  }

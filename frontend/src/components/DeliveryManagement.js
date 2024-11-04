@@ -25,7 +25,7 @@ const DeliveryManagement = () => {
       'order.user.username',
       'order.user.email'
     ],
-    defaultSort: { key: 'order._id', direction: 'asc' },
+    defaultSort: { key: 'createdAt', direction: 'desc' },
     filterField: 'status'
   });
 
@@ -52,7 +52,10 @@ const DeliveryManagement = () => {
       const response = await getDeliveries();
       if (Array.isArray(response.data)) {
         const validDeliveries = response.data.filter(delivery => delivery && delivery._id);
-        setDeliveries(validDeliveries);
+        const sortedDeliveries = validDeliveries.sort((a, b) => 
+          new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setDeliveries(sortedDeliveries);
       } else {
         setError('Dữ liệu không hợp lệ từ máy chủ.');
       }

@@ -1,49 +1,130 @@
 .userOrders {
-  max-width: 800px;
-  margin: 0 auto;
+  max-width: 1200px;
+  margin: 40px auto;
   padding: 20px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .userOrders h2 {
   font-size: 24px;
-  margin-bottom: 20px;
   color: #333;
+  margin-bottom: 30px;
+  text-align: center;
+  position: relative;
+}
+
+.userOrders h2:after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: #000;
 }
 
 .ordersTable {
   width: 100%;
   border-collapse: collapse;
-  background-color: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.ordersTable th, .ordersTable td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #e0e0e0;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .ordersTable th {
-  background-color: #f1f3f5;
-  font-weight: bold;
+  background: #f8f9fa;
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #dee2e6;
 }
 
-.loading, .error, .noOrders {
+.ordersTable td {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  color: #666;
+}
+
+.ordersTable tr:hover {
+  background-color: #f8f9fa;
+}
+
+.orderStatus {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
   text-align: center;
-  padding: 20px;
-  font-size: 18px;
+  display: inline-block;
 }
 
-.error {
-  color: #721c24;
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
+.pending { background: #fff3cd; color: #856404; }
+.processing { background: #cce5ff; color: #004085; }
+.shipped { background: #d4edda; color: #155724; }
+.delivered { background: #d1e7dd; color: #0f5132; }
+.cancelled { background: #f8d7da; color: #721c24; }
+
+.viewButton {
+  padding: 8px 16px;
+  background: #000;
+  color: white;
   border-radius: 4px;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.viewButton:hover {
+  background: #333;
+  transform: translateY(-1px);
 }
 
 .noOrders {
-  color: #333;
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+@media (max-width: 768px) {
+  .userOrders {
+    padding: 15px;
+  }
+
+  .ordersTable {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .ordersTable th,
+  .ordersTable td {
+    padding: 12px;
+    min-width: 120px;
+  }
+
+  .orderStatus {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .userOrders h2 {
+    font-size: 20px;
+  }
+
+  .ordersTable th,
+  .ordersTable td {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .viewButton {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
 }

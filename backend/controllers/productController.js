@@ -198,9 +198,9 @@ exports.searchProducts = async (req, res) => {
   }
 };
 
-// Đảm bảo rằng hàm getProductsByCategorySlug được export đúng cách
+
 exports.getProductsByCategorySlug = async (req, res) => {
-  // ... logic của hàm ...
+  
 };
 
 exports.getProductsByParentCategory = async (req, res) => {
@@ -228,7 +228,7 @@ exports.getProductsByParentCategory = async (req, res) => {
 exports.getProductBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
-    console.log('Requested slug:', slug); // Thêm log này để kiểm tra
+    console.log('Requested slug:', slug); 
     if (!slug || slug === 'undefined') {
       return res.status(400).json({ message: 'Invalid slug' });
     }
