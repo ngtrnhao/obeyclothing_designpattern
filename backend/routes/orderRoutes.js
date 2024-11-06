@@ -72,4 +72,6 @@ router.get('/payment-methods', orderController.getPaymentMethods);
 
 router.post('/cod', authMiddleware, orderController.createCodOrder);
 
+router.put('/:id/cancel', authMiddleware, orderController.cancelOrder);
+
 module.exports = router;

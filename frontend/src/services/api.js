@@ -39,7 +39,7 @@ api.interceptors.response.use(
   }
 );
 
-// Danh sách c��c endpoint không cần xác thực
+// Danh sách c c endpoint không cần xác thực
 const publicEndpoints = ['/products', '/categories', '/products/category'];
 
 // Hàm để set token vào header của mọi request
@@ -602,6 +602,16 @@ export const toggleUserStatus = async (userId) => {
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: 'Có lỗi xảy ra khi thay đổi trạng thái người dùng' };
+  }
+};
+
+export const cancelOrder = async (orderId) => {
+  try {
+    const response = await api.put(`/orders/${orderId}/cancel`);
+    return response.data;
+  } catch (error) {
+    console.error('Error cancelling order:', error);
+    throw error;
   }
 };
 

@@ -90,6 +90,26 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
+.cancelButton {
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 10px;
+  font-size: 14px;
+}
+
+.cancelButton:hover {
+  background-color: #cc0000;
+}
+
+.cancelButton:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
   .userOrders {
     padding: 15px;

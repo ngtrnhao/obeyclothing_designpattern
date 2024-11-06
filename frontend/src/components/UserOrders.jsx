@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getUserOrders } from '../services/api';
+import { getUserOrders, cancelOrder } from '../services/api';
 import styles from './style.component/UserOrders.module.css';
 import { Link } from 'react-router-dom';
 
@@ -22,6 +22,23 @@ const UserOrders = () => {
       setError('Không thể tải danh sách đơn hàng. Vui lòng thử lại sau.');
       setLoading(false);
     }
+  };
+
+  const handleCancelOrder = async (orderId) => {
+    if (window.confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) {
+      try {
+        await cancelOrder(orderId);
+        alert('Đơn hàng đã được hủy thành công');
+        fetchUserOrders(); // Refresh danh sách đơn hàng
+      } catch (error) {
+        console.error('Error cancelling order:', error);
+        alert(error.response?.data?.message || 'Không thể hủy đơn hàng. Vui lòng thử lại.');
+      }
+    }
+  };
+
+  const canCancelOrder = (status) => {
+    return ['pending', 'processing'].includes(status);
   };
 
   if (loading) return <div className={styles.loading}>Đang tải...</div>;
@@ -56,6 +73,14 @@ const UserOrders = () => {
                 <Link to={`/user/orders/${order._id}`} className={styles.viewButton}>
                   Xem chi tiết
                 </Link>
+                {canCancelOrder(order.status) && (
+                  <button 
+                    onClick={() => handleCancelOrder(order._id)}
+                    className={styles.cancelButton}
+                  >
+                    Hủy đơn hàng
+                  </button>
+                )}
               </td>
             </tr>
           ))}
