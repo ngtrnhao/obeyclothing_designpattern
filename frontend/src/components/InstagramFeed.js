@@ -29,15 +29,6 @@ const InstagramFeed = () => {
         >
         </blockquote>
       </div>
-      
-      <a 
-        href="https://www.instagram.com/obeyclothing/"
-        target="_blank"
-        rel="noopener noreferrer"
-        className={styles.followButton}
-      >
-        Xem toàn bộ trang cá nhân trên Instagram
-      </a>
     </div>
   );
 };

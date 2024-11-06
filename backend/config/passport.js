@@ -21,7 +21,6 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
           googleId: profile.id,
           email: profile.emails[0].value,
           name: profile.displayName,
-          // Thêm các trường khác nếu cần
         });
         await user.save();
       }
@@ -43,9 +42,9 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
     profileFields: ['id', 'displayName', 'photos', 'email']
   },
   async (accessToken, refreshToken, profile, done) => {
-    // Facebook authentication logic here
+   
     console.log('Facebook profile:', profile);
-    // ... rest of your Facebook authentication logic
+   
   }));
 } else {
   console.warn('Facebook OAuth credentials are missing.');

@@ -25,7 +25,7 @@ exports.createPaypalOrder = async (req, res) => {
       sum + (item.product.price * item.quantity), 0
     );
 
-    // Sử dụng tỷ giá hối đoái từ biến môi trường
+    
     const exchangeRate = process.env.USD_VND_RATE || 23000;
     const usdAmount = (total / exchangeRate).toFixed(2);
 
