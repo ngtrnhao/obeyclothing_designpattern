@@ -84,6 +84,34 @@ const DeliveryManagement = () => {
     }
   };
 
+  const handleDownloadDeliveryNote = async (deliveryId) => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/deliveries/${deliveryId}/delivery-note`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `delivery-note-${deliveryId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading delivery note:', error);
+      alert('Có lỗi xảy ra khi tải xuống phiếu giao hàng');
+    }
+  };
+
   const renderTable = () => (
     <div className={styles.tableWrapper}>
       <table className={styles.deliveryTable}>
@@ -168,6 +196,12 @@ const DeliveryManagement = () => {
                     </option>
                   ))}
                 </select>
+                <button 
+                  onClick={() => handleDownloadDeliveryNote(delivery._id)}
+                  className={styles.downloadButton}
+                >
+                  Tải phiếu giao hàng
+                </button>
               </td>
             </tr>
           ))}

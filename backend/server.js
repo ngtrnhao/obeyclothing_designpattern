@@ -7,6 +7,8 @@ const authMiddleware = require('./middleware/authMiddleware');
 const adminMiddleware = require('./middleware/adminMiddleware');
 const cron = require('node-cron');
 const inventoryController = require('./controllers/inventoryController');
+const deliveryRoutes = require('./routes/deliveryRoutes');
+
 
 dotenv.config();
 
@@ -129,8 +131,10 @@ app.use('/api', adminRoutes);
 
 // Add route for delivery management
 app.use('/api/admin/deliveries', require('./routes/deliveryRoutes'));
+app.use('/api/deliveries', deliveryRoutes);
 
 // Import cronJobs
 require('./utils/cronJobs');
+
 
 module.exports = app;

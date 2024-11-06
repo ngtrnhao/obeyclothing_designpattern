@@ -198,4 +198,85 @@ function createInvoicePDF(invoice, res) {
   doc.end();
 }
 
-module.exports = { createPurchaseOrderPDF, createReceiptConfirmationPDF, createInvoicePDF };
+function createDeliveryNotePDF(delivery, res) {
+  const doc = new PDFDocument({
+    size: 'A4',
+    margin: 50
+  });
+
+  doc.pipe(res);
+
+  // Đăng ký font
+  const fontPath = path.join(__dirname, '../fonts/Roboto-Regular.ttf');
+  const fontBoldPath = path.join(__dirname, '../fonts/Roboto-Bold.ttf');
+  doc.registerFont('Roboto', fontPath);
+  doc.registerFont('Roboto-Bold', fontBoldPath);
+
+  // Header
+  doc.font('Roboto-Bold').fontSize(24).text('PHIẾU GIAO HÀNG', { align: 'center' });
+  doc.moveDown(1);
+
+  // Thông tin phiếu
+  doc.font('Roboto').fontSize(12);
+  doc.text(`Mã phiếu giao hàng: ${delivery._id}`);
+  doc.text(`Mã đơn hàng: ${delivery.order._id}`);
+  doc.text(`Ngày tạo: ${new Date().toLocaleDateString('vi-VN')}`);
+  doc.moveDown();
+
+  // Thông tin người nhận
+  doc.font('Roboto-Bold').text('THÔNG TIN NGƯỜI NHẬN:');
+  doc.font('Roboto');
+  doc.text(`Họ tên: ${delivery.shippingInfo.fullName}`);
+  doc.text(`Số điện thoại: ${delivery.shippingInfo.phone}`);
+  doc.text('Địa chỉ: ' + [
+    delivery.shippingInfo.streetAddress,
+    delivery.shippingInfo.wardName,
+    delivery.shippingInfo.districtName,
+    delivery.shippingInfo.provinceName
+  ].filter(Boolean).join(', '));
+  doc.moveDown();
+
+  // Chi tiết đơn hàng
+  doc.font('Roboto-Bold').text('CHI TIẾT ĐƠN HÀNG:');
+  doc.moveDown();
+
+  // Header của bảng
+  const tableTop = doc.y;
+  doc.font('Roboto-Bold');
+  doc.text('STT', 50, tableTop);
+  doc.text('Tên sản phẩm', 100, tableTop);
+  doc.text('SL', 350, tableTop, { width: 50, align: 'center' });
+  doc.text('Ghi chú', 400, tableTop);
+
+  // Kẻ đường line
+  doc.moveTo(50, tableTop + 20).lineTo(550, tableTop + 20).stroke();
+
+  // Nội dung bảng
+  let y = tableTop + 30;
+  doc.font('Roboto');
+  
+  delivery.order.items.forEach((item, index) => {
+    doc.text((index + 1).toString(), 50, y);
+    doc.text(item.product.name, 100, y);
+    doc.text(item.quantity.toString(), 350, y, { width: 50, align: 'center' });
+    doc.text('', 400, y);
+    y += 25;
+  });
+
+  // Phần chữ ký
+  doc.moveDown(4);
+  doc.fontSize(11);
+  
+  doc.text('Người giao hàng', 50, doc.y, { width: 200, align: 'center' });
+  doc.moveDown(3);
+  doc.text('(Ký và ghi rõ họ tên)', 50, doc.y, { width: 200, align: 'center' });
+
+  const currentY = doc.y - 80;
+  doc.text('Người nhận hàng', 350, currentY, { width: 200, align: 'center' });
+  doc.moveDown(3);
+  doc.text('(Ký và ghi rõ họ tên)', 350, doc.y - 40, { width: 200, align: 'center' });
+
+  doc.end();
+}
+
+module.exports = { createPurchaseOrderPDF, createReceiptConfirmationPDF, createInvoicePDF, createDeliveryNotePDF };
