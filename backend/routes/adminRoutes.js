@@ -54,6 +54,7 @@ router.post('/suppliers', supplierController.createSupplier);
 router.put('/suppliers/:id', supplierController.updateSupplier);
 router.delete('/suppliers/:id', supplierController.deleteSupplier);
 
+router.get('/statistics/download', adminMiddleware, adminController.downloadStatisticsReport);
 // Quản lý voucher
 router.post('/vouchers', adminController.createVoucher);
 router.get('/vouchers', authMiddleware, adminMiddleware, adminController.getAllVouchers);

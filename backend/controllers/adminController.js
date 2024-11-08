@@ -3,6 +3,7 @@ const Order = require('../models/Order');
 const User = require('../models/User');
 const Voucher = require('../models/Voucher');
 const moment = require('moment');
+const { createStatisticsReportPDF } = require('../utils/pdfGenerator');
 
 exports.getAllProducts = async (req, res) => {
   try {
@@ -153,70 +154,84 @@ async function countDeliveredOrders(start, end) {
   });
 }
 
-async function getTopProducts(start, end, limit = 5) {
-  return await Order.aggregate([
-    {
-      $match: {
-        status: 'delivered',
-        updatedAt: { $gte: start.toDate(), $lte: end.toDate() }
-      }
-    },
-    { $unwind: '$items' },
-    {
-      $group: {
-        _id: '$items.product',
-        totalSold: { $sum: '$items.quantity' },
-        totalRevenue: { $sum: { $multiply: ['$items.price', '$items.quantity'] } }
-      }
-    },
-    { $sort: { totalSold: -1 } },
-    { $limit: limit },
-    {
-      $lookup: {
-        from: 'products',
-        localField: '_id',
-        foreignField: '_id',
-        as: 'productInfo'
-      }
-    },
-    { $unwind: '$productInfo' },
-    {
-      $project: {
-        name: '$productInfo.name',
-        totalSold: 1,
-        totalRevenue: 1
-      }
-    }
-  ]);
+async function getTopProducts(start, end) {
+  try {
+    const topProducts = await Order.aggregate([
+      {
+        $match: {
+          status: 'delivered',
+          createdAt: { $gte: start.toDate(), $lte: end.toDate() }
+        }
+      },
+      { $unwind: '$items' },
+      {
+        $group: {
+          _id: '$items.product',
+          soldQuantity: { $sum: '$items.quantity' },
+          revenue: { $sum: { $multiply: ['$items.quantity', '$items.price'] } }
+        }
+      },
+      {
+        $lookup: {
+          from: 'products',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'productInfo'
+        }
+      },
+      { $unwind: '$productInfo' },
+      {
+        $project: {
+          name: '$productInfo.name',
+          soldQuantity: 1,
+          revenue: 1
+        }
+      },
+      { $sort: { revenue: -1 } },
+      { $limit: 5 }
+    ]);
+
+    return topProducts;
+  } catch (error) {
+    console.error('Error getting top products:', error);
+    return [];
+  }
 }
 
 async function getSalesData(start, end, period) {
   try {
     let groupBy;
     let dateFormat;
+    let interval;
 
     switch (period) {
       case 'day':
         groupBy = {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$updatedAt" } }
+          year: { $year: "$updatedAt" },
+          month: { $month: "$updatedAt" },
+          day: { $dayOfMonth: "$updatedAt" }
         };
-        dateFormat = 'YYYY-MM-DD';
+        dateFormat = 'DD/MM/YYYY';
+        interval = { days: 1 };
         break;
       case 'week':
         groupBy = {
-          _id: {
-            week: { $week: "$updatedAt" },
-            year: { $year: "$updatedAt" }
-          }
+          year: { $year: "$updatedAt" },
+          week: { $week: "$updatedAt" }
         };
-        dateFormat = '[W]WW-YYYY';
+        dateFormat = '[Tuần] w/YYYY';
+        interval = { weeks: 1 };
         break;
       case 'month':
-      default:
         groupBy = {
-          _id: { $dateToString: { format: "%Y-%m", date: "$updatedAt" } }
+          year: { $year: "$updatedAt" },
+          month: { $month: "$updatedAt" }
         };
-        dateFormat = 'YYYY-MM';
+        dateFormat = 'MM/YYYY';
+        interval = { months: 1 };
+        break;
+      default:
+        throw new Error('Khoảng thời gian không hợp lệ');
     }
 
     const result = await Order.aggregate([
@@ -228,7 +243,7 @@ async function getSalesData(start, end, period) {
       },
       {
         $group: {
-          ...groupBy,
+          _id: groupBy,
           revenue: { $sum: '$totalAmount' },
           orders: { $sum: 1 }
         }
@@ -236,47 +251,36 @@ async function getSalesData(start, end, period) {
       { $sort: { "_id": 1 } }
     ]);
 
-    // Format dữ liệu theo period
-    const formattedData = result.map(item => {
-      let date;
-      if (period === 'week') {
-        date = `W${item._id.week}-${item._id.year}`;
-      } else {
-        date = item._id;
-      }
-
-      return {
-        date,
-        revenue: item.revenue || 0,
-        orders: item.orders || 0
-      };
-    });
-
-    // Fill missing dates
-    const filledData = [];
-    let current = moment(start);
-    const endMoment = moment(end);
-
-    while (current.isSameOrBefore(endMoment)) {
-      let key;
-      if (period === 'week') {
-        key = `W${current.week()}-${current.year()}`;
-      } else {
-        key = current.format(dateFormat);
-      }
-
-      const existingData = formattedData.find(d => d.date === key);
-      filledData.push({
-        date: key,
-        revenue: existingData ? existingData.revenue : 0,
-        orders: existingData ? existingData.orders : 0
-      });
-
-      // Increment by period
-      current.add(1, period === 'week' ? 'weeks' : period);
+    // Tạo mảng các ngày trong khoảng
+    let currentDate = moment(start);
+    const dates = [];
+    while (currentDate <= end) {
+      dates.push(moment(currentDate));
+      currentDate = moment(currentDate).add(1, `${period}s`);
     }
 
-    return filledData;
+    // Map kết quả với các ngày
+    return dates.map(date => {
+      const matchingData = result.find(item => {
+        if (period === 'day') {
+          return item._id.year === date.year() &&
+                 item._id.month === date.month() + 1 &&
+                 item._id.day === date.date();
+        } else if (period === 'week') {
+          return item._id.year === date.year() &&
+                 item._id.week === date.week();
+        } else {
+          return item._id.year === date.year() &&
+                 item._id.month === date.month() + 1;
+        }
+      });
+
+      return {
+        date: date.format(dateFormat),
+        revenue: matchingData ? matchingData.revenue : 0,
+        orders: matchingData ? matchingData.orders : 0
+      };
+    });
   } catch (error) {
     console.error('Error in getSalesData:', error);
     throw error;
@@ -410,6 +414,79 @@ exports.toggleUserStatus = async (req, res) => {
     res.status(500).json({ 
       message: 'Lỗi khi thay đổi trạng thái người dùng' 
     });
+  }
+};
+
+exports.downloadStatisticsReport = async (req, res) => {
+  try {
+    const { startDate, endDate, period } = req.query;
+    
+    // Chuyển đổi và kiểm tra ngày hợp lệ
+    const start = moment(startDate);
+    const end = moment(endDate);
+
+    if (!start.isValid() || !end.isValid()) {
+      throw new Error('Ngày không hợp lệ');
+    }
+
+    // Đảm bảo start date bắt đầu từ đầu ngày và end date kết thúc cuối ngày
+    const startDateTime = start.startOf(period);
+    const endDateTime = end.endOf(period);
+
+    // Kiểm tra khoảng thời gian hợp lệ
+    if (!['day', 'week', 'month'].includes(period)) {
+      throw new Error('Khoảng thời gian không hợp lệ');
+    }
+
+    if (endDateTime.isBefore(startDateTime)) {
+      throw new Error('Ngày kết thúc phải sau ngày bắt đầu');
+    }
+
+    const stats = {
+      totalRevenue: await calculateTotalRevenue(startDateTime, endDateTime),
+      totalOrders: await countDeliveredOrders(startDateTime, endDateTime),
+      totalUsers: await User.countDocuments(),
+      topProducts: (await getTopProducts(startDateTime, endDateTime)).map(product => ({
+        name: product.name || 'Không xác định',
+        soldQuantity: product.soldQuantity || 0,
+        revenue: product.revenue || 0
+      })),
+      salesData: await getSalesData(startDateTime, endDateTime, period)
+    };
+
+    // Định dạng tên file theo period
+    const periodText = {
+      day: 'ngay',
+      week: 'tuan',
+      month: 'thang'
+    };
+
+    const filename = `bao-cao-thong-ke-${periodText[period]}-${start.format('DDMMYYYY')}-${end.format('DDMMYYYY')}.pdf`;
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+
+    // Thêm thông tin period vào tiêu đề báo cáo
+    const periodTitle = {
+      day: 'Theo ngày',
+      week: 'Theo tuần',
+      month: 'Theo tháng'
+    };
+
+    await createStatisticsReportPDF(
+      stats, 
+      `${periodTitle[period]}: ${start.format('DD/MM/YYYY')} - ${end.format('DD/MM/YYYY')}`,
+      res
+    );
+
+  } catch (error) {
+    console.error('Error generating statistics report:', error);
+    if (!res.headersSent) {
+      res.status(500).json({ 
+        message: 'Lỗi khi tạo báo cáo thống kê', 
+        error: error.message 
+      });
+    }
   }
 };
 

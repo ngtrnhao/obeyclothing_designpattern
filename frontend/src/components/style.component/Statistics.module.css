@@ -100,4 +100,23 @@
     gap: 1rem;
   }
 }
+.downloadButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
 
+.downloadButton:hover {
+  background-color: #45a049;
+}
+
+.downloadButton svg {
+  font-size: 16px;
+}
