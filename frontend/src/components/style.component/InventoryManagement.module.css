@@ -57,7 +57,7 @@ h3 {
   align-items: center;
   padding: 15px;
   border-bottom: 1px solid #eee;
-  transition: background-color 0.3s ease;
+  margin-bottom: 10px;
 }
 
 .productItem:hover {
@@ -73,13 +73,45 @@ h3 {
   color: #333;
 }
 
+.productInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.stockCount {
+  color: #666;
+}
+
+.stockCount strong {
+  color: #ff4444;
+}
+
+.productActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
 .stockInput {
   width: 80px;
-  padding: 8px;
-  text-align: center;
+  padding: 5px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 14px;
+}
+
+.orderButton {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.orderButton:hover {
+  background-color: #45a049;
 }
 
 .stockInput:focus {

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { getAdminProducts, updateStock, getLowStockProducts } from '../services/api';
 import styles from './style.component/InventoryManagement.module.css';
+import { useNavigate } from 'react-router-dom';
 
 const InventoryManagement = () => {
   const [products, setProducts] = useState([]);
   const [lowStockProducts, setLowStockProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchProducts();
@@ -56,6 +58,18 @@ const InventoryManagement = () => {
     }
   };
 
+  const handleCreatePurchaseOrder = (product) => {
+    navigate('/admin/purchase-orders', { 
+      state: { 
+        preselectedProduct: {
+          id: product._id,
+          name: product.name,
+          currentStock: product.stock
+        }
+      }
+    });
+  };
+
   if (loading) return <div className={styles.loading}>Đang tải...</div>;
   if (error) return <div className={styles.error}>{error}</div>;
 
@@ -69,15 +83,27 @@ const InventoryManagement = () => {
           <ul className={styles.productList}>
             {lowStockProducts.map(product => (
               <li key={product._id} className={styles.productItem}>
-                <span>{product.name}</span>
-                <span>Số lượng: {product.stock}</span>
-                <input 
-                  type="number" 
-                  defaultValue={product.stock}
-                  min="0"
-                  onChange={(e) => handleUpdateStock(product._id, e.target.value)}
-                  className={styles.stockInput}
-                />
+                <div className={styles.productInfo}>
+                  <span>{product.name}</span>
+                  <span className={styles.stockCount}>
+                    Số lượng: <strong>{product.stock}</strong>
+                  </span>
+                </div>
+                <div className={styles.productActions}>
+                  <input 
+                    type="number" 
+                    defaultValue={product.stock}
+                    min="0"
+                    onChange={(e) => handleUpdateStock(product._id, e.target.value)}
+                    className={styles.stockInput}
+                  />
+                  <button
+                    onClick={() => handleCreatePurchaseOrder(product)}
+                    className={styles.orderButton}
+                  >
+                    Đặt hàng ngay
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

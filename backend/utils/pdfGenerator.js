@@ -509,5 +509,7 @@ module.exports = {
   createPurchaseOrderPDF,
   createInvoicePDF,
   createDeliveryNotePDF,
-  createStatisticsReportPDF
+  createStatisticsReportPDF,
+  createReceiptConfirmationPDF,
+  createPurchaseOrderPDF
 };
