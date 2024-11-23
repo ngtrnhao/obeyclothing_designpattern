@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -8,6 +9,7 @@ const adminMiddleware = require('./middleware/adminMiddleware');
 const cron = require('node-cron');
 const inventoryController = require('./controllers/inventoryController');
 const deliveryRoutes = require('./routes/deliveryRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 
 
 dotenv.config();
@@ -18,7 +20,7 @@ const app = express();
 
 // Cấu hình CORS
 app.use(cors({
-  origin: 'http://localhost:3000', // Thay đổi thành URL của frontend của bạn
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
   credentials: true
 }));
 
@@ -136,5 +138,13 @@ app.use('/api/deliveries', deliveryRoutes);
 // Import cronJobs
 require('./utils/cronJobs');
 
+// Thêm route chat trước middleware xác thực
+app.use('/api/chat', chatRoutes);
+
+// Các route khác cần xác thực
+app.use('/api', authMiddleware, (req, res, next) => {
+  console.log('Protected route accessed');
+  next();
+});
 
 module.exports = app;

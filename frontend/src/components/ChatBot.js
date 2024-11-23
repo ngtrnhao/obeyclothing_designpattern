@@ -1,23 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FaComments, FaTimes, FaPaperPlane, FaUser } from 'react-icons/fa';
 import styles from './style.component/ChatBot.module.css';
+import axios from 'axios';
+import api from '../services/api';
 
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     { 
       text: 'Xin chào! Tôi là OBEY Assistant. Tôi có thể giúp gì cho bạn?',
-      isBot: true,
-      options: [
-        'Tìm sản phẩm',
-        'Hướng dẫn chọn size',
-        'Chính sách đổi trả',
-        'Thông tin vận chuyển',
-        'Khuyến mãi hiện có'
-      ]
+      isBot: true
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -28,6 +24,36 @@ const ChatBot = () => {
     scrollToBottom();
   }, [messages]);
 
+  const getAIResponse = async (message, chatHistory) => {
+    try {
+      const response = await api.post('/chat', {
+        message,
+        chatHistory: chatHistory.filter(msg => 
+          msg.text !== 'Không có token, quyền truy cập bị từ chối'
+        )
+      });
+
+      return response.data.response;
+
+    } catch (error) {
+      console.error('Error in getAIResponse:', error);
+      return getFallbackResponse(message);
+    }
+  };
+
+  const getFallbackResponse = (message) => {
+    if (message.toLowerCase().includes('size')) {
+      return `Dưới đây là bảng size tham khảo của OBEY:
+      - Size S: 40-60kg
+      - Size M: 55-65kg
+      - Size L: 63-75kg
+      - Size XL: 70-85kg
+      
+      Bạn có thể cho tôi biết chiều cao và cân nặng để được tư vấn cụ thể hơn.`;
+    }
+    return 'Xin lỗi, hiện tại hệ thống đang bận. Bạn có thể liên hệ hotline 1900xxxx để được hỗ trợ.';
+  };
+
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!inputMessage.trim()) return;
@@ -36,87 +62,32 @@ const ChatBot = () => {
     const userMessage = { text: inputMessage, isBot: false };
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
+    setIsTyping(true);
 
-    // Lấy phản hồi từ bot
-    setTimeout(() => {
-      const botResponse = getBotResponse(inputMessage);
+    try {
+      // Lấy phản hồi từ AI
+      const aiResponse = await getAIResponse(inputMessage, messages);
+      if (!aiResponse) {
+        const fallbackResponse = getFallbackResponse(inputMessage);
+        setMessages(prev => [...prev, { 
+          text: fallbackResponse,
+          isBot: true
+        }]);
+      } else {
+        setMessages(prev => [...prev, { 
+          text: aiResponse,
+          isBot: true
+        }]);
+      }
+    } catch (error) {
+      const fallbackResponse = getFallbackResponse(inputMessage);
       setMessages(prev => [...prev, { 
-        text: botResponse.text, 
-        isBot: true,
-        options: botResponse.options 
+        text: fallbackResponse,
+        isBot: true
       }]);
-    }, 500);
-  };
-
-  const handleOptionClick = (option) => {
-    // Thêm lựa chọn của người dùng vào chat
-    setMessages(prev => [...prev, { text: option, isBot: false }]);
-    
-    // Lấy phản hồi từ bot
-    setTimeout(() => {
-      const botResponse = getBotResponse(option);
-      setMessages(prev => [...prev, { 
-        text: botResponse.text, 
-        isBot: true,
-        options: botResponse.options 
-      }]);
-    }, 500);
-  };
-
-  const getBotResponse = (message) => {
-    const lowerMessage = message.toLowerCase();
-    
-    // Xử lý câu hỏi về size
-    if (lowerMessage.includes('size') || lowerMessage.includes('kích thước')) {
-      return {
-        text: 'Bạn có thể tham khảo bảng size của chúng tôi:\n- S: 40-60kg\n- M: 55-65kg\n- L: 63-75kg\n- XL: 70-85kg\nBạn cần tư vấn cụ thể hơn về size không?',
-        options: ['Tư vấn chọn size', 'Xem bảng size chi tiết']
-      };
+    } finally {
+      setIsTyping(false);
     }
-
-    // Xử lý câu hỏi về vận chuyển
-    if (lowerMessage.includes('ship') || lowerMessage.includes('giao hàng') || lowerMessage.includes('vận chuyển')) {
-      return {
-        text: 'OBEY hỗ trợ giao hàng toàn quốc:\n- Nội thành: 1-2 ngày\n- Ngoại thành: 2-3 ngày\n- Tỉnh khác: 3-5 ngày\nPhí ship sẽ được tính dựa theo địa chỉ cụ thể.',
-        options: ['Tính phí ship', 'Chính sách giao hàng']
-      };
-    }
-
-    // Xử lý câu hỏi về thanh toán
-    if (lowerMessage.includes('thanh toán') || lowerMessage.includes('payment')) {
-      return {
-        text: 'OBEY hỗ trợ các hình thức thanh toán:\n- COD (Thanh toán khi nhận hàng)\n- Chuyển khoản ngân hàng\n- Ví điện tử (Momo, ZaloPay)\n- Thẻ tín dụng/ghi nợ',
-        options: ['Thông tin chuyển khoản', 'Hướng dẫn thanh toán']
-      };
-    }
-
-    // Xử lý câu hỏi về khuyến mãi
-    if (lowerMessage.includes('sale') || lowerMessage.includes('khuyến mãi') || lowerMessage.includes('giảm giá')) {
-      return {
-        text: 'Hiện tại OBEY đang có các chương trình:\n- Giảm 10% cho đơn hàng từ 1 triệu\n- Freeship cho đơn từ 500k\n- Tặng voucher 100k cho khách hàng mới',
-        options: ['Xem thêm khuyến mãi', 'Nhận mã giảm giá']
-      };
-    }
-
-    // Xử lý câu hỏi về đổi trả
-    if (lowerMessage.includes('đổi') || lowerMessage.includes('trả') || lowerMessage.includes('hoàn tiền')) {
-      return {
-        text: 'OBEY hỗ trợ đổi trả trong vòng 7 ngày với điều kiện:\n- Sản phẩm còn nguyên tem mác\n- Không có dấu hiệu đã qua sử dụng\n- Có hóa đơn mua hàng',
-        options: ['Chính sách đổi trả', 'Hướng dẫn đổi trả']
-      };
-    }
-
-    // Câu trả lời mặc định
-    return {
-      text: 'Xin lỗi, tôi chưa hiểu rõ câu hỏi của bạn. Bạn có thể chọn một trong những chủ đề sau:',
-      options: [
-        'Tìm sản phẩm',
-        'Hướng dẫn chọn size',
-        'Chính sách đổi trả',
-        'Thông tin vận chuyển',
-        'Khuyến mãi hiện có'
-      ]
-    };
   };
 
   return (
@@ -128,7 +99,9 @@ const ChatBot = () => {
               <FaUser className={styles.botAvatar} />
               <div>
                 <h3>OBEY Assistant</h3>
-                <span className={styles.status}>Trực tuyến</span>
+                <span className={styles.status}>
+                  {isTyping ? 'Đang trả lời...' : 'Trực tuyến'}
+                </span>
               </div>
             </div>
             <button onClick={() => setIsOpen(false)}>
@@ -138,25 +111,22 @@ const ChatBot = () => {
           
           <div className={styles.chatMessages}>
             {messages.map((msg, index) => (
-              <div key={index} className={`${styles.messageWrapper} ${msg.isBot ? styles.bot : styles.user}`}>
+              <div 
+                key={index} 
+                className={`${styles.messageWrapper} ${msg.isBot ? styles.bot : styles.user}`}
+              >
                 <div className={styles.message}>
                   {msg.text}
-                  {msg.isBot && msg.options && (
-                    <div className={styles.options}>
-                      {msg.options.map((option, optIndex) => (
-                        <button
-                          key={optIndex}
-                          className={styles.optionButton}
-                          onClick={() => handleOptionClick(option)}
-                        >
-                          {option}
-                        </button>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
             ))}
+            {isTyping && (
+              <div className={`${styles.messageWrapper} ${styles.bot}`}>
+                <div className={`${styles.message} ${styles.typing}`}>
+                  <span>.</span><span>.</span><span>.</span>
+                </div>
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </div>
 
@@ -166,8 +136,9 @@ const ChatBot = () => {
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               placeholder="Nhập tin nhắn..."
+              disabled={isTyping}
             />
-            <button type="submit">
+            <button type="submit" disabled={isTyping}>
               <FaPaperPlane />
             </button>
           </form>
