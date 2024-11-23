@@ -1,0 +1,158 @@
+.chatbot {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.chatButton {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #000;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s;
+}
+
+.chatButton:hover {
+  transform: scale(1.1);
+}
+
+.chatWindow {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 380px;
+  height: 550px;
+  background-color: white;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.chatHeader {
+  padding: 15px;
+  background-color: #000;
+  color: white;
+  border-radius: 10px 10px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chatHeader button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.chatMessages {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+}
+
+.message {
+  margin-bottom: 15px;
+  padding: 12px 15px;
+  border-radius: 15px;
+  max-width: 85%;
+  line-height: 1.4;
+}
+
+.bot {
+  background-color: #f0f0f0;
+  margin-right: auto;
+}
+
+.user {
+  background-color: #000;
+  color: white;
+  margin-left: auto;
+}
+
+.chatInput {
+  padding: 15px;
+  border-top: 1px solid #eee;
+  display: flex;
+  gap: 10px;
+}
+
+.chatInput input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  outline: none;
+}
+
+.chatInput button {
+  padding: 10px 15px;
+  background-color: #000;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chatInput button:hover {
+  background-color: #333;
+}
+
+@media (max-width: 480px) {
+  .chatWindow {
+    width: calc(100% - 40px);
+    height: 60vh;
+  }
+}
+
+.botInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.botAvatar {
+  width: 40px;
+  height: 40px;
+  background: #333;
+  border-radius: 50%;
+  padding: 8px;
+}
+
+.status {
+  font-size: 12px;
+  color: #4CAF50;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.optionButton {
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  padding: 8px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.optionButton:hover {
+  background: #000;
+  color: white;
+} 
