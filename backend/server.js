@@ -19,11 +19,13 @@ console.log('ADMIN_SECRET:', process.env.ADMIN_SECRET);
 const app = express();
 
 // Cấu hình CORS
+// Thay đổi cấu hình CORS để chấp nhận nhiều origin
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: [process.env.FRONTEND_URL, 'http://localhost:3000', 'https://mern-auth-nej2.vercel.app'],
   credentials: true
 }));
 
+// Xóa middleware CORS thứ hai vì không cần thiết
 // Thêm middleware này sau middleware CORS
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
