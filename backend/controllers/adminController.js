@@ -133,7 +133,7 @@ exports.getStatistics = async (req, res) => {
     res.status(500).json({ message: 'Error fetching statistics', error: error.message });
   }
 };
-
+//Tính tổng doanh thu 
 async function calculateTotalRevenue(start, end) {
   const result = await Order.aggregate([
     {
@@ -146,7 +146,7 @@ async function calculateTotalRevenue(start, end) {
   ]);
   return result[0]?.total || 0;
 }
-
+//đếm số đơn hàng đã giao 
 async function countDeliveredOrders(start, end) {
   return await Order.countDocuments({
     status: 'delivered',
