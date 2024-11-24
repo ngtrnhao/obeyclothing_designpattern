@@ -7,6 +7,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import MainLayout from './layouts/MainLayout';
 import AppRoutes from './AppRoutes';
+import ChatBot from './components/ChatBot';
 
 const paypalOptions = {
   "client-id": process.env.REACT_APP_PAYPAL_CLIENT_ID,
@@ -34,6 +35,7 @@ function App() {
               pauseOnHover
               theme="light"
             />
+            <ChatBot />
           </Router>
         </CartProvider>
       </AuthProvider>

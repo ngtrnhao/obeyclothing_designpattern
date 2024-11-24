@@ -15,8 +15,13 @@ const api = axios.create({
 // Chỉ giữ một interceptor request
 api.interceptors.request.use(
   (config) => {
+    const publicEndpoints = ['/products', '/categories', '/products/category', '/chat'];
+    if (publicEndpoints.some(endpoint => config.url.includes(endpoint))) {
+      return config;
+    }
+    
     const token = localStorage.getItem('token');
-    if (token && !publicEndpoints.some(endpoint => config.url.includes(endpoint))) {
+    if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
     return config;
@@ -40,7 +45,8 @@ api.interceptors.response.use(
 );
 
 // Danh sách c c endpoint không cần xác thực
-const publicEndpoints = ['/products', '/categories', '/products/category'];
+
+const publicEndpoints = ['/products', '/categories', '/products/category', '/chat'];
 
 // Hàm để set token vào header của mọi request
 export const setAuthToken = (token) => {
