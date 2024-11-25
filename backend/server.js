@@ -21,7 +21,7 @@ const app = express();
 // Cấu hình CORS
 // Thay đổi cấu hình CORS để chấp nhận nhiều origin
 app.use(cors({
-  origin: [process.env.FRONTEND_URL, 'http://localhost:3000', 'https://mern-auth-nej2.vercel.app'],
+  origin: [process.env.FRONTEND_URL, 'http://localhost:3000', 'https://frontend-obeyclothing.vercel.app','https://mern-auth-nej2.vercel.app'],
   credentials: true
 }));
 
