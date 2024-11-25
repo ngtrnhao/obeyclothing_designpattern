@@ -2,151 +2,108 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const dotenv = require('dotenv');
 const path = require('path');
+const cron = require('node-cron');
+
+// Import middleware
 const authMiddleware = require('./middleware/authMiddleware');
 const adminMiddleware = require('./middleware/adminMiddleware');
-const cron = require('node-cron');
+
+// Import controllers
 const inventoryController = require('./controllers/inventoryController');
-const deliveryRoutes = require('./routes/deliveryRoutes');
-const chatRoutes = require('./routes/chatRoutes');
-
-
-dotenv.config();
-
-console.log('ADMIN_SECRET:', process.env.ADMIN_SECRET);
-
-const app = express();
-
-// Cấu hình CORS
-// Thay đổi cấu hình CORS để chấp nhận nhiều origin
-app.use(cors({
-  origin: [process.env.FRONTEND_URL, 'http://localhost:3000', 'https://frontend-obeyclothing.vercel.app','https://mern-auth-nej2.vercel.app'],
-  credentials: true
-}));
-
-// Xóa middleware CORS thứ hai vì không cần thiết
-// Thêm middleware này sau middleware CORS
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:3000','https://frontend-obeyclothing.vercel.app','https://mern-auth-nej2.vercel.app');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  next();
-});
-
-app.use(express.json());
-
-app.use((req, res, next) => {
-  console.log(`Incoming ${req.method} request to ${req.path}`);
-  console.log('Request body:', req.body);
-  next();
-});
-
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-  next();
-});
-
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('MongoDB connected successfully'))
-.catch((err) => console.error('MongoDB connection error:', err));
+const productController = require('./controllers/productController');
 
 // Import routes
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const cartRoutes = require('./routes/cart');
-//const userRoutes = require('./routes/user');
-const categoryRoutes = require('./routes/categories');
-const orderRoutes = require('./routes/orderRoutes');
-const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoutes');
 const categoriesRoutes = require('./routes/categories');
+const orderRoutes = require('./routes/orderRoutes');
+const inventoryRoutes = require('./routes/inventoryRoutes');
+const supplierRoutes = require('./routes/supplierRoutes');
+const deliveryRoutes = require('./routes/deliveryRoutes');
+const chatRoutes = require('./routes/chatRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 const addressRoutes = require('./routes/addressRoutes');
 
-// Đặt route admin trước các route khác
-app.use('/api/admin', authMiddleware, adminMiddleware, (req, res, next) => {
-  console.log('Admin route accessed');
-  next();
-}, adminRoutes);
+// Load environment variables
+const PORT = process.env.PORT || 5000;
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/mydatabase';
 
-// Serve static files from the 'uploads' directory
+const app = express();
+
+// Middleware: Configure CORS
+const corsOptions = {
+  origin: [
+    FRONTEND_URL, 
+    'http://localhost:3000', 
+    'https://frontend-obeyclothing.vercel.app',
+    'https://mern-auth-nej2.vercel.app'
+  ],
+  credentials: true, // Allow cookies and credentials
+};
+app.use(cors(corsOptions));
+
+// Middleware: Parse JSON
+app.use(express.json());
+
+// Middleware: Logging requests
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
+
+// Database connection
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+  .then(() => console.log('MongoDB connected successfully'))
+  .catch((err) => console.error('MongoDB connection error:', err));
+
+// Serve static files from 'uploads' directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Use routes
+// Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/products', (req, res, next) => {
-  console.log('Request to /api/products:', req.method, req.url);
-  next();
-}, productRoutes);
+app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
-//app.use('/api/user', userRoutes);
-//Admin routes
 app.use('/api/user', userRoutes);
-
-/*app.use('/api/categories', categoryRoutes);*/
-app.use('/api/orders', orderRoutes);
 app.use('/api/categories', categoriesRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/inventory', inventoryRoutes);
+app.use('/api/suppliers', supplierRoutes);
 app.use('/api/address', addressRoutes);
+app.use('/api/deliveries', deliveryRoutes);
+app.use('/api/chat', chatRoutes);
 
-const productController = require('./controllers/productController');
-console.log(productController); // Kiểm tra xem object này có chứa hàm getProductsByCategorySlug không
+// Admin routes
+app.use('/api/admin', authMiddleware, adminMiddleware, adminRoutes);
 
-// Add this line after other route definitions
+// Additional routes
 app.get('/api/categories/:slug/products', productController.getProductsByCategorySlug);
-
 app.get('/api/products/slug/:slug', productController.getProductBySlug);
 
-const inventoryRoutes = require('./routes/inventoryRoutes');
+// Static files for frontend
+app.use(express.static(path.join(__dirname, '../frontend/build')));
 
-// Thêm dòng này vào phần sử dụng routes
-app.use('/api/inventory', inventoryRoutes);
-
-const supplierRoutes = require('./routes/supplierRoutes');
-
-// Thêm dòng này vào phần khai báo routes
-app.use('/api/suppliers', supplierRoutes);
-
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`API URL: http://localhost:${PORT}/api`);
+// Cron jobs
+cron.schedule('0 0 * * *', () => {
+  inventoryController.checkAndCreatePurchaseOrders();
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ message: 'Đã xảy ra lỗi server', error: err.message });
+  res.status(500).json({ message: 'Internal Server Error', error: err.message });
 });
 
-// Chạy mỗi ngày lúc 00:00
-cron.schedule('0 0 * * *', () => {
-  inventoryController.checkAndCreatePurchaseOrders();
-});
-
-// Sau đó mới đến các route khác và static files
-app.use(express.static(path.join(__dirname, '../frontend/build')));
-
-// Add admin routes
-app.use('/api', adminRoutes);
-
-// Add route for delivery management
-app.use('/api/admin/deliveries', require('./routes/deliveryRoutes'));
-app.use('/api/deliveries', deliveryRoutes);
-
-// Import cronJobs
-require('./utils/cronJobs');
-
-// Thêm route chat trước middleware xác thực
-app.use('/api/chat', chatRoutes);
-
-// Các route khác cần xác thực
-app.use('/api', authMiddleware, (req, res, next) => {
-  console.log('Protected route accessed');
-  next();
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`API is available at http://localhost:${PORT}/api`);
 });
 
 module.exports = app;
