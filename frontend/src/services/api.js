@@ -2,11 +2,11 @@
 import axios from 'axios';
 
 // Thay thế dòng const API_URL = ... bằng:
-const API_URL = process.env.REACT_APP_API_URL || 'https://mern-auth-eight-sage.vercel.app/api';
+const API_URL = process.env.REACT_APP_API_URL || 'https://mern-auth-eight-sage.vercel.app';
 
 // Tạo một instance của axios với cấu hình mặc định
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: `${API_URL}/api`,
   headers: {
     'Content-Type': 'application/json',
   },
