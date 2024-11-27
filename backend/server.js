@@ -18,7 +18,8 @@ console.log('ADMIN_SECRET:', process.env.ADMIN_SECRET);
 
 const app = express();
 
-// Xóa cấu hình CORS cũ và thay thế bằng cấu hình mới
+// Cấu hình CORS
+// Thay đổi cấu hình CORS để chấp nhận nhiều origin
 const corsOptions = {
   origin: [
     'https://obeyclothing.vercel.app',
