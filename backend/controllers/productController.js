@@ -5,10 +5,20 @@ const Category = require('../models/Category'); // Thêm dòng này ở đầu f
 
 exports.getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find();
+    console.log('Getting all products...');
+    
+    // Thêm lean() để tối ưu performance
+    const products = await Product.find().lean();
+    console.log('Found products:', products.length);
+    
     res.json(products);
   } catch (error) {
-    res.status(500).json({ message: 'Lỗi server', error: error.message });
+    console.error('Error in getAllProducts:', error);
+    res.status(500).json({ 
+      message: 'Lỗi server', 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 };
 
