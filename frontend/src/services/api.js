@@ -44,6 +44,20 @@ api.interceptors.response.use(
   }
 );
 
+// Add error interceptor
+api.interceptors.response.use(
+  response => response,
+  error => {
+    console.error('API Error:', {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      data: error.response?.data
+    });
+    return Promise.reject(error);
+  }
+);
+
 // Danh sách c c endpoint không cần xác thực
 
 const publicEndpoints = ['/products', '/categories', '/products/category', '/chat'];

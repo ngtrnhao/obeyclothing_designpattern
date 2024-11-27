@@ -1,11 +1,12 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "cross-env PORT=5001 nodemon server.js"
-  },
+  "main": "server.js",{
+    "scripts": {
+      "start": "node server.js",
+      "build": "npm install"
+    }
+  }
   "dependencies": {
     "@paypal/checkout-server-sdk": "^1.0.3",
     "axios": "^1.7.7",

@@ -34,6 +34,13 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+app.use(cors({
+  origin: [
+    'https://frontend-obeyclothing-qwbf3s07r-ngtrnhaos-projects.vercel.app',
+    'http://localhost:3000'
+  ],
+  credentials: true
+}));
 
 app.use(express.json());
 
