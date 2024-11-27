@@ -6,7 +6,7 @@ const API_URL = process.env.REACT_APP_API_URL || 'https://mern-auth-eight-sage.v
 
 // Tạo một instance của axios với cấu hình mặc định
 const api = axios.create({
-  baseURL: `${API_URL}/api`,
+  baseURL: API_URL.endsWith('/') ? `${API_URL}api` : `${API_URL}/api`,
   headers: {
     'Content-Type': 'application/json',
   },
