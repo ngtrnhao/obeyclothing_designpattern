@@ -18,17 +18,13 @@ console.log('ADMIN_SECRET:', process.env.ADMIN_SECRET);
 
 const app = express();
 
-// Cấu hình CORS
-// Thay đổi cấu hình CORS để chấp nhận nhiều origin
+// Thêm cấu hình CORS trước các routes
 const corsOptions = {
-  origin: [
-    'https://obeyclothing.vercel.app',
-    'https://frontend-obeyclothing.vercel.app',
-    'http://localhost:3000'
-  ],
-  credentials: true,
+  origin: 'https://obeyclothing.vercel.app',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
