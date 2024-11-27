@@ -22,15 +22,15 @@ const app = express();
 // Thay đổi cấu hình CORS để chấp nhận nhiều origin
 const corsOptions = {
   origin: [
-    process.env.FRONTEND_URL, 
-    'http://localhost:3000', 
-    'https://frontend-obeyclothing.vercel.app', 
-    'https://mern-auth-nej2.vercel.app'
+    process.env.FRONTEND_URL,
+    ...process.env.FRONTEND_URL_EXTRA.split(','),
+    'http://localhost:3000'
   ],
-  credentials: true, // Nếu bạn cần gửi cookie hoặc header xác thực
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Các phương thức HTTP được phép
-  allowedHeaders: ['Content-Type', 'Authorization'], // Các header được phép gửi
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
+
 
 app.use(cors(corsOptions));
 
