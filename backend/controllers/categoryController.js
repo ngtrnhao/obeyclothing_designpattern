@@ -3,7 +3,7 @@ const Product = require('../models/Product');
 
 exports.createCategory = async (req, res) => {
   try {
-    console.log('Received category data:', req.body); // Log để kiểm tra
+    console.log('Received category data:', req.body); 
     const { name, parentId, slug } = req.body;
     
     let newSlug = slug;
