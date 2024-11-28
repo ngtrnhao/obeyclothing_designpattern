@@ -1,16 +1,14 @@
 ﻿/* eslint-disable unicode-bom */
 import axios from 'axios';
 
-// Thay thế dòng const API_URL = ... bằng:
-const API_URL = process.env.REACT_APP_API_URL || 'https://mern-auth-eight-sage.vercel.app';
-
 // Tạo một instance của axios với cấu hình mặc định
 const api = axios.create({
-  baseURL: API_URL.endsWith('/') ? `${API_URL}api` : `${API_URL}/api`,
+  baseURL: `${process.env.REACT_APP_API_URL}/api`,
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true
+  withCredentials: true,
+  timeout: 10000
 });
 
 // Chỉ giữ một interceptor request
@@ -41,20 +39,6 @@ api.interceptors.response.use(
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
-    return Promise.reject(error);
-  }
-);
-
-// Add error interceptor
-api.interceptors.response.use(
-  response => response,
-  error => {
-    console.error('API Error:', {
-      url: error.config?.url,
-      method: error.config?.method,
-      status: error.response?.status,
-      data: error.response?.data
-    });
     return Promise.reject(error);
   }
 );
@@ -110,7 +94,7 @@ export const resetPassword = (token, newPassword) => {
 };
 
 export const loginWithGoogle = async () => {
-  window.location.href = `${API_URL}/auth/google`;
+  window.location.href = `${process.env.REACT_APP_API_URL}/auth/google`;
 };
 
 export const loginWithFacebook = async () => {
@@ -449,7 +433,7 @@ export const getProductsByCategorySlug = async (slug) => {
 
 export const getAllProducts = async () => {
   try {
-    const response = await axios.get(`${API_URL}/products`);
+    const response = await axios.get(`${process.env.REACT_APP_API_URL}/products`);
     return response.data;
   } catch (error) {
     console.error('Error fetching all products:', error);
@@ -459,7 +443,7 @@ export const getAllProducts = async () => {
 
 export const getProductsByCategoryAndChildren = async (categoryId) => {
   try {
-    const response = await axios.get(`${API_URL}/api/categories/${categoryId}/products-recursive`);
+    const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/categories/${categoryId}/products-recursive`);
     return response.data;
   } catch (error) {
     console.error('Error fetching products by category and children:', error);
@@ -637,4 +621,3 @@ export const cancelOrder = async (orderId) => {
 };
 
 export default api;
-
