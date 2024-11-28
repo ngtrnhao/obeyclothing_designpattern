@@ -20,21 +20,15 @@ const app = express();
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',');
 
-app.use(cors({
-  origin: function (origin, callback) {
-    // Cho phép requests không có origin (như mobile apps hoặc curl requests)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? [process.env.FRONTEND_URL]
+    : ['http://localhost:3000'],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-}));
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH']
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
