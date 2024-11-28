@@ -18,16 +18,23 @@ console.log('ADMIN_SECRET:', process.env.ADMIN_SECRET);
 
 const app = express();
 
-// Thêm cấu hình CORS trước các routes
-const corsOptions = {
-  origin: 'https://obeyclothing.vercel.app',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-  optionsSuccessStatus: 200
-};
+const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',');
 
-app.use(cors(corsOptions));
+app.use(cors({
+  origin: function (origin, callback) {
+    // Cho phép requests không có origin (như mobile apps hoặc curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
 
 app.use(express.json());
 
@@ -54,7 +61,6 @@ const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const cartRoutes = require('./routes/cart');
 //const userRoutes = require('./routes/user');
-const categoryRoutes = require('./routes/categories');
 const orderRoutes = require('./routes/orderRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -113,8 +119,14 @@ app.listen(PORT, () => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Đã xảy ra lỗi server', error: err.message });
+  if (err.message === 'Not allowed by CORS') {
+    res.status(403).json({
+      message: 'Origin not allowed',
+      allowedOrigins: process.env.NODE_ENV === 'development' ? allowedOrigins : undefined
+    });
+  } else {
+    next(err);
+  }
 });
 
 // Chạy mỗi ngày lúc 00:00

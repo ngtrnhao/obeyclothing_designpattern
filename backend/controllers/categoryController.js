@@ -53,37 +53,14 @@ exports.createCategory = async (req, res) => {
 
 exports.getAllCategories = async (req, res) => {
   try {
-    console.log('Getting all categories...');
-    
-    // Đơn giản hóa query, không dùng populate
-    const categories = await Category.find().lean();
-    console.log('Found categories:', categories);
-
-    // Cấu trúc lại categories thành dạng cây
-    const rootCategories = categories.filter(cat => !cat.parent);
-    const categoryMap = {};
-    
-    categories.forEach(cat => {
-      categoryMap[cat._id] = { ...cat, children: [] };
+    const categories = await Category.find({ parent: null }).populate({
+      path: 'children',
+      populate: { path: 'children' }
     });
-
-    categories.forEach(cat => {
-      if (cat.parent) {
-        const parent = categoryMap[cat.parent];
-        if (parent) {
-          parent.children.push(categoryMap[cat._id]);
-        }
-      }
-    });
-
-    res.json(rootCategories);
+    res.json(categories);
   } catch (error) {
     console.error('Error in getAllCategories:', error);
-    res.status(500).json({ 
-      message: 'Lỗi server', 
-      error: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
   }
 };
 
