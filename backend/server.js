@@ -11,6 +11,7 @@ const inventoryController = require('./controllers/inventoryController');
 const deliveryRoutes = require('./routes/deliveryRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 
+const connectWithRetry = require('./config/db');
 
 dotenv.config();
 
@@ -43,12 +44,20 @@ app.use((req, res, next) => {
   next();
 });
 
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('MongoDB connected successfully'))
-.catch((err) => console.error('MongoDB connection error:', err));
+// Connect to MongoDB with retry logic
+connectWithRetry();
+
+mongoose.connection.on('error', err => {
+  console.error('MongoDB connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('MongoDB disconnected');
+});
+
+mongoose.connection.on('connected', () => {
+  console.log('MongoDB connected');
+});
 
 // Import routes
 const authRoutes = require('./routes/auth');
