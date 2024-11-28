@@ -5,8 +5,7 @@ import styles from './style.component/ProductCard.module.css';
 const ProductCard = ({ product }) => {
   const imageUrl = (img) => {
     if (!img) return '/images/placeholder-image.jpg';
-    if (img.startsWith('http')) return img;
-    return `${process.env.REACT_APP_API_URL}/uploads/${img}`;
+    return img;
   };
 
   // Kiểm tra sản phẩm mới (ví dụ: trong vòng 7 ngày)

@@ -67,8 +67,7 @@ app.use('/api/admin', authMiddleware, adminMiddleware, (req, res, next) => {
   next();
 }, adminRoutes);
 
-// Serve static files from the 'uploads' directory
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 // Use routes
 app.use('/api/auth', authRoutes);

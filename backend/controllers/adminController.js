@@ -30,7 +30,7 @@ exports.updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, price, description, category } = req.body;
-    const image = req.file ? req.file.filename : undefined;
+    const image = req.file ? req.file.path : undefined;
 
     const updateData = { name, price, description, category };
     if (image) {

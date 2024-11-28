@@ -1,8 +1,23 @@
 const Product = require('../models/Product');
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
 const Category = require('../models/Category'); // Thêm dòng này ở đầu file
+const cloudinary = require ('cloudinary');
+const {CloudinaryStorage} = require ('multer-storage-cloudinary');
 
+
+cloudinary.config({
+  cloude_name : process.env.CLOUDDINARY_CLOUD_NAME,
+  api_key:process.env.CLOUDINARY_API_KEY,
+  api_secret:process.env.CLOUDINARY_API_SECRET
+});
+const storage = new CloudinaryStorage({
+  cloudinary : cloudinary,
+  params :{
+    folder: ' obey-clothing',
+    allowed_formats:['jpg','png','jpeg','webp']
+  }
+});
+const upload = multer({storage:storage});
 exports.getAllProducts = async (req, res) => {
   try {
     const products = await Product.find();
@@ -33,10 +48,10 @@ exports.createProduct = async (req, res) => {
 
     if (req.files) {
       if (req.files['image']) {
-        image = req.files['image'][0].filename; // Chỉ lưu tên file
+        image = req.files['image'][0].path; // Cloudinary trả về URL đầy đủ
       }
       if (req.files['detailImages']) {
-        detailImages = req.files['detailImages'].map(file => file.filename);
+        detailImages = req.files['detailImages'].map(file => file.path);
       }
     }
 
@@ -50,8 +65,8 @@ exports.createProduct = async (req, res) => {
       description,
       price,
       category: categoryId,
-      image,
-      detailImages,
+      image, // URL từ Cloudinary
+      detailImages, // Array các URL từ Cloudinary
       stock,
       sizes: sizes ? sizes.split(',').map(size => size.trim()) : [],
       colors: colors ? colors.split(',').map(color => color.trim()) : [],
