@@ -138,7 +138,7 @@ router.post('/checkout', async (req, res) => {
     const { shippingAddress, paymentMethod } = req.body;
     
     // Validate payment method
-    const validPaymentMethods = ['cod', 'paypal', 'banking'];
+    const validPaymentMethods = ['cod', 'paypal', 'banking', 'vnpay'];
     if (!validPaymentMethods.includes(paymentMethod)) {
       return res.status(400).json({ 
         message: 'Phương thức thanh toán không hợp lệ' 

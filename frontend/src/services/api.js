@@ -45,7 +45,6 @@ api.interceptors.response.use(
 
 // Danh sách c c endpoint không cần xác thực
 
-const publicEndpoints = ['/products', '/categories', '/products/category', '/chat'];
 
 // Hàm để set token vào header của mọi request
 export const setAuthToken = (token) => {
@@ -433,7 +432,7 @@ export const getProductsByCategorySlug = async (slug) => {
 
 export const getAllProducts = async () => {
   try {
-    const response = await axios.get(`${process.env.REACT_APP_API_URL}/products`);
+    const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/products`);
     return response.data;
   } catch (error) {
     console.error('Error fetching all products:', error);
@@ -454,6 +453,15 @@ export const getProductsByCategoryAndChildren = async (categoryId) => {
 export const createPaypalOrder = async () => {
   try {
     const response = await api.post('/orders/create-paypal-order');
+    return response.data;
+  } catch (error) {
+    console.error('Error creating PayPal order:', error);
+    throw error;
+  }
+};
+export const createPayment = async () => {
+  try {
+    const response = await api.post(`${process.env.REACT_APP_API_URL}/api/vnpay`);
     return response.data;
   } catch (error) {
     console.error('Error creating PayPal order:', error);

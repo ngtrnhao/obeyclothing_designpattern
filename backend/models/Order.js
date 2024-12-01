@@ -5,7 +5,7 @@ const orderSchema = new mongoose.Schema({
   paypalOrderId: { type: String },
   status: {
     type: String,
-    enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'paid'],
+    enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'awaiting_payment'],
     default: 'pending'
   },
   items: [{
@@ -57,7 +57,7 @@ const orderSchema = new mongoose.Schema({
   delivery: { type: mongoose.Schema.Types.ObjectId, ref: 'Delivery' },
   paymentMethod: {
     type: String,
-    enum: ['cod', 'paypal', 'banking'],
+    enum: ['cod', 'paypal', 'banking', 'vnpay'],
     required: true
   },
   codStatus: {
