@@ -109,56 +109,58 @@ const Header = () => {
                 )}
               </Link>
               
-              {user ? (
-                <div className={styles.userMenu} ref={userMenuRef}>
-                  <button 
-                    className={styles.userMenuButton}
-                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  >
-                    Tài Khoản
-                  </button>
-                  {isUserMenuOpen && (
-                    <div className={styles.userMenuDropdown}>
-                      <Link 
-                        to={user.role === 'admin' ? "/admin/profile" : "/user/profile"}
-                        className={styles.menuItem}
-                        onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        Thông tin tài khoản
-                      </Link>
-                      <Link 
-                        to="/user/orders" 
-                        className={styles.menuItem}
-                        onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        Đơn hàng của tôi
-                      </Link>
-                      {user.role === 'admin' && (
+              <div className={styles.userMenu} ref={userMenuRef}>
+                {user ? (
+                  <>
+                    <button 
+                      className={styles.userMenuButton}
+                      onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    >
+                      Tài Khoản
+                    </button>
+                    {isUserMenuOpen && (
+                      <div className={styles.userMenuDropdown}>
                         <Link 
-                          to="/admin" 
+                          to={user.role === 'admin' ? "/admin/profile" : "/user/profile"}
                           className={styles.menuItem}
                           onClick={() => setIsUserMenuOpen(false)}
                         >
-                          Quản Trị
+                          Thông tin tài khoản
                         </Link>
-                      )}
-                      <button 
-                        onClick={() => {
-                          logout();
-                          setIsUserMenuOpen(false);
-                        }} 
-                        className={styles.menuItem}
-                      >
-                        Đăng Xuất
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Link to="/login" className={styles.navLink}>
-                  Đăng Nhập
-                </Link>
-              )}
+                        <Link 
+                          to="/user/orders" 
+                          className={styles.menuItem}
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          Đơn hàng của tôi
+                        </Link>
+                        {user.role === 'admin' && (
+                          <Link 
+                            to="/admin" 
+                            className={styles.menuItem}
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            Quản Trị
+                          </Link>
+                        )}
+                        <button 
+                          onClick={() => {
+                            logout();
+                            setIsUserMenuOpen(false);
+                          }} 
+                          className={styles.menuItem}
+                        >
+                          Đăng Xuất
+                        </button>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <Link to="/login" className={styles.navLink}>
+                    Đăng Nhập
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         </div>
