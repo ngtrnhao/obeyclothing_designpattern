@@ -1,14 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useMemo, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './style.component/Header.module.css';
 import Menu from './Menu';
 import SearchBar from './SearchBar';
 import { useAuth } from '../contexts/AuthContext';
+import { CartContext } from '../contexts/CartContext';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { user, logout } = useAuth();
+  const { cartItems } = useContext(CartContext);
+  const userMenuRef = useRef(null);
+
+  const totalItems = useMemo(() => {
+    return cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  }, [cartItems]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -84,26 +102,63 @@ const Header = () => {
               </svg>
             </button>
             <div className={styles.rightLinks}>
-              {user ? (
-                <>
-                  <Link to={user.role === 'admin' ? "/admin/profile" : "/user/profile"} className={styles.navLink}>
-                    Tài Khoản
-                  </Link>
-                  {user.role === 'admin' && (
-                    <Link to="/admin" className={styles.navLink}>
-                      Quản Trị
-                    </Link>
-                  )}
-                  <button onClick={logout} className={styles.navLink}>
-                    Đăng Xuất
-                  </button>
-                </>
-              ) : (
-                <Link to="/login" className={styles.navLink}>Đăng Nhập</Link>
-              )}
               <Link to="/cart" className={styles.bagLink}>
-                Giỏ Hàng <span className={styles.bagCount}></span>
+                Giỏ Hàng 
+                {totalItems > 0 && (
+                  <span className={styles.bagCount}>{totalItems}</span>
+                )}
               </Link>
+              
+              {user ? (
+                <div className={styles.userMenu} ref={userMenuRef}>
+                  <button 
+                    className={styles.userMenuButton}
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  >
+                    Tài Khoản
+                  </button>
+                  {isUserMenuOpen && (
+                    <div className={styles.userMenuDropdown}>
+                      <Link 
+                        to={user.role === 'admin' ? "/admin/profile" : "/user/profile"}
+                        className={styles.menuItem}
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        Thông tin tài khoản
+                      </Link>
+                      <Link 
+                        to="/user/orders" 
+                        className={styles.menuItem}
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        Đơn hàng của tôi
+                      </Link>
+                      {user.role === 'admin' && (
+                        <Link 
+                          to="/admin" 
+                          className={styles.menuItem}
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          Quản Trị
+                        </Link>
+                      )}
+                      <button 
+                        onClick={() => {
+                          logout();
+                          setIsUserMenuOpen(false);
+                        }} 
+                        className={styles.menuItem}
+                      >
+                        Đăng Xuất
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link to="/login" className={styles.navLink}>
+                  Đăng Nhập
+                </Link>
+              )}
             </div>
           </div>
         </div>
