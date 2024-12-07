@@ -432,7 +432,7 @@ export const getProductsByCategorySlug = async (slug) => {
 
 export const getAllProducts = async () => {
   try {
-    const response = await api.get(`${process.env.REACT_APP_API_URL}/products`);
+    const response = await axios.get(`${process.env.REACT_APP_API_URL}api/products`);
     return response.data;
   } catch (error) {
     console.error('Error fetching all products:', error);
