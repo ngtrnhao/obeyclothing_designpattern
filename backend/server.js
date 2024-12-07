@@ -21,11 +21,10 @@ const app = express();
 const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',');
 
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.FRONTEND_URL]
-    : ['http://localhost:3000'],
+  origin: process.env.ALLOWED_ORIGINS.split(','),
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
 
 app.use(cors(corsOptions));
@@ -112,14 +111,8 @@ app.listen(PORT, () => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  if (err.message === 'Not allowed by CORS') {
-    res.status(403).json({
-      message: 'Origin not allowed',
-      allowedOrigins: process.env.NODE_ENV === 'development' ? allowedOrigins : undefined
-    });
-  } else {
-    next(err);
-  }
+  console.error(err.stack);
+  res.status(500).json({ message: 'Đã xảy ra lỗi!', error: err.message });
 });
 
 // Chạy mỗi ngày lúc 00:00
