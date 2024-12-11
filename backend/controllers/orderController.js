@@ -40,7 +40,7 @@ const sortObject = (obj) => {
 const createVNPayUrl = async (order, ipAddr) => {
   // Kiểm tra biến môi trường từ config
   if (!vnpayConfig.tmCode || !vnpayConfig.hashSecret || !vnpayConfig.url) {
-    console.error('VNPAY Config:', vnpayConfig);
+    console.error("VNPAY Config:", vnpayConfig);
     throw new Error("Thiếu cấu hình VNPAY trong biến môi trường");
   }
 
@@ -59,7 +59,7 @@ const createVNPayUrl = async (order, ipAddr) => {
     vnp_OrderInfo: `Thanh toan don hang ${order._id}`,
     vnp_OrderType: "other",
     vnp_ReturnUrl: vnpayConfig.returnUrl,
-    vnp_TxnRef: order._id.toString()
+    vnp_TxnRef: order._id.toString(),
   };
 
   const sortedParams = sortObject(vnpParams);
@@ -69,7 +69,9 @@ const createVNPayUrl = async (order, ipAddr) => {
   const signed = hmac.update(Buffer.from(signData, "utf-8")).digest("hex");
   vnpParams.vnp_SecureHash = signed;
 
-  return `${vnpayConfig.url}?${querystring.stringify(vnpParams, { encode: false })}`;
+  return `${vnpayConfig.url}?${querystring.stringify(vnpParams, {
+    encode: false,
+  })}`;
 };
 
 exports.createPaypalOrder = async (req, res) => {
@@ -185,7 +187,7 @@ exports.completePaypalOrder = async (req, res) => {
       paypalDetails: paypalDetails,
       shippingInfo: shippingInfo,
       paymentMethod: "paypal",
-      status: "paid",
+      status: "pending",
     });
 
     await newOrder.save();
@@ -253,7 +255,7 @@ exports.completePaypalOrder = async (req, res) => {
 exports.createPayment = async (req, res) => {
   try {
     // Log request body để debug
-    console.log('Request body:', req.body);
+    console.log("Request body:", req.body);
 
     // Kiểm tra cấu hình VNPAY
     if (!vnpayConfig.tmCode || !vnpayConfig.hashSecret || !vnpayConfig.url) {
@@ -273,21 +275,21 @@ exports.createPayment = async (req, res) => {
     }
 
     // Log để kiểm tra dữ liệu
-    console.log('Cart data:', {
+    console.log("Cart data:", {
       items: cart.items,
       totalAmount: cart.totalAmount,
-      finalAmount: cart.finalAmount
+      finalAmount: cart.finalAmount,
     });
 
     // Tạo order với dữ liệu từ cart
     const order = new Order({
       user: userId,
-      items: cart.items.map(item => ({
+      items: cart.items.map((item) => ({
         product: item.product._id,
         quantity: item.quantity,
         price: item.product.price,
         size: item.size,
-        color: item.color
+        color: item.color,
       })),
       shippingInfo,
       totalAmount: cart.totalAmount,
@@ -296,7 +298,7 @@ exports.createPayment = async (req, res) => {
       discountAmount: cart.discountAmount || 0,
       finalAmount: cart.finalAmount,
       paymentMethod: "vnpay",
-      status: "awaiting_payment"
+      status: "awaiting_payment",
     });
 
     await order.save();
@@ -307,9 +309,9 @@ exports.createPayment = async (req, res) => {
     res.json({ url: vnpUrl });
   } catch (error) {
     console.error("Lỗi khi tạo thanh toán:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       message: "Lỗi khi tạo thanh toán",
-      error: error.message 
+      error: error.message,
     });
   }
 };
@@ -387,7 +389,7 @@ exports.handlePaymentResponse = async (req, res) => {
         (cart.discountAmount || 0),
       vnpayOrderId: orderId,
       paymentMethod: "vnpay",
-      status: "paid",
+      status: "pending",
     });
 
     await newOrder.save();
