@@ -4,7 +4,6 @@
 - [Giới Thiệu](#giới-thiệu)
 - [Tính Năng](#tính-năng)
 - [Công Nghệ Sử Dụng](#công-nghệ-sử-dụng)
-- [Cấu Trúc Dự Án](#cấu-trúc-dự-án)
 - [Cài Đặt và Chạy](#cài-đặt-và-chạy)
 - [API Documentation](#api-documentation)
 - [Giao Diện](#giao-diện)
