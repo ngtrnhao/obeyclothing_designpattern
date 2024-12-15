@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './HomePage.module.css';
-import { getProducts } from '../services/api';
+import { getRelatedProducts } from '../services/api';
 
 const imageUrl = (img) => {
   if (!img) return '/assets/placeholder-image.jpg';
@@ -18,7 +18,7 @@ const HomePage = () => {
 
   const fetchFeaturedProducts = async () => {
     try {
-      const response = await getProducts(); 
+      const response = await getRelatedProducts(); 
       if (response && Array.isArray(response)) {
         const sortedProducts = response.sort((a, b) => b.sales - a.sales);
         setFeaturedProducts(sortedProducts.slice(0, 4));

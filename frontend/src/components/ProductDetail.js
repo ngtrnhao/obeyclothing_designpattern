@@ -1,22 +1,26 @@
-﻿import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getProductById, addToCart, getProducts, getCategoryPath, getProductBySlug } from '../services/api';
-import { useAuth } from '../contexts/AuthContext';
-import SizeGuideModal from './SizeGuideModal'
-import styles from './style.component/ProductDetail.module.css';
-import ProductReviews from './ProductReviews';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import placeholderImage from '../components/placeholder.png';
-
+﻿import React, { useState, useEffect } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import {
+  addToCart,
+  getCategoryPath,
+  getProductBySlug,
+  getRelatedProducts,
+} from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
+import SizeGuideModal from "./SizeGuideModal";
+import styles from "./style.component/ProductDetail.module.css";
+import ProductReviews from "./ProductReviews";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import placeholderImage from "../components/placeholder.png";
 
 const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedSize, setSelectedSize] = useState('');
-  const [selectedColor, setSelectedColor] = useState('');
+  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const { slug } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -36,36 +40,41 @@ const ProductDetail = () => {
           setSelectedColor(productData.colors[0]);
         }
 
-        const relatedData = await getProducts({ 
-          category: productData.category,
-          limit: 4,
-          exclude: productData._id
-        });
-        setRelatedProducts(relatedData);
+        if (productData.category) {
+          const relatedData = await getRelatedProducts({
+            category: productData.category,
+            limit: 4,
+            exclude: productData._id,
+          });
+          setRelatedProducts(relatedData);
+        }
 
         if (productData.category) {
           const pathData = await getCategoryPath(productData.category);
           setCategoryPath(pathData);
         }
       } catch (err) {
-        console.error('Error fetching product:', err);
-        setError('Không thể tải thông tin sản phẩm');
+        console.error("Error fetching product:", err);
+        setError("Không thể tải thông tin sản phẩm");
       }
     };
     fetchProductAndRelated();
   }, [slug]);
 
   const formatPrice = (price) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(price);
   };
 
   const handleAddToCart = async () => {
     if (!user) {
-      setError('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng');
+      setError("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng");
       return;
     }
     if (product.stock === 0) {
-      setError('Sản phẩm đã hết hàng');
+      setError("Sản phẩm đã hết hàng");
       return;
     }
     try {
@@ -73,13 +82,13 @@ const ProductDetail = () => {
         productId: product._id,
         quantity,
         size: selectedSize,
-        color: selectedColor
+        color: selectedColor,
       };
       await addToCart(cartItem);
-      navigate('/cart'); // Redirect to cart page
+      navigate("/cart"); // Redirect to cart page
     } catch (err) {
-      console.error('Error adding to cart:', err);
-      setError('Không thể thêm sản phẩm vào giỏ hàng');
+      console.error("Error adding to cart:", err);
+      setError("Không thể thêm sản phẩm vào giỏ hàng");
     }
   };
 
@@ -92,34 +101,33 @@ const ProductDetail = () => {
 
   const incrementQuantity = () => {
     if (quantity < product.stock) {
-      setQuantity(prevQuantity => prevQuantity + 1);
+      setQuantity((prevQuantity) => prevQuantity + 1);
     }
   };
 
   const decrementQuantity = () => {
     if (quantity > 1) {
-      setQuantity(prevQuantity => prevQuantity - 1);
+      setQuantity((prevQuantity) => prevQuantity - 1);
     }
   };
 
   const handleNextImage = () => {
     if (selectedImage < (product.detailImages?.length || 0)) {
-      setSelectedImage(prevImage => prevImage + 1);
+      setSelectedImage((prevImage) => prevImage + 1);
     }
   };
 
   const handlePrevImage = () => {
     if (selectedImage > 0) {
-      setSelectedImage(prevImage => prevImage - 1);
+      setSelectedImage((prevImage) => prevImage - 1);
     }
   };
 
   const imageUrl = (img) => {
     if (!img) return placeholderImage;
-    if (img.startsWith('http')) return img;
-    return `${process.env.REACT_APP_API_URL}/uploads/${img.split('/').pop()}`;
+    if (img.startsWith("http")) return img;
+    return `${process.env.REACT_APP_API_URL}/uploads/${img.split("/").pop()}`;
   };
-
 
   if (!product) return <div className={styles.loading}>Đang tải...</div>;
   if (error) return <div className={styles.error}>{error}</div>;
@@ -129,29 +137,35 @@ const ProductDetail = () => {
       <div className={styles.productMain}>
         <div className={styles.imageSection}>
           <div className={styles.thumbnails}>
-            {[product.image, ...(product.detailImages || [])].map((img, index) => (
-              <div 
-                key={index} 
-                className={`${styles.thumbnailContainer} ${selectedImage === index ? styles.selected : ''}`}
-                onClick={() => setSelectedImage(index)}
-              >
-                <img
-                  src={imageUrl(img)}
-                  alt={`Thumbnail ${index + 1}`}
-                  className={styles.thumbnail}
-                  onError={(e) => {
-                    console.error("Error loading image:", e.target.src);
-                    e.target.onerror = null;
-                    e.target.src = placeholderImage;
-                  }}
-                />
-              </div>
-            ))}
+            {[product.image, ...(product.detailImages || [])].map(
+              (img, index) => (
+                <div
+                  key={index}
+                  className={`${styles.thumbnailContainer} ${
+                    selectedImage === index ? styles.selected : ""
+                  }`}
+                  onClick={() => setSelectedImage(index)}
+                >
+                  <img
+                    src={imageUrl(img)}
+                    alt={`Thumbnail ${index + 1}`}
+                    className={styles.thumbnail}
+                    onError={(e) => {
+                      console.error("Error loading image:", e.target.src);
+                      e.target.onerror = null;
+                      e.target.src = placeholderImage;
+                    }}
+                  />
+                </div>
+              )
+            )}
           </div>
           <div className={styles.mainImageContainer}>
             <img
               className={styles.mainImage}
-              src={imageUrl([product.image, ...(product.detailImages || [])][selectedImage])}
+              src={imageUrl(
+                [product.image, ...(product.detailImages || [])][selectedImage]
+              )}
               alt={product.name}
               onError={(e) => {
                 console.error("Error loading image:", e.target.src);
@@ -160,10 +174,18 @@ const ProductDetail = () => {
               }}
             />
             <div className={styles.imageNavigation}>
-              <button onClick={handlePrevImage} disabled={selectedImage === 0} className={styles.navButton}>
+              <button
+                onClick={handlePrevImage}
+                disabled={selectedImage === 0}
+                className={styles.navButton}
+              >
                 <FaChevronLeft />
               </button>
-              <button onClick={handleNextImage} disabled={selectedImage === (product.detailImages?.length || 0)} className={styles.navButton}>
+              <button
+                onClick={handleNextImage}
+                disabled={selectedImage === (product.detailImages?.length || 0)}
+                className={styles.navButton}
+              >
                 <FaChevronRight />
               </button>
             </div>
@@ -175,7 +197,7 @@ const ProductDetail = () => {
             <p className={styles.productColor}>{product.colors[0]}</p>
           )}
           <p className={styles.price}>{formatPrice(product.price)}</p>
-          
+
           {product.sizes && product.sizes.length > 0 && (
             <div className={styles.sizeSection}>
               <p>SIZE</p>
@@ -183,7 +205,9 @@ const ProductDetail = () => {
                 {product.sizes.map((size) => (
                   <button
                     key={size}
-                    className={`${styles.sizeButton} ${selectedSize === size ? styles.selectedSize : ''}`}
+                    className={`${styles.sizeButton} ${
+                      selectedSize === size ? styles.selectedSize : ""
+                    }`}
                     onClick={() => setSelectedSize(size)}
                   >
                     {size}
@@ -195,14 +219,14 @@ const ProductDetail = () => {
 
           {product.sizeGuideType && (
             <>
-              <button 
+              <button
                 className={styles.viewSizeGuide}
                 onClick={() => setShowSizeGuide(true)}
               >
                 XEM HƯỚNG DẪN CHỌN SIZE
               </button>
-              
-              <SizeGuideModal 
+
+              <SizeGuideModal
                 isOpen={showSizeGuide}
                 onClose={() => setShowSizeGuide(false)}
                 guideType={product.sizeGuideType}
@@ -213,8 +237,16 @@ const ProductDetail = () => {
           {product.stock === 0 ? (
             <div className={styles.outOfStock}>
               <p>NHẬN THÔNG BÁO NGAY KHI CÓ HÀNG</p>
-              <input type="text" placeholder="Nguyễn Trương Nhật Hào" className={styles.input} />
-              <input type="email" placeholder="nguyentruongnhathao1922@gmail.com" className={styles.input} />
+              <input
+                type="text"
+                placeholder="Nguyễn Trương Nhật Hào"
+                className={styles.input}
+              />
+              <input
+                type="email"
+                placeholder="nguyentruongnhathao1922@gmail.com"
+                className={styles.input}
+              />
               <button className={styles.subscribeButton}>SUBSCRIBE NOW</button>
             </div>
           ) : (
@@ -222,7 +254,12 @@ const ProductDetail = () => {
               <div className={styles.quantitySection}>
                 <span className={styles.label}>Số lượng:</span>
                 <div className={styles.quantityControl}>
-                  <button onClick={decrementQuantity} className={styles.quantityButton}>-</button>
+                  <button
+                    onClick={decrementQuantity}
+                    className={styles.quantityButton}
+                  >
+                    -
+                  </button>
                   <input
                     type="number"
                     value={quantity}
@@ -231,13 +268,15 @@ const ProductDetail = () => {
                     max={product.stock}
                     className={styles.quantityInput}
                   />
-                  <button onClick={incrementQuantity} className={styles.quantityButton}>+</button>
+                  <button
+                    onClick={incrementQuantity}
+                    className={styles.quantityButton}
+                  >
+                    +
+                  </button>
                 </div>
               </div>
-              <button 
-                className={styles.addToBasket} 
-                onClick={handleAddToCart}
-              >
+              <button className={styles.addToBasket} onClick={handleAddToCart}>
                 THÊM VÀO GIỎ HÀNG
               </button>
             </>
@@ -250,7 +289,8 @@ const ProductDetail = () => {
 
           {categoryPath.length > 0 && (
             <p className={styles.category}>
-              Danh mục: {categoryPath.map((cat, index) => (
+              Danh mục:{" "}
+              {categoryPath.map((cat, index) => (
                 <span key={cat.id}>
                   {index > 0 && " > "}
                   <Link to={`/category/${cat.slug}`}>{cat.name}</Link>
@@ -274,14 +314,14 @@ const ProductDetail = () => {
           <h2>Sản phẩm liên quan</h2>
           <div className={styles.relatedProductsGrid}>
             {relatedProducts.map((product) => (
-              <Link 
-                to={`/product/${product.slug}`} 
-                key={product._id} 
+              <Link
+                to={`/product/${product.slug}`}
+                key={product._id}
                 className={styles.relatedProductCard}
               >
-                <img 
-                  src={imageUrl(product.image)} 
-                  alt={product.name} 
+                <img
+                  src={imageUrl(product.image)}
+                  alt={product.name}
                   className={styles.relatedProductImage}
                 />
                 <div className={styles.relatedProductInfo}>
@@ -301,8 +341,22 @@ const ProductDetail = () => {
           <div className={styles.modalContent}>
             <h2>Bạn đã thêm sản phẩm vào giỏ hàng !!</h2>
             <div className={styles.modalButtons}>
-              <button onClick={() => { setShowModal(false); navigate('/products'); }}>Tiếp tục mua hàng</button>
-              <button onClick={() => { setShowModal(false); navigate('/cart'); }}>Xem giỏ hàng</button>
+              <button
+                onClick={() => {
+                  setShowModal(false);
+                  navigate("/products");
+                }}
+              >
+                Tiếp tục mua hàng
+              </button>
+              <button
+                onClick={() => {
+                  setShowModal(false);
+                  navigate("/cart");
+                }}
+              >
+                Xem giỏ hàng
+              </button>
             </div>
           </div>
         </div>

@@ -27,6 +27,7 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage: storage });
 
 // Các route không cần xác thực
+router.get('/related',productController.getRelatedProducts);
 router.get('/search/suggestions', productController.getSearchSuggestions);
 router.get('/search', productController.searchProducts);
 router.get('/category/:categoryId/all', productController.getProductsByParentCategory);
