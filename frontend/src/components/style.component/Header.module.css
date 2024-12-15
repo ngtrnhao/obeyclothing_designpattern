@@ -115,44 +115,88 @@
 .rightLinks {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 24px;
+  margin-right: 16px;
 }
 
-.signInLink, .bagLink {
-  text-decoration: none;
-  color: #000;
-  font-size: 0.9rem;
-  margin-left: 20px;
-  text-transform: uppercase;
-}
-
-.bagLink {
-  order: 1;
-  text-decoration: none;
-  color: #333;
-  font-size: 15px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-weight: 500;
-  text-transform: uppercase;
+.navItem {
+  position: relative;
   display: flex;
   align-items: center;
-  letter-spacing: 0.5px;
+  gap: 8px;
+  padding: 8px 16px 8px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #1a1a1a;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s ease;
 }
 
-.bagCount {
-  background-color: #ff4444;
-  color: white;
-  border-radius: 50%;
-  padding: 0;
-  font-size: 11px;
-  font-weight: 600;
+.navItem:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.navItem.active {
+  background: #f0f0f0;
+}
+
+.cartWrapper {
   position: relative;
-  margin-left: 6px;
-  min-width: 16px;
-  height: 16px;
   display: inline-flex;
   align-items: center;
+}
+
+.cartIcon {
+  font-size: 22px;
+  color: #1a1a1a;
+}
+
+.cartBadge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 14px;
+  height: 14px;
+  background: #ff4d4f;
+  color: white;
+  font-size: 9px;
+  font-weight: 600;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
   justify-content: center;
+  border: 1px solid #fff;
+  padding: 0;
+  line-height: 1;
+}
+
+.cartText {
+  font-size: 14px;
+  margin-left: 4px;
+}
+
+.loginButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #1a1a1a;
+  color: white;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.loginButton:hover {
+  background: #333;
+  transform: translateY(-1px);
+}
+
+.loginIcon {
+  font-size: 16px;
 }
 
 .menuButton {
@@ -426,4 +470,218 @@
     right: 0;
     border-radius: 0;
   }
+}
+
+.cartWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.cartWrapper:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.cartIcon {
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.cartText {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+  margin-left: 4px;
+  position: relative;
+  z-index: 1;
+}
+
+.cartBadge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 14px;
+  height: 14px;
+  background: #ff4d4f;
+  color: white;
+  font-size: 9px;
+  font-weight: 600;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #fff;
+  padding: 0;
+  line-height: 1;
+}
+
+.userButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.8rem;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.userButton:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 250px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 0.5rem 0;
+  z-index: 1000;
+}
+
+.dropdownHeader {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  gap: 0.8rem;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.userFullName {
+  font-weight: 500;
+  color: #333;
+}
+
+.userEmail {
+  font-size: 0.8rem;
+  color: #666;
+  width: fit-content;
+}
+
+.dropdownDivider {
+  height: 1px;
+  background-color: #eee;
+  margin: 0.5rem 0;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  text-decoration: none;
+  color: #1a1a1a;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dropdownItem:hover {
+  background-color: #f5f5f5;
+}
+
+/* Style cho menu admin */
+.dropdownItem[href^="/admin"] {
+  color: #1890ff;
+}
+
+.dropdownItem[href^="/admin"] .itemIcon {
+  color: #1890ff;
+}
+
+.dropdownItem[href^="/admin"]:hover {
+  background-color: #e6f7ff;
+}
+
+.logoutButton {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  color: #ff4d4f;
+}
+
+.itemIcon {
+  font-size: 1rem;
+  color: #666;
+}
+
+.userDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 180px; /* Giới hạn chiều rộng */
+  overflow: hidden; /* Ẩn nội dung tràn */
+}
+
+.userName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Hiển thị dấu ... khi text bị cắt */
+}
+
+.userEmail {
+  font-size: 12px;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Hiển thị dấu ... khi text bị cắt */
+}
+
+.menuDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 300px; 
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.userHeader {
+  padding: 16px;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%; /* Đảm bảo header full width */
+  box-sizing: border-box; /* Tính padding vào width */
+}
+
+/* Thêm style mới cho tooltip khi hover vào email */
+.userEmail:hover {
+  position: relative;
+}
+
+.userEmail:hover::after {
+  content: attr(title); /* Hiển thị email đầy đủ khi hover */
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1001;
 }
