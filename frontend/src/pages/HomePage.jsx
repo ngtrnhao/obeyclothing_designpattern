@@ -19,15 +19,15 @@ const HomePage = () => {
   const fetchFeaturedProducts = async () => {
     try {
       const response = await getRelatedProducts(); 
-      if (response && Array.isArray(response)) {
-        const sortedProducts = response.sort((a, b) => b.sales - a.sales);
+      if (response && response.products && Array.isArray(response.products)) {
+        const sortedProducts = response.products.sort((a, b) => b.sales - a.sales);
         setFeaturedProducts(sortedProducts.slice(0, 4));
       } else {
-        console.error('Unexpected response format:', response);
+        console.error('Dữ liệu không hợp lệ:', response);
         setFeaturedProducts([]);
       }
     } catch (error) {
-      console.error('Error fetching featured products:', error);
+      console.error('Lỗi khi tải sản phẩm nổi bật:', error);
       setFeaturedProducts([]);
     }
   };
