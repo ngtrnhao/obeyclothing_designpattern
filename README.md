@@ -80,7 +80,7 @@ OBEY CLOTHING là một website thương mại điện tử chuyên về thời 
 
 1. Clone dự án:
 bash
-git clone [repository-url]
+git clone https://github.com/ngtrnhao/obeyclothing
 cd obey-clothing
 
 2. Cài đặt dependencies cho backend:
