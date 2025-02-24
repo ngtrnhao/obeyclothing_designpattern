@@ -306,7 +306,31 @@ const Checkout = () => {
 
       const token = localStorage.getItem("token");
 
-      if (selectedPaymentMethod === "vnpay") {
+      if (selectedPaymentMethod === "cod") {
+        const response = await axios.post(
+          "/api/orders/create-cod-order",
+          {
+            shippingInfo,
+            cartItems,
+            voucher,
+            totalAmount: total,
+            shippingFee: 30000,
+            discountAmount,
+            finalAmount
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (response.data.order) {
+          clearCart();
+          navigate(`/order-success/${response.data.order._id}`);
+        }
+      } else if (selectedPaymentMethod === "vnpay") {
         const response = await axios.post(
           "/api/orders/create-vnpay-payment",
           {

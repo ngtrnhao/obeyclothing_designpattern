@@ -289,14 +289,13 @@ async function getSalesData(start, end, period) {
 
 exports.getDashboardData = async (req, res) => {
   try {
-    // ... các thống kê khác ...
-
+   
     const lowStockProducts = await Product.find({
       $expr: { $lte: ['$stock', '$lowStockThreshold'] }
     }).select('name stock lowStockThreshold');
 
     res.json({
-      // ... các thống kê khác ...
+      
       lowStockProducts
     });
   } catch (error) {
