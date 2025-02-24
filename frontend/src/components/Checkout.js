@@ -11,7 +11,6 @@ import styles from "./style.component/Checkout.module.css";
 import { provinces, getDistricts, getWards } from "../data/vietnamData";
 import { useNavigate } from "react-router-dom";
 import AddressSection from "./AddressSection";
-import { createCodOrder } from "../services/orderService";
 import axios from "axios";
 
 const Checkout = () => {
@@ -308,7 +307,7 @@ const Checkout = () => {
 
       if (selectedPaymentMethod === "cod") {
         const response = await axios.post(
-          "/api/orders/create-cod-order",
+          `${process.env.REACT_APP_API_URL}/api/orders/create-cod-order`,
           {
             shippingInfo,
             cartItems,
@@ -316,7 +315,7 @@ const Checkout = () => {
             totalAmount: total,
             shippingFee: 30000,
             discountAmount,
-            finalAmount
+            finalAmount,
           },
           {
             headers: {
@@ -336,7 +335,11 @@ const Checkout = () => {
           {
             shippingInfo,
             cartItems,
-            totalAmount: finalAmount,
+            totalAmount: total,
+            shippingFee: 30000,
+            discountAmount: discountAmount || 0,
+            finalAmount: finalAmount,
+            voucher: voucher || null,
           },
           {
             headers: {
