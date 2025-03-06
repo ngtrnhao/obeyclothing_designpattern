@@ -1,21 +1,44 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { getCategories, createCategory, deleteCategory } from '../services/api';
-import styles from './style.component/CategoryManagement.module.css';
+import React, { useState, useEffect, useCallback } from "react";
+import { getCategories, createCategory, deleteCategory } from "../services/api";
+import CategoryComposite from "../models/CategoryComposite";
+import CategoryLeaf from "../models/CategoryLeaf";
+import styles from "./style.component/CategoryManagement.module.css";
 
 const CategoryManagement = () => {
   const [categories, setCategories] = useState([]);
-  const [newCategory, setNewCategory] = useState({ name: '', slug: '', parentId: '' });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [newCategory, setNewCategory] = useState({
+    name: "",
+    slug: "",
+    parentId: "",
+  });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const buildCategoryTree = useCallback((categoriesData) => {
+    return categoriesData.map((catData) => {
+      if (catData.children && catData.children.length > 0) {
+        const composite = new CategoryComposite(
+          catData._id,
+          catData.name,
+          catData.slug
+        );
+        const children = buildCategoryTree(catData.children);
+        children.forEach((child) => composite.addChild(child));
+        return composite;
+      }
+      return new CategoryLeaf(catData._id, catData.name, catData.slug);
+    });
+  }, []);
 
   const fetchCategories = useCallback(async () => {
     try {
       const response = await getCategories();
-      setCategories(response);
+      const categoryTree = buildCategoryTree(response);
+      setCategories(categoryTree);
     } catch (error) {
-      setError('Không thể tải danh sách danh mục. Vui lòng thử lại sau.');
+      setError("Không thể tải danh sách danh mục. Vui lòng thử lại sau.");
     }
-  }, []);
+  }, [buildCategoryTree]);
 
   useEffect(() => {
     fetchCategories();
@@ -23,7 +46,7 @@ const CategoryManagement = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewCategory(prev => ({ ...prev, [name]: value }));
+    setNewCategory((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleCreateCategory = async (e) => {
@@ -32,46 +55,70 @@ const CategoryManagement = () => {
       const categoryData = {
         name: newCategory.name,
         parentId: newCategory.parentId || null,
-        slug: newCategory.slug // Đảm bảo rằng slug được gửi
+        slug: newCategory.slug,
       };
-      console.log('Sending category data:', categoryData); // Log để kiểm tra
       const response = await createCategory(categoryData);
-      console.log('Server response:', response);
-      setCategories(prevCategories => [...prevCategories, response]);
-      setNewCategory({ name: '', slug: '', parentId: '' });
-      setSuccess('Danh mục đã được tạo thành công');
-      setError('');
+
+      // Tạo instance mới của Category dựa trên response
+      const newCategoryInstance =
+        response.children?.length > 0
+          ? new CategoryComposite(response._id, response.name, response.slug)
+          : new CategoryLeaf(response._id, response.name, response.slug);
+
+      setCategories((prevCategories) => [
+        ...prevCategories,
+        newCategoryInstance,
+      ]);
+      setNewCategory({ name: "", slug: "", parentId: "" });
+      setSuccess("Danh mục đã được tạo thành công");
+      setError("");
       fetchCategories();
     } catch (error) {
-      setError(error.response?.data?.message || 'Lỗi khi tạo danh mục');
-      setSuccess('');
+      setError(error.response?.data?.message || "Lỗi khi tạo danh mục");
+      setSuccess("");
     }
   };
 
   const handleDeleteCategory = async (categoryId) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa danh mục này?')) {
+    if (window.confirm("Bạn có chắc chắn muốn xóa danh mục này?")) {
       try {
         await deleteCategory(categoryId);
-        setSuccess('Danh mục đã được xóa thành công');
-        setError('');
+        setSuccess("Danh mục đã được xóa thành công");
+        setError("");
         fetchCategories();
       } catch (error) {
-        setError(error.response?.data?.message || 'Có lỗi xảy ra khi xóa danh mục');
-        setSuccess('');
+        setError(
+          error.response?.data?.message || "Có lỗi xảy ra khi xóa danh mục"
+        );
+        setSuccess("");
       }
     }
   };
 
   const renderCategories = (categories, level = 0) => {
-    return categories.map(category => (
-      <React.Fragment key={category._id}>
-        <div className={styles.categoryItem} style={{ marginLeft: `${level * 20}px` }}>
-          <span className={styles.categoryName}>{category.name} - {category.slug}</span>
-          <button className={styles.deleteButton} onClick={() => handleDeleteCategory(category._id)}>Xóa</button>
-        </div>
-        {category.children && category.children.length > 0 && renderCategories(category.children, level + 1)}
-      </React.Fragment>
-    ));
+    return categories.map((category) => {
+      const displayData = category.display();
+      return (
+        <React.Fragment key={category.getId()}>
+          <div
+            className={styles.categoryItem}
+            style={{ marginLeft: `${level * 20}px` }}
+          >
+            <span className={styles.categoryName}>
+              {category.getName()} - {category.getSlug()}
+            </span>
+            <button
+              className={styles.deleteButton}
+              onClick={() => handleDeleteCategory(category.getId())}
+            >
+              Xóa
+            </button>
+          </div>
+          {displayData.type === "composite" &&
+            renderCategories(category.getChildren(), level + 1)}
+        </React.Fragment>
+      );
+    });
   };
 
   return (
@@ -105,12 +152,14 @@ const CategoryManagement = () => {
         >
           <option value="">Không có danh mục cha</option>
           {categories.map((category) => (
-            <option key={category._id} value={category._id}>
-              {category.name}
+            <option key={category.getId()} value={category.getId()}>
+              {category.getName()}
             </option>
           ))}
         </select>
-        <button type="submit" className={styles.button}>Tạo danh mục</button>
+        <button type="submit" className={styles.button}>
+          Tạo danh mục
+        </button>
       </form>
       <div className={styles.categoryListContainer}>
         <h3>Danh sách danh mục:</h3>
