@@ -49,14 +49,23 @@ const CategoryManagement = () => {
   };
 
   const handleDeleteCategory = async (categoryId) => {
+    if (!categoryId) {
+      setError('ID danh mục không hợp lệ');
+      return;
+    }
+
     if (window.confirm('Bạn có chắc chắn muốn xóa danh mục này?')) {
       try {
-        await deleteCategory(categoryId);
-        setSuccess('Danh mục đã được xóa thành công');
+        console.log('Attempting to delete category:', categoryId);
+        const result = await deleteCategory(categoryId);
+        console.log('Delete result:', result);
+        
+        setSuccess(result.message || 'Danh mục đã được xóa thành công');
         setError('');
-        fetchCategories();
+        await fetchCategories();
       } catch (error) {
-        setError(error.response?.data?.message || 'Có lỗi xảy ra khi xóa danh mục');
+        console.error('Component error:', error);
+        setError(error.message || 'Có lỗi xảy ra khi xóa danh mục');
         setSuccess('');
       }
     }

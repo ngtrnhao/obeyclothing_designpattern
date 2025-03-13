@@ -282,18 +282,19 @@ export const getCategories = async () => {
   }
 };
 
-export const deleteCategory = async (category) => {
+export const deleteCategory = async (categoryId) => {
   try {
-    const token = localStorage.getItem("token");
-    const encodedCategory = encodeURIComponent(category);
-    const response = await api.delete(`/categories/${encodedCategory}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    if (!categoryId) {
+      throw new Error('Thiếu ID danh mục');
+    }
+    console.log('Deleting category:', categoryId);
+    const response = await api.delete(`/categories/${categoryId}`);
     return response.data;
   } catch (error) {
-    console.error("Error deleting category:", error);
+    console.error('API error:', error);
+    if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    }
     throw error;
   }
 };

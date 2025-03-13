@@ -1,115 +1,57 @@
 const Category = require('../models/Category');
 const Product = require('../models/Product');
+const CategoryService = require('../services/CategoryService');
 
 exports.createCategory = async (req, res) => {
   try {
-    console.log('Received category data:', req.body); 
-    const { name, parentId, slug } = req.body;
-    
-    let newSlug = slug;
-    if (!newSlug) {
-      newSlug = slugify(name, { lower: true, remove: /[*+~.()'"!:@]/g });
-    }
-
-    // Kiểm tra xem slug đã tồn tại chưa
-    const existingCategory = await Category.findOne({ slug: newSlug });
-    if (existingCategory) {
-      return res.status(400).json({ message: 'Slug đã tồn tại, vui lòng chọn slug khác' });
-    }
-
-    const newCategory = new Category({
-      name,
-      parent: parentId || null,
-      slug: newSlug
-    });
-
-    // Tạo fullSlug
-    if (parentId) {
-      const parentCategory = await Category.findById(parentId);
-      if (parentCategory) {
-        newCategory.fullSlug = `${parentCategory.fullSlug}/${newSlug}`;
-      } else {
-        return res.status(400).json({ message: 'Danh mục cha không tồn tại' });
-      }
-    } else {
-      newCategory.fullSlug = newSlug;
-    }
-
-    await newCategory.save();
-
-    if (parentId) {
-      await Category.findByIdAndUpdate(parentId, { $push: { children: newCategory._id } });
-    }
-
-    await newCategory.populate('parent');
-
-    console.log('Created category:', newCategory); // Log để kiểm tra
-    res.status(201).json(newCategory);
+    const category = await CategoryService.createCategory(req.body);
+    res.status(201).json(category);
   } catch (error) {
-    console.error('Error creating category:', error);
-    res.status(500).json({ message: 'Lỗi khi tạo danh mục', error: error.message });
+    res.status(400).json({ 
+      message: error.message || 'Lỗi khi tạo danh mục'
+    });
   }
 };
 
 exports.getAllCategories = async (req, res) => {
   try {
-    const categories = await Category.find({ parent: null }).populate({
-      path: 'children',
-      populate: { path: 'children' }
-    });
+    const categories = await CategoryService.getCategoryTree();
     res.json(categories);
   } catch (error) {
-    console.error('Error in getAllCategories:', error);
-    res.status(500).json({ message: 'Lỗi server', error: error.message });
+    res.status(500).json({ 
+      message: error.message || 'Lỗi khi lấy danh sách danh mục'
+    });
   }
 };
 
 exports.getCategoryBySlug = async (req, res) => {
   try {
-    const { slug } = req.params;
-    const category = await Category.findOne({ slug }).populate('children');
-    if (!category) {
-      return res.status(404).json({ message: 'Không tìm thấy danh mục' });
-    }
+    const category = await CategoryService.getCategoryBySlug(req.params.slug);
     res.json(category);
   } catch (error) {
-    res.status(500).json({ message: 'Lỗi server', error: error.message });
+    res.status(404).json({ 
+      message: error.message || 'Không tìm thấy danh mục'
+    });
   }
 };
 
 exports.deleteCategory = async (req, res) => {
   try {
-    const { categoryId } = req.params;
-    console.log('Attempting to delete category:', categoryId);
+    const categoryId = req.params.categoryId;
+    console.log('Deleting category with ID:', categoryId);
 
-    // Kiểm tra xem danh mục có tồn tại không
-    const category = await Category.findById(categoryId);
-    if (!category) {
-      console.log('Category not found');
-      return res.status(404).json({ message: 'Không tìm thấy danh mục' });
+    if (!categoryId) {
+      throw new Error('Thiếu ID danh mục');
     }
 
-    // Kiểm tra xem danh mục có danh mục con không
-    const childCategories = await Category.find({ parent: categoryId });
-    if (childCategories.length > 0) {
-      console.log('Category has child categories');
-      return res.status(400).json({ message: 'Không thể xóa danh mục có danh mục con' });
-    }
-
-    // Kiểm tra xem danh mục có sản phẩm không
-    const productsInCategory = await Product.find({ category: categoryId });
-    if (productsInCategory.length > 0) {
-      console.log('Category has products');
-      return res.status(400).json({ message: 'Không thể xóa danh mục có sản phẩm' });
-    }
-
-    // Xóa danh mục
-    await Category.findByIdAndDelete(categoryId);
-    console.log('Category deleted successfully');
-    res.json({ message: 'Danh mục đã được xóa thành công' });
+    const result = await CategoryService.deleteCategory(categoryId);
+    res.json(result);
   } catch (error) {
-    console.error('Error deleting category:', error);
-    res.status(500).json({ message: 'Lỗi server khi xóa danh mục', error: error.message });
+    console.error('Controller error:', error);
+    res.status(400).json({ 
+      success: false,
+      message: error.message || 'Lỗi khi xóa danh mục'
+    });
   }
 };
 
@@ -138,22 +80,12 @@ function structureCategories(categories) {
 
 exports.getCategoryPath = async (req, res) => {
   try {
-    const categoryId = req.params.categoryId;
-    let category = await Category.findById(categoryId).populate('parent');
-    if (!category) {
-      return res.status(404).json({ message: 'Không tìm thấy danh mục' });
-    }
-
-    let path = [];
-    while (category) {
-      path.unshift({ id: category._id, name: category.name, slug: category.slug });
-      category = category.parent;
-    }
-
+    const path = await CategoryService.getCategoryPath(req.params.categoryId);
     res.json(path);
   } catch (error) {
-    console.error('Error in getCategoryPath:', error);
-    res.status(500).json({ message: 'Lỗi server', error: error.message });
+    res.status(404).json({ 
+      message: error.message || 'Không tìm thấy đường dẫn danh mục'
+    });
   }
 };
 
