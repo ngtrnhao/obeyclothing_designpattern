@@ -1,8 +1,9 @@
 ﻿const express = require("express");
 const router = express.Router();
 const productController = require("../controllers/productController");
-const authMiddleware = require("../middleware/authMiddleware");
-const adminMiddleware = require("../middleware/adminMiddleware");
+// const authMiddleware = require("../middleware/authMiddleware");
+// const adminMiddleware = require("../middleware/adminMiddleware");
+const { authChainMiddleware, adminChainMiddleware } = require('../middleware/chainMiddleware');
 const cloudinary = require("cloudinary").v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const multer = require("multer");
@@ -41,11 +42,11 @@ router.get("/:id", productController.getProductById);
 router.get("/", productController.getAllProducts);
 
 // Các route cần xác thực
-router.use(authMiddleware);
+router.use(authChainMiddleware);
 router.post("/:id/reviews", productController.addProductReview);
 
 // Các route cần xác thực admin
-router.use(adminMiddleware);
+router.use(adminChainMiddleware);
 router.post(
   "/",
   upload.fields([

@@ -1,6 +1,7 @@
 ﻿const express = require('express');
 const router = express.Router();
-const authMiddleware = require('../middleware/authMiddleware');
+// const authMiddleware = require('../middleware/authMiddleware');
+const { authChainMiddleware } = require('../middleware/chainMiddleware');
 const Cart = require('../models/Cart');
 const Product = require('../models/Product'); // Thêm dòng này
 const Order = require('../models/Order'); // Thêm dòng này
@@ -8,7 +9,7 @@ const Voucher = require('../models/Voucher'); // Thêm dòng này
 const voucherController = require('../controllers/voucherController');
 
 // Áp dụng authMiddleware cho tất cả các route của giỏ hàng
-router.use(authMiddleware);
+router.use(authChainMiddleware);
 
 // Get user's cart
 router.get('/', async (req, res) => {
@@ -24,7 +25,7 @@ router.get('/', async (req, res) => {
 });
 
 // Add item to cart
-router.post('/add', authMiddleware, async (req, res) => {
+router.post('/add', authChainMiddleware, async (req, res) => {
   try {
     const { productId, quantity, size, color } = req.body;
     const userId = req.user._id;
@@ -442,6 +443,6 @@ router.post('/clear', async (req, res) => {
   }
 });
 
-router.post('/remove-voucher', authMiddleware, voucherController.removeVoucher);
+router.post('/remove-voucher', authChainMiddleware, voucherController.removeVoucher);
 
 module.exports = router;

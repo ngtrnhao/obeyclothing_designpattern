@@ -4,8 +4,9 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
-const authMiddleware = require('./middleware/authMiddleware');
-const adminMiddleware = require('./middleware/adminMiddleware');
+// const authMiddleware = require('./middleware/authMiddleware');
+// const adminMiddleware = require('./middleware/adminMiddleware');
+const { authChainMiddleware, adminChainMiddleware } = require('./middleware/chainMiddleware');
 const cron = require('node-cron');
 const inventoryController = require('./controllers/inventoryController');
 const deliveryRoutes = require('./routes/deliveryRoutes');
@@ -61,7 +62,7 @@ const categoriesRoutes = require('./routes/categories');
 const addressRoutes = require('./routes/addressRoutes');
 
 // Đặt route admin trước các route khác
-app.use('/api/admin', authMiddleware, adminMiddleware, (req, res, next) => {
+app.use('/api/admin', adminChainMiddleware, (req, res, next) => {
   console.log('Admin route accessed');
   next();
 }, adminRoutes);
@@ -138,7 +139,7 @@ require('./utils/cronJobs');
 app.use('/api/chat', chatRoutes);
 
 // Các route khác cần xác thực
-app.use('/api', authMiddleware, (req, res, next) => {
+app.use('/api', authChainMiddleware, (req, res, next) => {
   console.log('Protected route accessed');
   next();
 });

@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const adminController = require("../controllers/adminController");
-const authMiddleware = require("../middleware/authMiddleware");
-const adminMiddleware = require("../middleware/adminMiddleware");
+// const authMiddleware = require("../middleware/authMiddleware");
+// const adminMiddleware = require("../middleware/adminMiddleware");
+const { authChainMiddleware, adminChainMiddleware } = require('../middleware/chainMiddleware');
 const upload = require("../middleware/uploadMiddleware");
 const Order = require("../models/Order");
 const User = require("../models/User");
@@ -12,8 +13,8 @@ const supplierController = require("../controllers/supplierController");
 const Delivery = require("../models/Delivery");
 const voucherController = require("../controllers/voucherController");
 
-router.use(authMiddleware);
-router.use(adminMiddleware);
+router.use(authChainMiddleware);
+router.use(adminChainMiddleware);
 
 // Quản lý sản phẩm
 router.get("/products", adminController.getAllProducts);
@@ -47,20 +48,20 @@ router.get("/purchase-orders", inventoryController.getPurchaseOrders);
 router.post("/purchase-orders", inventoryController.createPurchaseOrder);
 router.put(
   "/purchase-orders/:id",
-  authMiddleware,
-  adminMiddleware,
+  authChainMiddleware,
+  adminChainMiddleware,
   inventoryController.updatePurchaseOrder
 );
 router.get(
   "/purchase-orders/:id/pdf",
-  authMiddleware,
-  adminMiddleware,
+  authChainMiddleware,
+  adminChainMiddleware,
   inventoryController.generatePurchaseOrderPDF
 );
 router.get(
   "/purchase-orders/:id/receipt-pdf",
-  authMiddleware,
-  adminMiddleware,
+  authChainMiddleware,
+  adminChainMiddleware,
   inventoryController.generateReceiptConfirmationPDF
 );
 
@@ -75,15 +76,15 @@ router.delete("/suppliers/:id", supplierController.deleteSupplier);
 
 router.get(
   "/statistics/download",
-  adminMiddleware,
+  adminChainMiddleware,
   adminController.downloadStatisticsReport
 );
 // Quản lý voucher
 router.post("/vouchers", adminController.createVoucher);
 router.get(
   "/vouchers",
-  authMiddleware,
-  adminMiddleware,
+  authChainMiddleware,
+  adminChainMiddleware,
   adminController.getAllVouchers
 );
 router.put("/vouchers/:id", adminController.updateVoucher);
@@ -91,8 +92,8 @@ router.delete("/vouchers/:id", adminController.deleteVoucher);
 
 router.put(
   "/purchase-orders/:id/confirm-receipt",
-  authMiddleware,
-  adminMiddleware,
+  authChainMiddleware,
+  adminChainMiddleware,
   inventoryController.confirmReceiptAndUpdateInventory
 );
 

@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const categoryController = require('../controllers/categoryController');
-const authMiddleware = require('../middleware/authMiddleware');
+// const authMiddleware = require('../middleware/authMiddleware');
+const { authChainMiddleware, adminChainMiddleware } = require('../middleware/chainMiddleware');
 
 // Các route không cần xác thực
 router.get('/', categoryController.getAllCategories);
@@ -9,8 +10,8 @@ router.get('/:categoryId/path', categoryController.getCategoryPath);
 router.get('/:categoryId/subcategories', categoryController.getSubcategories);
 
 // Các route cần xác thực (chỉ cho admin)
-router.post('/', authMiddleware, categoryController.createCategory);
-router.delete('/:categoryId', authMiddleware, categoryController.deleteCategory);
+router.post('/', authChainMiddleware, categoryController.createCategory);
+router.delete('/:categoryId', authChainMiddleware, categoryController.deleteCategory);
 
 // New route to handle slug or ID
 router.get('/find/:slugOrId', categoryController.getCategoryBySlugOrId);

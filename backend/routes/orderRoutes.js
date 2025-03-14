@@ -1,15 +1,16 @@
 const express = require("express");
 const router = express.Router();
 const orderController = require("../controllers/orderController");
-const authMiddleware = require("../middleware/authMiddleware");
+// const authMiddleware = require("../middleware/authMiddleware");
+const { authChainMiddleware } = require('../middleware/chainMiddleware');
 const Invoice = require("../models/Invoice"); // Thêm dòng này
 const { createInvoicePDF } = require("../utils/pdfGenerator");
 
-router.use(authMiddleware);
+router.use(authChainMiddleware);
 
 router.post(
   "/create-vnpay-payment",
-  authMiddleware,
+  authChainMiddleware,
   orderController.createPayment
 );
 router.get("/vnpay-return", orderController.handlePaymentResponse);
@@ -17,7 +18,7 @@ router.get("/vnpay-return", orderController.handlePaymentResponse);
 router.post("/create-paypal-order", orderController.createPaypalOrder);
 router.post(
   "/complete-paypal-order",
-  authMiddleware,
+  authChainMiddleware,
   (req, res, next) => {
     console.log("Received request body:", req.body);
     next();
@@ -71,7 +72,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.get("/invoice/:id", authMiddleware, async (req, res) => {
+router.get("/invoice/:id", authChainMiddleware, async (req, res) => {
   try {
     const invoice = await Invoice.findOne({ order: req.params.id }).populate(
       "items.product"
@@ -95,16 +96,16 @@ router.get("/invoice/:id", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/:id", authMiddleware, orderController.getOrderById);
+router.get("/:id", authChainMiddleware, orderController.getOrderById);
 
 // Thêm route để lấy danh sách phương thức thanh toán
 router.get("/payment-methods", orderController.getPaymentMethods);
 
-router.put("/:id/cancel", authMiddleware, orderController.cancelOrder);
+router.put("/:id/cancel", authChainMiddleware, orderController.cancelOrder);
 
 router.post(
   "/create-cod-order",
-  authMiddleware,
+  authChainMiddleware,
   orderController.createCodOrder
 );
 

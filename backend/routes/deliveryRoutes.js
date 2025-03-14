@@ -2,12 +2,13 @@ const express = require("express");
 const router = express.Router();
 const Delivery = require("../models/Delivery");
 const Order = require("../models/Order");
-const authMiddleware = require("../middleware/authMiddleware");
-const adminMiddleware = require("../middleware/adminMiddleware");
+// const authMiddleware = require("../middleware/authMiddleware");
+// const adminMiddleware = require("../middleware/authMiddleware");
+const { authChainMiddleware, adminChainMiddleware } = require('../middleware/chainMiddleware');
 const { createDeliveryNotePDF } = require("../utils/pdfGenerator");
 
-router.use(authMiddleware);
-router.use(adminMiddleware);
+ router.use(authChainMiddleware);
+router.use(adminChainMiddleware);
 
 router.get("/", async (req, res) => {
   try {
