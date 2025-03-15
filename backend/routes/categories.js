@@ -6,23 +6,20 @@ const { authChainMiddleware, adminChainMiddleware } = require('../middleware/cha
 
 // Các route không cần xác thực
 router.get('/', categoryController.getAllCategories);
-router.get('/:categoryId/path', categoryController.getCategoryPath);
-router.get('/:categoryId/subcategories', categoryController.getSubcategories);
+router.get('/slug/:slug', categoryController.getCategoryBySlug);
+router.get('/path/:categoryId', categoryController.getCategoryPath);
+router.get('/subcategories/:categoryId', categoryController.getSubcategories);
+router.get('/slugOrId/:slugOrId', categoryController.getCategoryBySlugOrId);
+router.get('/products/:slug', categoryController.getProductsByCategorySlug);
 
-// Các route cần xác thực (chỉ cho admin)
-router.post('/', authChainMiddleware, categoryController.createCategory);
-router.delete('/:categoryId', authChainMiddleware, categoryController.deleteCategory);
-
-// New route to handle slug or ID
-router.get('/find/:slugOrId', categoryController.getCategoryBySlugOrId);
-
-// New route to handle products by category slug
-router.get('/:slug/products', categoryController.getProductsByCategorySlug);
-
-// New route to handle products by category and children recursively
-router.get('/:id/products-recursive', categoryController.getProductsByCategoryAndChildren);
+// Các route cần xác thực và quyền admin
+router.post('/', adminChainMiddleware, categoryController.createCategory);
+router.delete('/:categoryId', adminChainMiddleware, categoryController.deleteCategory);
 
 // New route to handle categories by full slug
 router.get('/by-full-slug/*', categoryController.getCategoryByFullSlug);
+
+// New route to handle products by category slug
+router.get('/:slug/products', categoryController.getProductsByCategorySlug);
 
 module.exports = router;

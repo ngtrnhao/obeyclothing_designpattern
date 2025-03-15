@@ -32,10 +32,8 @@ class CategoryService {
         }
         newCategory.fullSlug = `${parentCategory.fullSlug}/${newSlug}`;
         
-        // Cập nhật parent category
-        parentCategory.children.push(newCategory._id);
-        parentCategory.isComposite = true;
-        await parentCategory.save();
+        // Sử dụng phương thức Composite Pattern
+        await parentCategory.add(newCategory);
       } else {
         newCategory.fullSlug = newSlug;
       }
@@ -77,7 +75,7 @@ class CategoryService {
       }
 
       // Kiểm tra có danh mục con không
-      const hasChildren = await Category.exists({ parent: categoryId });
+      const hasChildren = category.isComposite;
       if (hasChildren) {
         throw new Error('Không thể xóa danh mục có danh mục con');
       }
@@ -88,12 +86,12 @@ class CategoryService {
         throw new Error('Không thể xóa danh mục có sản phẩm');
       }
 
-      // Nếu có parent, cập nhật parent
+      // Nếu có parent, cập nhật parent bằng Composite Pattern
       if (category.parent) {
-        await Category.findByIdAndUpdate(
-          category.parent,
-          { $pull: { children: categoryId } }
-        );
+        const parentCategory = await Category.findById(category.parent);
+        if (parentCategory) {
+          await parentCategory.remove(category);
+        }
       }
 
       // Xóa category
@@ -118,17 +116,19 @@ class CategoryService {
     }
   }
 
-  async getAllChildCategories(categoryId) {
+  async getCategoryBySlugOrId(slugOrId) {
     try {
-      const children = await Category.find({ parent: categoryId });
-      let allChildren = [...children];
-      
-      for (let child of children) {
-        const grandChildren = await this.getAllChildCategories(child._id);
-        allChildren = allChildren.concat(grandChildren);
+      let category;
+      if (mongoose.Types.ObjectId.isValid(slugOrId)) {
+        category = await Category.findById(slugOrId).populate('children');
+      } else {
+        category = await Category.findOne({ slug: slugOrId }).populate('children');
       }
       
-      return allChildren;
+      if (!category) {
+        throw new Error('Không tìm thấy danh mục');
+      }
+      return category;
     } catch (error) {
       throw error;
     }
@@ -152,6 +152,69 @@ class CategoryService {
       }
       
       return path;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getAllChildCategories(categoryId) {
+    try {
+      const children = await Category.find({ parent: categoryId });
+      let allChildren = [...children];
+      
+      for (let child of children) {
+        const grandChildren = await this.getAllChildCategories(child._id);
+        allChildren = allChildren.concat(grandChildren);
+      }
+      
+      return allChildren;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getProductsByCategory(categoryIdOrSlug, includeChildren = true) {
+    try {
+      // Tìm category theo ID hoặc slug
+      let category;
+      if (mongoose.Types.ObjectId.isValid(categoryIdOrSlug)) {
+        category = await Category.findById(categoryIdOrSlug);
+      } else {
+        category = await Category.findOne({ slug: categoryIdOrSlug });
+      }
+      
+      if (!category) {
+        throw new Error('Không tìm thấy danh mục');
+      }
+      
+      // Xác định các danh mục cần tìm sản phẩm
+      let categoryIds = [category._id];
+      
+      // Nếu bao gồm con, lấy tất cả ID danh mục con
+      if (includeChildren) {
+        const childCategories = await this.getAllChildCategories(category._id);
+        if (childCategories.length > 0) {
+          categoryIds = [...categoryIds, ...childCategories.map(c => c._id)];
+        }
+      }
+      
+      // Tìm sản phẩm trong các danh mục
+      const products = await Product.find({ category: { $in: categoryIds } });
+      return products;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getSubcategories(parentId) {
+    try {
+      const category = await Category.findById(parentId);
+      if (!category) {
+        throw new Error('Không tìm thấy danh mục cha');
+      }
+      
+      // Sử dụng phương thức getChildren của Composite Pattern
+      return await category.getChildren();
     } catch (error) {
       throw error;
     }

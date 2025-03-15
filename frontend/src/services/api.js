@@ -8,7 +8,7 @@ const api = axios.create({
     "Content-Type": "application/json",
   },
   withCredentials: true,
-  timeout: 10000,
+  timeout: 30000,
 });
 
 // Chỉ giữ một interceptor request
@@ -285,13 +285,13 @@ export const getCategories = async () => {
 export const deleteCategory = async (categoryId) => {
   try {
     if (!categoryId) {
-      throw new Error('Thiếu ID danh mục');
+      throw new Error("Thiếu ID danh mục");
     }
-    console.log('Deleting category:', categoryId);
+    console.log("Deleting category:", categoryId);
     const response = await api.delete(`/categories/${categoryId}`);
     return response.data;
   } catch (error) {
-    console.error('API error:', error);
+    console.error("API error:", error);
     if (error.response?.data?.message) {
       throw new Error(error.response.data.message);
     }
@@ -437,7 +437,7 @@ export const getProductsByCategory = async (categoryId) => {
 
 export const getCategoryPath = async (categoryId) => {
   try {
-    const response = await api.get(`/categories/${categoryId}/path`);
+    const response = await api.get(`/categories/path/${categoryId}`);
     return response.data;
   } catch (error) {
     console.error("Error getting category path:", error);

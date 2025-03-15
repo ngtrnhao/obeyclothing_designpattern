@@ -54,12 +54,12 @@
 }
 
 .viewOrderButton {
-  background-color: #4CAF50;
+  background-color:#3127a3 ;
   color: white;
 }
 
 .viewOrderButton:hover {
-  background-color: #45a049;
+  background-color: #4338ca;
 }
 
 .continueButton {
@@ -92,7 +92,7 @@
   }
   
   .orderSuccessContainer h2 {
-    color: #4CAF50;
+    color: #4338ca; 
     font-size: 32px;
     margin-bottom: 20px;
   }

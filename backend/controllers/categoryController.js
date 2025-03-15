@@ -92,7 +92,7 @@ exports.getCategoryPath = async (req, res) => {
 exports.getSubcategories = async (req, res) => {
   try {
     const parentId = req.params.categoryId;
-    const subcategories = await Category.find({ parent: parentId });
+    const subcategories = await CategoryService.getSubcategories(parentId);
     res.json(subcategories);
   } catch (error) {
     console.error('Error in getSubcategories:', error);
@@ -103,43 +103,25 @@ exports.getSubcategories = async (req, res) => {
 exports.getCategoryBySlugOrId = async (req, res) => {
   try {
     const { slugOrId } = req.params;
-    let category;
-
-    if (mongoose.Types.ObjectId.isValid(slugOrId)) {
-      category = await Category.findById(slugOrId);
-    } else {
-      category = await Category.findOne({ slug: slugOrId });
-    }
-
-    if (!category) {
-      return res.status(404).json({ message: 'Không tìm thấy danh mục' });
-    }
-
+    const category = await CategoryService.getCategoryBySlugOrId(slugOrId);
     res.json(category);
   } catch (error) {
     console.error('Error in getCategoryBySlugOrId:', error);
-    res.status(500).json({ message: 'Lỗi server', error: error.message });
+    res.status(404).json({ message: error.message || 'Không tìm thấy danh mục' });
   }
 };
 
 exports.getProductsByCategorySlug = async (req, res) => {
   try {
     const { slug } = req.params;
-    let categoryIds;
-
+    let products;
+    
     if (slug === 'all') {
-      const allCategories = await Category.find();
-      categoryIds = allCategories.map(cat => cat._id);
+      products = await Product.find();
     } else {
-      const category = await Category.findOne({ slug });
-      if (!category) {
-        return res.status(404).json({ message: 'Không tìm thấy danh mục' });
-      }
-      const subcategories = await getAllChildCategories(category._id);
-      categoryIds = [category._id, ...subcategories.map(sub => sub._id)];
+      products = await CategoryService.getProductsByCategory(slug, true);
     }
-
-    const products = await Product.find({ category: { $in: categoryIds } });
+    
     res.json(products);
   } catch (error) {
     console.error('Error in getProductsByCategorySlug:', error);

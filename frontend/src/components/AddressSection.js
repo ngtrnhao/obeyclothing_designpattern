@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import styles from './style.component/Checkout.module.css';
+import React, { useState } from "react";
+import styles from "./style.component/AddressSection.module.css";
+import { FaMapMarkerAlt, FaPencilAlt, FaTrash, FaPlus, FaArrowLeft } from "react-icons/fa";
 
 const AddressSection = ({
   shippingAddresses,
@@ -11,13 +12,15 @@ const AddressSection = ({
   isAddingNewAddress,
   newAddress,
   handleAddOrUpdateAddress,
-  renderAddressFields
+  renderAddressFields,
 }) => {
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [showAddressForm, setShowAddressForm] = useState(false);
-  
-  const defaultAddress = shippingAddresses.find(addr => addr.isDefault);
-  const selectedAddress = shippingAddresses.find(addr => addr._id === selectedAddressId) || defaultAddress;
+
+  const defaultAddress = shippingAddresses.find((addr) => addr.isDefault);
+  const selectedAddress =
+    shippingAddresses.find((addr) => addr._id === selectedAddressId) ||
+    defaultAddress;
 
   const handleAddNewClick = () => {
     setShowAddressForm(true);
@@ -33,24 +36,23 @@ const AddressSection = ({
   if (!shippingAddresses || shippingAddresses.length === 0) {
     return (
       <div className={styles.shippingInfo}>
-        <div className={styles.sectionHeader}>
-          <h2>Địa chỉ giao hàng</h2>
-        </div>
         <div className={styles.noAddressMessage}>
           <p>Bạn chưa có địa chỉ giao hàng nào.</p>
-          <button 
+          <button
             className={styles.addFirstAddressBtn}
             onClick={handleAddNewClick}
           >
-            + Thêm địa chỉ mới
+            <FaPlus /> Thêm địa chỉ mới
           </button>
         </div>
-        
+
         {showAddressForm && (
-          <form onSubmit={(e) => {
-            handleAddOrUpdateAddress(e);
-            setShowAddressForm(false);
-          }}>
+          <form
+            onSubmit={(e) => {
+              handleAddOrUpdateAddress(e);
+              setShowAddressForm(false);
+            }}
+          >
             {renderAddressFields(newAddress)}
             <button type="submit" className={styles.submitBtn}>
               Lưu địa chỉ
@@ -63,26 +65,25 @@ const AddressSection = ({
 
   return (
     <div className={styles.shippingInfo}>
-      <div className={styles.sectionHeader}>
-        <h2>Địa chỉ giao hàng</h2>
-      </div>
-
       {selectedAddress && (
-        <div className={styles.selectedAddressCard}>
-          <div className={styles.addressContent}>
-            <h3>{selectedAddress.fullName}</h3>
-            <p className={styles.phone}>{selectedAddress.phone}</p>
-            <p className={styles.streetAddress}>
-              {selectedAddress.streetAddress}, {selectedAddress.wardName}, 
-              {selectedAddress.districtName}, {selectedAddress.provinceName}
-            </p>
+        <div className={styles.selectedAddressWrapper}>
+          <div className={styles.checkIcon}></div>
+          <div className={styles.selectedAddressCard}>
+            <div className={styles.addressContent}>
+              <h3>{selectedAddress.fullName}</h3>
+              <p className={styles.phone}>{selectedAddress.phone}</p>
+              <p className={styles.streetAddress}>
+                {selectedAddress.streetAddress}, {selectedAddress.wardName},{" "}
+                {selectedAddress.districtName}, {selectedAddress.provinceName}
+              </p>
+            </div>
+            <button
+              className={styles.changeAddressBtn}
+              onClick={() => setShowAddressModal(true)}
+            >
+              Thay đổi
+            </button>
           </div>
-          <button 
-            className={styles.changeAddressBtn}
-            onClick={() => setShowAddressModal(true)}
-          >
-            Thay đổi
-          </button>
         </div>
       )}
 
@@ -93,19 +94,21 @@ const AddressSection = ({
               <>
                 <div className={styles.modalHeader}>
                   <h2>Chọn địa chỉ giao hàng</h2>
-                  <button 
+                  <button
                     className={styles.addAddressBtn}
                     onClick={handleAddNewClick}
                   >
-                    + Thêm địa chỉ mới
+                    <FaPlus /> Thêm địa chỉ mới
                   </button>
                 </div>
-                
+
                 <div className={styles.addressList}>
-                  {shippingAddresses.map(address => (
-                    <div 
-                      key={address._id} 
-                      className={`${styles.addressCard} ${selectedAddressId === address._id ? styles.selected : ''}`}
+                  {shippingAddresses.map((address) => (
+                    <div
+                      key={address._id}
+                      className={`${styles.addressCard} ${
+                        selectedAddressId === address._id ? styles.selected : ""
+                      }`}
                       onClick={() => {
                         setSelectedAddressId(address._id);
                         setShowAddressModal(false);
@@ -115,18 +118,20 @@ const AddressSection = ({
                         <div className={styles.addressHeader}>
                           <h3>{address.fullName}</h3>
                           {address.isDefault && (
-                            <span className={styles.defaultBadge}>Mặc định</span>
+                            <span className={styles.defaultBadge}>
+                              Mặc định
+                            </span>
                           )}
                         </div>
                         <p className={styles.phone}>{address.phone}</p>
                         <p className={styles.address}>
-                          {address.streetAddress}, {address.wardName}, 
+                          {address.streetAddress}, {address.wardName},{" "}
                           {address.districtName}, {address.provinceName}
                         </p>
                       </div>
-                      
+
                       <div className={styles.addressActions}>
-                        <button 
+                        <button
                           className={styles.editBtn}
                           onClick={(e) => {
                             e.stopPropagation();
@@ -134,16 +139,16 @@ const AddressSection = ({
                             setShowAddressModal(false);
                           }}
                         >
-                          Sửa
+                          <FaPencilAlt /> Sửa
                         </button>
-                        <button 
+                        <button
                           className={styles.deleteBtn}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteAddress(address._id);
                           }}
                         >
-                          Xóa
+                          <FaTrash /> Xóa
                         </button>
                       </div>
                     </div>
@@ -153,20 +158,19 @@ const AddressSection = ({
             ) : (
               <>
                 <div className={styles.modalHeader}>
-                  <button 
-                    className={styles.backBtn}
-                    onClick={handleBackToList}
-                  >
-                    ← Quay lại
+                  <button className={styles.backBtn} onClick={handleBackToList}>
+                    <FaArrowLeft /> Quay lại
                   </button>
                   <h2>Thêm địa chỉ mới</h2>
                 </div>
-                
-                <form onSubmit={(e) => {
-                  handleAddOrUpdateAddress(e);
-                  setShowAddressForm(false);
-                  setShowAddressModal(false);
-                }}>
+
+                <form
+                  onSubmit={(e) => {
+                    handleAddOrUpdateAddress(e);
+                    setShowAddressForm(false);
+                    setShowAddressModal(false);
+                  }}
+                >
                   {renderAddressFields(newAddress)}
                   <button type="submit" className={styles.submitBtn}>
                     Lưu địa chỉ
@@ -175,7 +179,7 @@ const AddressSection = ({
               </>
             )}
 
-            <button 
+            <button
               className={styles.closeModalBtn}
               onClick={() => {
                 setShowAddressModal(false);
@@ -192,4 +196,4 @@ const AddressSection = ({
   );
 };
 
-export default AddressSection; 
+export default AddressSection;

@@ -12,6 +12,15 @@ import { provinces, getDistricts, getWards } from "../data/vietnamData";
 import { useNavigate } from "react-router-dom";
 import AddressSection from "./AddressSection";
 import axios from "axios";
+import {
+  FaShippingFast,
+  FaCreditCard,
+  FaMapMarkerAlt,
+  FaArrowLeft,
+  FaCheck,
+  FaTruck,
+  FaShoppingBag,
+} from "react-icons/fa";
 
 const Checkout = () => {
   const { cartItems, total, voucher, discountAmount, finalAmount, clearCart } =
@@ -363,116 +372,254 @@ const Checkout = () => {
 
   return (
     <div className={styles.checkoutContainer}>
-      <div className={styles.mainContent}>
-        <AddressSection
-          shippingAddresses={shippingAddresses}
-          selectedAddressId={selectedAddressId}
-          setSelectedAddressId={setSelectedAddressId}
-          handleEditAddress={handleEditAddress}
-          handleDeleteAddress={handleDeleteAddress}
-          setIsAddingNewAddress={setIsAddingNewAddress}
-          isAddingNewAddress={isAddingNewAddress}
-          newAddress={newAddress}
-          handleAddOrUpdateAddress={handleAddOrUpdateAddress}
-          renderAddressFields={renderAddressFields}
-        />
-        {isAddingNewAddress && (
-          <form
-            onSubmit={handleAddOrUpdateAddress}
-            className={styles.newAddressForm}
-          >
-            {renderAddressFields(editingAddress || newAddress)}
-            <button type="submit">
-              {editingAddress ? "Cập nhật địa chỉ" : "Lưu địa chỉ mới"}
-            </button>
-          </form>
-        )}
-        <div className={styles.orderSummary}>
-          <h2>Thông tin đơn hàng</h2>
-          {cartItems.map((item) => (
-            <div key={item._id} className={styles.orderItem}>
-              <img src={imageUrl(item.product.image)} alt={item.product.name} />
-              <div>
-                <h3>{item.product.name}</h3>
-                <p>Số lượng: {item.quantity}</p>
-                <p>Giá: {item.product.price.toLocaleString("vi-VN")} đ</p>
-              </div>
+      <div className={styles.checkoutHeader}>
+        <h1>Thanh toán</h1>
+        <div className={styles.checkoutSteps}>
+          <div className={styles.stepItem}>
+            <div className={styles.stepIcon}>
+              <FaShoppingBag />
             </div>
-          ))}
-          <div className={styles.orderTotal}>
-            <p>Tạm tính: {total.toLocaleString("vi-VN")} đ</p>
-            {voucher && (
-              <p className={styles.discount}>
-                Giảm giá (Mã: {voucher.code}): -
-                {discountAmount.toLocaleString("vi-VN")} đ
-              </p>
-            )}
-            <p>Phí vận chuyển: {shippingFee.toLocaleString("vi-VN")} đ</p>
-            <h3>Tổng cộng: {totalWithShipping.toLocaleString("vi-VN")} đ</h3>
+            <div className={styles.stepLabel}>Giỏ hàng</div>
+            <div className={styles.stepDot}></div>
           </div>
-        </div>
-        <div className={styles.paymentSection}>
-          <h2>Phương thức thanh toán</h2>
-          <div className={styles.paymentMethods}>
-            {paymentMethods.map((method) => (
-              <div
-                key={method.id}
-                className={`${styles.paymentMethod} ${
-                  selectedPaymentMethod === method.id ? styles.selected : ""
-                }`}
-                onClick={() => setSelectedPaymentMethod(method.id)}
-              >
-                <div className={styles.methodInfo}>
-                  <img
-                    src={`/images/${method.icon}`}
-                    alt={method.name}
-                    className={styles.methodIcon}
-                  />
-                  <div>
-                    <h3>{method.name}</h3>
-                    <p>{method.description}</p>
-                  </div>
-                </div>
-                {method.id === "banking" &&
-                  selectedPaymentMethod === "banking" && (
-                    <div className={styles.bankingInfo}>
-                      <p>
-                        <strong>Thông tin chuyển khoản:</strong>
-                      </p>
-                      <p>Ngân hàng: {method.bankInfo.bankName}</p>
-                      <p>Số tài khoản: {method.bankInfo.accountNumber}</p>
-                      <p>Chủ tài khoản: {method.bankInfo.accountName}</p>
-                      <p>Chi nhánh: {method.bankInfo.branch}</p>
-                    </div>
-                  )}
-              </div>
-            ))}
+          <div className={`${styles.stepLine} ${styles.activeLine}`}></div>
+          <div className={`${styles.stepItem} ${styles.activeStep}`}>
+            <div className={styles.stepIcon}>
+              <FaCreditCard />
+            </div>
+            <div className={styles.stepLabel}>Thanh toán</div>
+            <div className={styles.stepDot}></div>
+          </div>
+          <div className={styles.stepLine}></div>
+          <div className={styles.stepItem}>
+            <div className={styles.stepIcon}>
+              <FaCheck />
+            </div>
+            <div className={styles.stepLabel}>Hoàn tất</div>
+            <div className={styles.stepDot}></div>
           </div>
         </div>
       </div>
 
-      {selectedAddressId && (
-        <div className={styles.checkoutActions}>
-          {selectedPaymentMethod === "paypal" ? (
-            <div className={styles.paypalContainer}>
-              <PayPalCheckout
-                amount={totalWithShipping}
-                shippingInfo={shippingAddresses.find(
-                  (addr) => addr._id === selectedAddressId
-                )}
-              />
+      <div className={styles.checkoutContent}>
+        <div className={styles.leftColumn}>
+          <div className={styles.addressSection}>
+            <div className={styles.sectionHeader}>
+              <h2>
+                <FaMapMarkerAlt /> Địa chỉ giao hàng
+              </h2>
             </div>
-          ) : (
-            <button
-              className={styles.checkoutButton}
-              onClick={handleCheckout}
-              disabled={!selectedAddressId}
-            >
-              Đặt hàng ({totalWithShipping.toLocaleString("vi-VN")} đ)
-            </button>
-          )}
+
+            <AddressSection
+              shippingAddresses={shippingAddresses}
+              selectedAddressId={selectedAddressId}
+              setSelectedAddressId={setSelectedAddressId}
+              handleEditAddress={handleEditAddress}
+              handleDeleteAddress={handleDeleteAddress}
+              setIsAddingNewAddress={setIsAddingNewAddress}
+              isAddingNewAddress={isAddingNewAddress}
+              newAddress={newAddress}
+              handleAddOrUpdateAddress={handleAddOrUpdateAddress}
+              renderAddressFields={renderAddressFields}
+            />
+
+            {isAddingNewAddress && (
+              <div className={styles.newAddressFormContainer}>
+                <form
+                  onSubmit={handleAddOrUpdateAddress}
+                  className={styles.newAddressForm}
+                >
+                  <div className={styles.formHeader}>
+                    <h3>
+                      {editingAddress ? "Cập nhật địa chỉ" : "Thêm địa chỉ mới"}
+                    </h3>
+                  </div>
+                  {renderAddressFields(editingAddress || newAddress)}
+                  <div className={styles.formActions}>
+                    <button
+                      type="button"
+                      className={styles.cancelButton}
+                      onClick={() => {
+                        setIsAddingNewAddress(false);
+                        setEditingAddress(null);
+                      }}
+                    >
+                      Hủy
+                    </button>
+                    <button type="submit" className={styles.saveButton}>
+                      {editingAddress ? "Cập nhật" : "Lưu địa chỉ"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            <div className={styles.paymentMethodSection}>
+              <div className={styles.sectionHeader}>
+                <h2>
+                  <FaCreditCard /> Phương thức thanh toán
+                </h2>
+              </div>
+              <div className={styles.paymentMethods}>
+                {paymentMethods.map((method) => (
+                  <div
+                    key={method.id}
+                    className={`${styles.paymentMethod} ${
+                      selectedPaymentMethod === method.id ? styles.selected : ""
+                    }`}
+                    onClick={() => setSelectedPaymentMethod(method.id)}
+                  >
+                    <div className={styles.methodInfo}>
+                      <div className={styles.radioButton}>
+                        <div
+                          className={
+                            selectedPaymentMethod === method.id
+                              ? styles.radioInner
+                              : ""
+                          }
+                        ></div>
+                      </div>
+                      <img
+                        src={`/images/${method.icon}`}
+                        alt={method.name}
+                        className={styles.methodIcon}
+                      />
+                      <div>
+                        <h3>{method.name}</h3>
+                        <p>{method.description}</p>
+                      </div>
+                    </div>
+                    {method.id === "banking" &&
+                      selectedPaymentMethod === "banking" && (
+                        <div className={styles.bankingInfo}>
+                          <p>
+                            <strong>Thông tin chuyển khoản:</strong>
+                          </p>
+                          <p>Ngân hàng: {method.bankInfo.bankName}</p>
+                          <p>Số tài khoản: {method.bankInfo.accountNumber}</p>
+                          <p>Chủ tài khoản: {method.bankInfo.accountName}</p>
+                          <p>Chi nhánh: {method.bankInfo.branch}</p>
+                        </div>
+                      )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
-      )}
+
+        <div className={styles.rightColumn}>
+          <div className={styles.orderSummaryCard}>
+            <div className={styles.sectionHeader}>
+              <h2>
+                <FaShoppingBag /> Thông tin đơn hàng
+              </h2>
+            </div>
+
+            <div className={styles.orderItemsList}>
+              {cartItems.map((item) => (
+                <div key={item._id} className={styles.orderItem}>
+                  <div className={styles.itemImageContainer}>
+                    <img
+                      src={imageUrl(item.product.image)}
+                      alt={item.product.name}
+                    />
+                    <span className={styles.itemQuantity}>{item.quantity}</span>
+                  </div>
+                  <div className={styles.itemDetails}>
+                    <h3>{item.product.name}</h3>
+                    <div className={styles.itemPriceInfo}>
+                      <span>
+                        {item.product.price.toLocaleString("vi-VN")}đ x{" "}
+                        {item.quantity}
+                      </span>
+                      <span className={styles.itemTotal}>
+                        {(item.product.price * item.quantity).toLocaleString(
+                          "vi-VN"
+                        )}
+                        đ
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className={styles.orderSummary}>
+              <div className={styles.summaryRow}>
+                <span>Tạm tính ({cartItems.length} sản phẩm):</span>
+                <span>{total.toLocaleString("vi-VN")}đ</span>
+              </div>
+
+              {voucher && (
+                <div className={styles.summaryRow}>
+                  <span>Giảm giá (Mã: {voucher.code}):</span>
+                  <span className={styles.discountAmount}>
+                    -{discountAmount.toLocaleString("vi-VN")}đ
+                  </span>
+                </div>
+              )}
+
+              <div className={styles.summaryRow}>
+                <span>
+                  <FaTruck /> Phí vận chuyển:
+                </span>
+                <span className={styles.shippingFee}>
+                  {shippingFee.toLocaleString("vi-VN")}đ
+                </span>
+              </div>
+
+              <div className={styles.divider}></div>
+
+              <div className={styles.totalRow}>
+                <span>Tổng cộng:</span>
+                <span className={styles.finalAmount}>
+                  {totalWithShipping.toLocaleString("vi-VN")}đ
+                </span>
+              </div>
+            </div>
+
+            {selectedAddressId && (
+              <div className={styles.checkoutActions}>
+                {selectedPaymentMethod === "paypal" ? (
+                  <div className={styles.paypalContainer}>
+                    <PayPalCheckout
+                      amount={totalWithShipping}
+                      shippingInfo={shippingAddresses.find(
+                        (addr) => addr._id === selectedAddressId
+                      )}
+                    />
+                  </div>
+                ) : (
+                  <button
+                    className={styles.checkoutButton}
+                    onClick={handleCheckout}
+                    disabled={!selectedAddressId}
+                  >
+                    Đặt hàng ({totalWithShipping.toLocaleString("vi-VN")}đ)
+                  </button>
+                )}
+
+                <button
+                  className={styles.backButton}
+                  onClick={() => navigate("/cart")}
+                >
+                  <FaArrowLeft /> Quay lại giỏ hàng
+                </button>
+              </div>
+            )}
+
+            <div className={styles.securityNotice}>
+              <div className={styles.securityItem}>
+                <FaShippingFast /> <span>Giao hàng nhanh 2-5 ngày</span>
+              </div>
+              <div className={styles.securityItem}>
+                <FaCheck /> <span>Sản phẩm chính hãng 100%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

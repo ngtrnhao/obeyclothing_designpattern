@@ -1,0 +1,385 @@
+.shippingInfo {
+    margin-bottom: 30px;
+  }
+  
+  .sectionHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .sectionHeader h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #334155;
+  }
+  
+  /* Khi không có địa chỉ */
+  .noAddressMessage {
+    text-align: center;
+    padding: 30px 20px;
+    background-color: #f8fafc;
+    border-radius: 12px;
+    border: 1px dashed #e2e8f0;
+  }
+  
+  .noAddressMessage p {
+    margin-bottom: 16px;
+    color: #64748b;
+    font-size: 16px;
+  }
+  
+  .addFirstAddressBtn {
+    padding: 10px 20px;
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .addFirstAddressBtn:hover {
+    background-color: #4338ca;
+  }
+  
+  /* Địa chỉ đã chọn */
+  .selectedAddressWrapper {
+    position: relative;
+    padding-left: 22px;
+    margin-bottom: 20px;
+  }
+  
+  .checkIcon {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background-color: #4f46e5;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .checkIcon::after {
+    content: "✓";
+    position: absolute;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  
+  .selectedAddressCard {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 16px;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    position: relative;
+  }
+  
+  .addressContent {
+    flex: 1;
+  }
+  
+  .addressContent h3 {
+    margin: 0 0 5px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #334155;
+  }
+  
+  .phone {
+    font-size: 15px;
+    color: #64748b;
+    margin: 0 0 8px 0;
+  }
+  
+  .streetAddress {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #64748b;
+    margin: 0;
+  }
+  
+  .changeAddressBtn {
+    padding: 8px 16px;
+    background-color: transparent;
+    color: #4f46e5;
+    border: 1px solid #4f46e5;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    margin-left: 16px;
+  }
+  
+  .changeAddressBtn:hover {
+    background-color: #f5f3ff;
+  }
+  
+  /* Modal địa chỉ */
+  .addressModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .modalContent {
+    background-color: white;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    padding: 24px;
+    position: relative;
+  }
+  
+  .modalHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .modalHeader h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #334155;
+  }
+  
+  .addAddressBtn {
+    padding: 8px 16px;
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .addAddressBtn:hover {
+    background-color: #4338ca;
+  }
+  
+  .addressList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 4px;
+  }
+  
+  .addressCard {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  
+  .addressCard:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+  
+  .addressCard.selected {
+    border-color: #4f46e5;
+    background-color: #f8fafc;
+  }
+  
+  .addressCard.selected::after {
+    content: "✓";
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 24px;
+    height: 24px;
+    background: #4f46e5;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 14px;
+  }
+  
+  .addressHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  
+  .defaultBadge {
+    background-color: #4f46e5;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+  }
+  
+  .address {
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.5;
+    margin: 0;
+  }
+  
+  .addressActions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  
+  .editBtn, .deleteBtn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .editBtn {
+    background-color: #f1f5f9;
+    color: #475569;
+  }
+  
+  .editBtn:hover {
+    background-color: #e2e8f0;
+  }
+  
+  .deleteBtn {
+    background-color: #fee2e2;
+    color: #ef4444;
+  }
+  
+  .deleteBtn:hover {
+    background-color: #fecaca;
+  }
+  
+  .backBtn {
+    color: #64748b;
+    background: none;
+    border: none;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 0;
+  }
+  
+  .backBtn:hover {
+    color: #334155;
+  }
+  
+  .closeModalBtn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 4px;
+  }
+  
+  .closeModalBtn:hover {
+    color: #475569;
+  }
+  
+  /* Form styles */
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  input, select {
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 15px;
+    color: #334155;
+  }
+  
+  input:focus, select:focus {
+    border-color: #4f46e5;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+  }
+  
+  .submitBtn {
+    padding: 12px;
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+  }
+  
+  .submitBtn:hover {
+    background-color: #4338ca;
+  }
+  
+  @media (max-width: 768px) {
+    .addressList {
+      grid-template-columns: 1fr;
+    }
+  
+    .selectedAddressCard {
+      flex-direction: column;
+    }
+  
+    .changeAddressBtn {
+      margin: 16px 0 0 0;
+      width: 100%;
+    }
+  }

@@ -3,6 +3,7 @@ const multer = require("multer");
 const Category = require("../models/Category"); // Thêm dòng này ở đầu file
 const cloudinary = require("cloudinary");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const CategoryService = require('../services/CategoryService');
 
 cloudinary.config({
   cloude_name: process.env.CLOUDDINARY_CLOUD_NAME,
@@ -255,11 +256,7 @@ exports.getProductsByCategory = async (req, res) => {
     const categoryId = req.params.categoryId;
     console.log("Fetching products for category:", categoryId);
 
-    // Lấy tất cả danh mục con
-    const childCategories = await getAllChildCategories(categoryId);
-    const allCategoryIds = [categoryId, ...childCategories.map((c) => c._id)];
-
-    const products = await Product.find({ category: { $in: allCategoryIds } });
+    const products = await CategoryService.getProductsByCategory(categoryId, true);
     console.log("Products found:", products.length);
 
     res.json(products);
@@ -269,21 +266,29 @@ exports.getProductsByCategory = async (req, res) => {
   }
 };
 
-exports.getProductsByCategorySlug = async (req, res) => {};
+exports.getProductsByCategorySlug = async (req, res) => {
+  try {
+    const slug = req.params.slug;
+    const products = await CategoryService.getProductsByCategory(slug, true);
+    res.json(products);
+  } catch (error) {
+    console.error("Error in getProductsByCategorySlug:", error);
+    res.status(500).json({ message: "Lỗi server", error: error.message });
+  }
+};
 
 exports.getProductsByParentCategory = async (req, res) => {
   try {
     const { categoryId } = req.params;
+    // Chỉ lấy sản phẩm trong danh mục này và danh mục con cấp 1
     const category = await Category.findById(categoryId);
     if (!category) {
       return res.status(404).json({ message: "Category not found" });
     }
 
-    let categoryIds = [categoryId];
-    if (category.children && category.children.length > 0) {
-      const subcategories = await Category.find({ parent: categoryId });
-      categoryIds = [...categoryIds, ...subcategories.map((sub) => sub._id)];
-    }
+    // Lấy danh sách ID danh mục con cấp 1
+    const subcategories = await CategoryService.getSubcategories(categoryId);
+    const categoryIds = [categoryId, ...subcategories.map(sub => sub._id)];
 
     const products = await Product.find({ category: { $in: categoryIds } });
     res.json(products);
