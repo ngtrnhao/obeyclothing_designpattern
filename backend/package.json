@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "build": "npm install"
+    "build": "npm ci"
   },
   "dependencies": {
     "@paypal/checkout-server-sdk": "^1.0.3",

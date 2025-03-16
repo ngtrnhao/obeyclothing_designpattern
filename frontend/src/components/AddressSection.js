@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styles from "./style.component/AddressSection.module.css";
-import { FaMapMarkerAlt, FaPencilAlt, FaTrash, FaPlus, FaArrowLeft } from "react-icons/fa";
+import {  FaPencilAlt, FaTrash, FaPlus, FaArrowLeft } from "react-icons/fa";
 
 const AddressSection = ({
   shippingAddresses,
