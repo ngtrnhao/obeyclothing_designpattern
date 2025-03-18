@@ -342,24 +342,6 @@ export const getAdminUsers = () => {
   });
 };
 
-export const toggleAdminUserStatus = async (userId, isActive) => {
-  try {
-    const response = await api.patch(`/admin/users/${userId}/toggle-status`, {
-      isActive,
-    });
-    return response;
-  } catch (error) {
-    const errorMessage =
-      error.response?.data?.message || "Lỗi khi thay đổi trạng thái người dùng";
-    const customError = new Error(errorMessage);
-    customError.response = {
-      data: {
-        message: errorMessage,
-      },
-    };
-    throw customError;
-  }
-};
 
 export const getAdminStatistics = async (startDate, endDate, period) => {
   const token = localStorage.getItem("token");
@@ -673,17 +655,36 @@ export const changeUserRole = async (userId, role) => {
     throw error;
   }
 };
-
+// Thêm vào frontend/src/services/api.js
+export const checkAuthToken = () => {
+  const token = localStorage.getItem("token");
+  console.log("Current auth token:", token ? "Valid token exists" : "No token found");
+  return !!token;
+};
 export const toggleUserStatus = async (userId) => {
   try {
+    // Thêm log để debug
+    console.log(`Attempting to toggle status for user: ${userId}`);
+    
     const response = await api.patch(`/admin/users/${userId}/toggle-status`);
+    console.log("Toggle status response:", response.data);
     return response.data;
   } catch (error) {
-    throw (
-      error.response?.data || {
-        message: "Có lỗi xảy ra khi thay đổi trạng thái người dùng",
-      }
-    );
+    // Log chi tiết lỗi
+    console.error("Toggle status error details:", {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
+    });
+    
+    if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    } else if (error.message) {
+      throw new Error(error.message);
+    } else {
+      throw new Error("Có lỗi xảy ra khi thay đổi trạng thái người dùng");
+    }
   }
 };
 
