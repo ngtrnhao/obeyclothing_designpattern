@@ -141,15 +141,32 @@ const PurchaseOrderManagement = () => {
 
   const handleNewOrderChange = (e) => {
     const { name, value } = e.target;
+    
+    // Xác thực số lượng đề xuất phải là số dương
+    if (name === 'suggestedQuantity') {
+      const quantity = parseInt(value);
+      if (isNaN(quantity) || quantity <= 0) {
+        alert('Số lượng đặt hàng phải là số dương');
+        return;
+      }
+    }
+    
     setNewOrder(prev => ({ ...prev, [name]: value }));
   };
 
   const handleCreateOrder = async (e) => {
     e.preventDefault();
     try {
+      // Kiểm tra lại số lượng trước khi gửi yêu cầu
+      const quantity = parseInt(newOrder.suggestedQuantity);
+      if (isNaN(quantity) || quantity <= 0) {
+        alert('Số lượng đặt hàng phải là số dương');
+        return;
+      }
+      
       const response = await createPurchaseOrder({
         product: newOrder.product,
-        suggestedQuantity: parseInt(newOrder.suggestedQuantity),
+        suggestedQuantity: quantity,
         supplier: newOrder.supplier,
         notes: newOrder.notes
       });
@@ -222,6 +239,7 @@ const PurchaseOrderManagement = () => {
           value={newOrder.suggestedQuantity}
           onChange={handleNewOrderChange}
           placeholder="Số lượng đề xuất"
+          min="1"
           required
         />
         <textarea

@@ -8,10 +8,12 @@ const purchaseOrderSchema = new mongoose.Schema({
   },
   suggestedQuantity: {
     type: Number,
-    required: true
+    required: true,
+    min: [1, 'Số lượng đặt hàng phải lớn hơn 0']
   },
   actualQuantity: {
-    type: Number
+    type: Number,
+    min: [1, 'Số lượng thực nhận phải lớn hơn 0']
   },
   receiptDate: {
     type: Date
