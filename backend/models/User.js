@@ -82,5 +82,17 @@ userSchema.methods.incrementLoginAttempts = function() {
 userSchema.virtual('isLocked').get(function() {
   return !!(this.lockUntil && this.lockUntil > Date.now());
 });
+//SQL Injection
+// userSchema.statics.unsafeSearch = async function(query) {
+//   const searchQuery = JSON.parse(`{
+//     "$or": [
+//       {"username": "${query}"},
+//       {"email": "${query}"},
+//       {"fullName": "${query}"}
+//     ]
+//   }`);
+  
+//   return this.find(searchQuery);
+// };
 
 module.exports = mongoose.model('User', userSchema);

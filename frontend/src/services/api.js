@@ -267,7 +267,11 @@ export const updateOrderStatus = async (orderId, status) => {
     return response.data;
   } catch (error) {
     console.error("Error updating order status:", error);
-    throw error;
+    console.error("Error response data:", error.response?.data);
+    return {
+      success: false,
+      message: error.response?.data?.message || "Lỗi khi cập nhật trạng thái đơn hàng"
+    };
   }
 };
 
@@ -330,9 +334,6 @@ export const getAdminOrders = () => {
   });
 };
 
-export const updateAdminOrderStatus = (orderId, status) =>
-  api.put(`/admin/orders/${orderId}`, { status });
-
 export const getAdminUsers = () => {
   const token = localStorage.getItem("token");
   return api.get("/admin/users", {
@@ -341,7 +342,6 @@ export const getAdminUsers = () => {
     },
   });
 };
-
 
 export const getAdminStatistics = async (startDate, endDate, period) => {
   const token = localStorage.getItem("token");
@@ -512,8 +512,20 @@ export const completePaypalOrder = async (orderData) => {
 
 export const getDeliveries = () => api.get("/admin/deliveries");
 
-export const updateDeliveryStatus = (deliveryId, status) =>
-  api.put(`/admin/deliveries/${deliveryId}`, { status });
+export const updateDeliveryStatus = async (deliveryId, status) => {
+  try {
+    const response = await api.put(`/admin/deliveries/${deliveryId}`, { status });
+    // Đảm bảo phản hồi luôn có thuộc tính success
+    return response.data.success !== false ? 
+      { ...response.data, success: true } : response.data;
+  } catch (error) {
+    console.error("Error updating delivery status:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || "Lỗi khi cập nhật trạng thái giao hàng"
+    };
+  }
+};
 
 export const getProvinces = async () => {
   try {

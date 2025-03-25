@@ -4,6 +4,7 @@ import { FaSort, FaSearch } from 'react-icons/fa';
 import TableLayout from './common/TableLayout';
 import useTableControls from '../hooks/useTableControls';
 import styles from './style.component/DeliveryManagement.module.css';
+import { toast } from 'react-toastify';
 
 const DeliveryManagement = () => {
   const [deliveries, setDeliveries] = useState([]);
@@ -68,20 +69,65 @@ const DeliveryManagement = () => {
 
   const handleStatusChange = async (deliveryId, newStatus) => {
     try {
+      // Hiển thị toast đang xử lý
+      toast.info("Đang cập nhật trạng thái...");
+      
+      // Tìm thông tin delivery hiện tại
+      const delivery = deliveries.find(d => d._id === deliveryId);
+      if (!delivery) {
+        toast.error('Không tìm thấy đơn giao hàng');
+        return;
+      }
+
+      // Kiểm tra transition hợp lệ
+      const isValidTransition = checkValidTransition(delivery.status, newStatus);
+      if (!isValidTransition) {
+        toast.error(`Không thể chuyển từ trạng thái ${delivery.status} sang ${newStatus}`);
+        return;
+      }
+
+      // Gọi API cập nhật trạng thái
       const response = await updateDeliveryStatus(deliveryId, newStatus);
-      if (response?.data?.delivery && response?.data?.order) {
-        const { delivery, order } = response.data;
+      
+      if (response.success) {
+        // Cập nhật state để UI thay đổi ngay lập tức
         setDeliveries(prev => 
-          prev.map(d => d._id === delivery._id ? 
-            { ...d, status: delivery.status, order: { ...d.order, status: order.status } } : d
+          prev.map(d => d._id === deliveryId ? 
+            { 
+              ...d, 
+              status: newStatus, 
+              order: { 
+                ...d.order, 
+                // Đồng bộ trạng thái order theo delivery
+                status: newStatus === 'shipping' ? 'shipped' : 
+                       newStatus === 'delivered' ? 'delivered' :
+                       newStatus === 'cancelled' ? 'cancelled' : d.order.status
+              } 
+            } : d
           )
         );
+        
+        toast.success(`Đã cập nhật trạng thái thành ${newStatus}`);
       } else {
-        setError('Không thể cập nhật trạng thái giao hàng. Dữ liệu không hợp lệ.');
+        toast.error(response.message || 'Không thể cập nhật trạng thái giao hàng');
       }
     } catch (error) {
-      setError('Không thể cập nhật trạng thái giao hàng. Vui lòng thử lại.');
+      console.error("Error updating delivery status:", error);
+      toast.error('Không thể cập nhật trạng thái giao hàng. Vui lòng thử lại.');
     }
+  };
+
+  // Hàm kiểm tra transition hợp lệ
+  const checkValidTransition = (currentStatus, newStatus) => {
+    const transitions = {
+      'pending': ['processing', 'cancelled'],
+      'processing': ['shipping', 'cancelled'],
+      'shipping': ['delivered', 'cancelled'],
+      'delivered': [],
+      'cancelled': []
+    };
+    
+    return transitions[currentStatus]?.includes(newStatus) || false;
   };
 
   const handleDownloadDeliveryNote = async (deliveryId) => {

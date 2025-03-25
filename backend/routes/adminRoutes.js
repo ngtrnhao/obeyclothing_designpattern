@@ -99,48 +99,53 @@ router.put(
 
 router.put("/deliveries/:id", async (req, res) => {
   try {
-    const { id } = req.params;
     const { status } = req.body;
+    const delivery = await Delivery.findById(req.params.id);
+    
+    if (!delivery) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Không tìm thấy đơn giao hàng" 
+      });
+    }
+    
+    const order = await Order.findById(delivery.order);
+    if (!order) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Không tìm thấy đơn hàng" 
+      });
+    }
+
+    // Ánh xạ trạng thái giao hàng sang trạng thái đơn hàng
+    let orderStatus = status;
+    if (status === "shipping") {
+      orderStatus = "shipped";
+    }
+
+    // Sử dụng state pattern
+    const stateResult = await order.changeState(orderStatus);
+    
+    if (!stateResult.success) {
+      return res.status(400).json(stateResult);
+    }
 
     // Cập nhật trạng thái giao hàng
-    const updatedDelivery = await Delivery.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true }
-    );
+    delivery.status = status;
+    await delivery.save();
 
-    if (!updatedDelivery) {
-      return res.status(404).json({ message: "Không tìm thấy đơn giao hàng" });
-    }
-
-    // Cập nhật trạng thái đơn hàng tương ứng
-    let orderStatus;
-    switch (status) {
-      case "pending":
-        orderStatus = "processing";
-        break;
-      case "shipping":
-        orderStatus = "shipped";
-        break;
-      case "delivered":
-        orderStatus = "delivered";
-        break;
-      case "cancelled":
-        orderStatus = "cancelled";
-        break;
-      default:
-        orderStatus = "processing";
-    }
-
-    const updatedOrder = await Order.findByIdAndUpdate(
-      updatedDelivery.order,
-      { status: orderStatus },
-      { new: true }
-    );
-
-    res.json({ delivery: updatedDelivery, order: updatedOrder });
+    res.json({
+      success: true,
+      message: stateResult.message,
+      delivery: delivery,
+      order: order
+    });
   } catch (error) {
-    res.status(500).json({ message: "Lỗi server", error: error.message });
+    console.error("Error updating delivery status:", error);
+    res.status(500).json({ 
+      success: false,
+      message: error.message || "Lỗi khi cập nhật trạng thái"
+    });
   }
 });
 
