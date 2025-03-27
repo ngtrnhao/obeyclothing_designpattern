@@ -48,8 +48,6 @@ api.interceptors.response.use(
   }
 );
 
-// Danh sách c c endpoint không cần xác thực
-
 // Hàm để set token vào header của mọi request
 export const setAuthToken = (token) => {
   if (token) {
@@ -260,7 +258,6 @@ export const createOrder = async (cartItems, shippingInfo, totalAmount) => {
 export const getOrders = () => api.get("/orders");
 export const getOrderById = (id) => api.get(`/orders/${id}`);
 
-// Thêm hàm updateOrderStatus
 export const updateOrderStatus = async (orderId, status) => {
   try {
     const response = await api.put(`/admin/orders/${orderId}`, { status });
@@ -270,12 +267,12 @@ export const updateOrderStatus = async (orderId, status) => {
     console.error("Error response data:", error.response?.data);
     return {
       success: false,
-      message: error.response?.data?.message || "Lỗi khi cập nhật trạng thái đơn hàng"
+      message:
+        error.response?.data?.message || "Lỗi khi cập nhật trạng thái đơn hàng",
     };
   }
 };
 
-// Thêm hàm getCategories
 export const getCategories = async () => {
   try {
     const response = await api.get("/categories");
@@ -303,7 +300,6 @@ export const deleteCategory = async (categoryId) => {
   }
 };
 
-// Admin Dashboard APIs
 export const getAdminProducts = () => api.get("/admin/products");
 
 export const updateAdminProduct = (id, productData) => {
@@ -365,8 +361,6 @@ export const getAdminStatistics = async (startDate, endDate, period) => {
     throw error;
   }
 };
-
-// ... existing functions ...
 
 export const getProductReviews = async (productId) => {
   try {
@@ -514,15 +508,20 @@ export const getDeliveries = () => api.get("/admin/deliveries");
 
 export const updateDeliveryStatus = async (deliveryId, status) => {
   try {
-    const response = await api.put(`/admin/deliveries/${deliveryId}`, { status });
-    // Đảm bảo phản hồi luôn có thuộc tính success
-    return response.data.success !== false ? 
-      { ...response.data, success: true } : response.data;
+    const response = await api.put(`/admin/deliveries/${deliveryId}`, {
+      status,
+    });
+    
+    return response.data.success !== false
+      ? { ...response.data, success: true }
+      : response.data;
   } catch (error) {
     console.error("Error updating delivery status:", error);
     return {
       success: false,
-      message: error.response?.data?.message || "Lỗi khi cập nhật trạng thái giao hàng"
+      message:
+        error.response?.data?.message ||
+        "Lỗi khi cập nhật trạng thái giao hàng",
     };
   }
 };
@@ -670,14 +669,17 @@ export const changeUserRole = async (userId, role) => {
 // Thêm vào frontend/src/services/api.js
 export const checkAuthToken = () => {
   const token = localStorage.getItem("token");
-  console.log("Current auth token:", token ? "Valid token exists" : "No token found");
+  console.log(
+    "Current auth token:",
+    token ? "Valid token exists" : "No token found"
+  );
   return !!token;
 };
 export const toggleUserStatus = async (userId) => {
   try {
     // Thêm log để debug
     console.log(`Attempting to toggle status for user: ${userId}`);
-    
+
     const response = await api.patch(`/admin/users/${userId}/toggle-status`);
     console.log("Toggle status response:", response.data);
     return response.data;
@@ -687,9 +689,9 @@ export const toggleUserStatus = async (userId) => {
       status: error.response?.status,
       statusText: error.response?.statusText,
       data: error.response?.data,
-      message: error.message
+      message: error.message,
     });
-    
+
     if (error.response?.data?.message) {
       throw new Error(error.response.data.message);
     } else if (error.message) {
