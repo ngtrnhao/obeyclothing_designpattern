@@ -757,10 +757,11 @@ exports.cancelOrder = async (req, res) => {
 
     // Cập nhật delivery nếu có
     if (order.delivery) {
-      await Delivery.findByIdAndUpdate(order.delivery, {
-        status: "cancelled",
-        cancelledAt: new Date(),
-      });
+      const delivery = await Delivery.findById(order.delivery);
+      if (delivery) {
+        // Sử dụng State Pattern cho Delivery
+        await delivery.cancelDelivery();
+      }
     }
 
     res.json({

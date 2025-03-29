@@ -1,9 +1,8 @@
-// backend/middleware/chainMiddleware.js
 const AuthenticationHandler = require('./handlers/AuthenticationHandler');
 const AccountStatusHandler = require('./handlers/AccountStatusHandler');
 const RoleHandler = require('./handlers/RoleHandler');
 
-// Middleware xác thực cơ bản sử dụng Chain of Responsibility
+
 const authChainMiddleware = (req, res, next) => {
   try {
     // Khởi tạo chuỗi handler cơ bản: xác thực -> kiểm tra trạng thái tài khoản
@@ -30,7 +29,6 @@ const authChainMiddleware = (req, res, next) => {
   }
 };
 
-// Middleware cho admin
 const adminChainMiddleware = (req, res, next) => {
   try {
     // Khởi tạo và thiết lập chuỗi: xác thực -> kiểm tra trạng thái -> kiểm tra role admin

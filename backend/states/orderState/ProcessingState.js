@@ -1,4 +1,4 @@
-const OrderState = require("../interfaces/OderState");
+const OrderState = require("../../interfaces/OderState");
 
 class ProcessingState extends OrderState {
   constructor(order) {
@@ -24,7 +24,6 @@ class ProcessingState extends OrderState {
     return "Không thể giao đơn hàng đang được xử lý";
   }
   cancel() {
-    
     this.order.cancelledAt = new Date();
     this.order.returnProductToStock();
     return "Đơn hàng đã bị hủy trong quá trình xử lý";

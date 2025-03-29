@@ -142,15 +142,15 @@ export const getRelatedProducts = async (params = {}) => {
   }
 };
 
-export const getProductById = async (id) => {
-  try {
-    const response = await api.get(`/products/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching product by id:", error);
-    throw error;
-  }
-};
+// export const getProductById = async (id) => {
+//   try {
+//     const response = await api.get(`/products/${id}`);
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error fetching product by id:", error);
+//     throw error;
+//   }
+// };
 
 export const createProduct = async (productData) => {
   try {
@@ -431,15 +431,15 @@ export const getSubcategories = async (categoryId) => {
   }
 };
 
-export const getCategoryBySlugOrId = async (slugOrId) => {
-  try {
-    const response = await api.get(`/categories/find/${slugOrId}`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching category:", error);
-    throw error;
-  }
-};
+// export const getCategoryBySlugOrId = async (slugOrId) => {
+//   try {
+//     const response = await api.get(`/categories/find/${slugOrId}`);
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error fetching category:", error);
+//     throw error;
+//   }
+// };
 
 export const getProductsByCategorySlug = async (slug) => {
   try {
@@ -506,26 +506,32 @@ export const completePaypalOrder = async (orderData) => {
 
 export const getDeliveries = () => api.get("/admin/deliveries");
 
+// Trong file frontend/src/services/api.js
 export const updateDeliveryStatus = async (deliveryId, status) => {
   try {
+    console.log(
+      `[DEBUG] Gửi yêu cầu cập nhật trạng thái: ${deliveryId} -> ${status}`
+    );
     const response = await api.put(`/admin/deliveries/${deliveryId}`, {
       status,
     });
-    
-    return response.data.success !== false
-      ? { ...response.data, success: true }
-      : response.data;
+
+    console.log(`[DEBUG] Phản hồi cập nhật trạng thái:`, response.data);
+    return response.data;
   } catch (error) {
     console.error("Error updating delivery status:", error);
+
+    // Trả về thông tin lỗi chi tiết từ server nếu có
+    if (error.response?.data) {
+      return error.response.data;
+    }
+
     return {
       success: false,
-      message:
-        error.response?.data?.message ||
-        "Lỗi khi cập nhật trạng thái giao hàng",
+      message: error.message || "Lỗi khi cập nhật trạng thái giao hàng",
     };
   }
 };
-
 export const getProvinces = async () => {
   try {
     const response = await api.get("/address/provinces");

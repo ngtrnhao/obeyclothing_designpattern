@@ -5,6 +5,7 @@ import TableLayout from './common/TableLayout';
 import useTableControls from '../hooks/useTableControls';
 import styles from './style.component/DeliveryManagement.module.css';
 import { toast } from 'react-toastify';
+import { Badge, FormGroup, Input } from 'reactstrap';
 
 const DeliveryManagement = () => {
   const [deliveries, setDeliveries] = useState([]);
@@ -67,68 +68,74 @@ const DeliveryManagement = () => {
     }
   };
 
-  const handleStatusChange = async (deliveryId, newStatus) => {
-    try {
-      // Hiển thị toast đang xử lý
-      toast.info("Đang cập nhật trạng thái...");
-      
-      // Tìm thông tin delivery hiện tại
-      const delivery = deliveries.find(d => d._id === deliveryId);
-      if (!delivery) {
-        toast.error('Không tìm thấy đơn giao hàng');
-        return;
-      }
-
-      // Kiểm tra transition hợp lệ
-      const isValidTransition = checkValidTransition(delivery.status, newStatus);
-      if (!isValidTransition) {
-        toast.error(`Không thể chuyển từ trạng thái ${delivery.status} sang ${newStatus}`);
-        return;
-      }
-
-      // Gọi API cập nhật trạng thái
-      const response = await updateDeliveryStatus(deliveryId, newStatus);
-      
-      if (response.success) {
-        // Cập nhật state để UI thay đổi ngay lập tức
-        setDeliveries(prev => 
-          prev.map(d => d._id === deliveryId ? 
-            { 
-              ...d, 
-              status: newStatus, 
-              order: { 
-                ...d.order, 
-                // Đồng bộ trạng thái order theo delivery
-                status: newStatus === 'shipping' ? 'shipped' : 
-                       newStatus === 'delivered' ? 'delivered' :
-                       newStatus === 'cancelled' ? 'cancelled' : d.order.status
-              } 
-            } : d
-          )
-        );
-        
-        toast.success(`Đã cập nhật trạng thái thành ${newStatus}`);
-      } else {
-        toast.error(response.message || 'Không thể cập nhật trạng thái giao hàng');
-      }
-    } catch (error) {
-      console.error("Error updating delivery status:", error);
-      toast.error('Không thể cập nhật trạng thái giao hàng. Vui lòng thử lại.');
+  // Trong file frontend/src/components/DeliveryManagement.js
+const handleStatusChange = async (deliveryId, newStatus) => {
+  try {
+    // Tìm delivery trong danh sách
+    const delivery = deliveries.find(d => d._id === deliveryId);
+    if (!delivery) {
+      toast.error('Không tìm thấy đơn giao hàng');
+      return;
     }
-  };
 
-  // Hàm kiểm tra transition hợp lệ
-  const checkValidTransition = (currentStatus, newStatus) => {
-    const transitions = {
-      'pending': ['processing', 'cancelled'],
-      'processing': ['shipping', 'cancelled'],
+    // Kiểm tra nếu trạng thái không thay đổi
+    if (delivery.status === newStatus) {
+      toast.info(`Đơn giao hàng đã ở trạng thái ${getStatusText(newStatus)}`);
+      return;
+    }
+
+    // Kiểm tra tính hợp lệ của chuyển đổi
+    const isValidTransition = checkValidDeliveryTransition(delivery.status, newStatus);
+    if (!isValidTransition) {
+      toast.error(`Không thể chuyển từ trạng thái ${getStatusText(delivery.status)} sang ${getStatusText(newStatus)}`);
+      return;
+    }
+
+    setLoading(true);
+    const response = await updateDeliveryStatus(deliveryId, newStatus);
+    
+    if (response.success) {
+      toast.success(response.message || 'Cập nhật trạng thái thành công');
+      
+      // Tải lại toàn bộ danh sách thay vì cập nhật cục bộ
+      await fetchDeliveries();
+    } else {
+      toast.error(response.message || 'Lỗi khi cập nhật trạng thái');
+    }
+  } catch (error) {
+    console.error('Lỗi khi cập nhật trạng thái:', error);
+    const errorMessage = error.response?.data?.message || 
+                         (error.response?.data?.success === false ? error.response.data.message : 
+                         'Lỗi khi cập nhật trạng thái');
+    toast.error(errorMessage);
+  } finally {
+    setLoading(false);
+  }
+};
+
+  // Hàm kiểm tra tính hợp lệ của chuyển đổi trạng thái
+  const checkValidDeliveryTransition = (currentStatus, newStatus) => {
+    // Đồ thị chuyển trạng thái
+    const validTransitions = {
+      'pending': ['shipping', 'cancelled'],
       'shipping': ['delivered', 'cancelled'],
       'delivered': [],
       'cancelled': []
     };
-    
-    return transitions[currentStatus]?.includes(newStatus) || false;
+
+    return validTransitions[currentStatus]?.includes(newStatus) || false;
   };
+
+  // // Hàm ánh xạ trạng thái giao hàng sang trạng thái đơn hàng
+  // const mapDeliveryStatusToOrderStatus = (deliveryStatus) => {
+  //   const statusMap = {
+  //     'pending': 'pending',
+  //     'shipping': 'shipped',
+  //     'delivered': 'delivered',
+  //     'cancelled': 'cancelled'
+  //   };
+  //   return statusMap[deliveryStatus] || deliveryStatus;
+  // };
 
   const handleDownloadDeliveryNote = async (deliveryId) => {
     try {
@@ -156,6 +163,50 @@ const DeliveryManagement = () => {
       console.error('Error downloading delivery note:', error);
       alert('Có lỗi xảy ra khi tải xuống phiếu giao hàng');
     }
+  };
+
+  // Hàm lấy danh sách trạng thái có thể chuyển đổi từ trạng thái hiện tại
+  const getAvailableStatusOptions = (currentStatus) => {
+    const validTransitions = {
+      'pending': ['shipping', 'cancelled'],
+      'shipping': ['delivered', 'cancelled'],
+      'delivered': [],
+      'cancelled': []
+    };
+    
+    const statusLabels = {
+      'pending': 'Chờ xử lý',
+      'shipping': 'Đang giao hàng',
+      'delivered': 'Đã giao hàng',
+      'cancelled': 'Đã hủy'
+    };
+    
+    return (validTransitions[currentStatus] || []).map(status => ({
+      value: status,
+      label: statusLabels[status] || status
+    }));
+  };
+
+  // Hàm lấy màu hiển thị cho trạng thái
+  const getStatusColor = (status) => {
+    const colors = {
+      'pending': 'warning',
+      'shipping': 'info',
+      'delivered': 'success',
+      'cancelled': 'danger'
+    };
+    return colors[status] || 'secondary';
+  };
+
+  // Hàm lấy text hiển thị cho trạng thái
+  const getStatusText = (status) => {
+    const texts = {
+      'pending': 'Chờ xử lý',
+      'shipping': 'Đang giao hàng',
+      'delivered': 'Đã giao hàng',
+      'cancelled': 'Đã hủy'
+    };
+    return texts[status] || status;
   };
 
   const renderTable = () => (
@@ -220,9 +271,9 @@ const DeliveryManagement = () => {
                 ) : 'Chưa có địa chỉ'}
               </td>
               <td>
-                <span className={`${styles.statusBadge} ${styles[delivery.status]}`}>
-                  {delivery.status || 'N/A'}
-                </span>
+                <Badge color={getStatusColor(delivery.status)}>
+                  {getStatusText(delivery.status)}
+                </Badge>
               </td>
               <td>
                 <span className={`${styles.statusBadge} ${styles[delivery.order?.status]}`}>
@@ -230,18 +281,26 @@ const DeliveryManagement = () => {
                 </span>
               </td>
               <td className={styles.actions}>
-                <select
-                  value={delivery.status || ''}
-                  onChange={(e) => handleStatusChange(delivery._id, e.target.value)}
-                  className={styles.statusSelect}
-                  disabled={delivery.status === 'delivered' || delivery.status === 'cancelled'}
-                >
-                  {filterOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                <FormGroup>
+                  <Input
+                    type="select"
+                    value="" // Đặt giá trị mặc định là rỗng
+                    onChange={(e) => {
+                      if (e.target.value) { // Chỉ xử lý khi có giá trị được chọn
+                        handleStatusChange(delivery._id, e.target.value);
+                        e.target.value = ''; // Reset về giá trị rỗng sau khi chọn
+                      }
+                    }}
+                    disabled={loading}
+                  >
+                    <option value="">Cập nhật trạng thái</option>
+                    {getAvailableStatusOptions(delivery.status).map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </Input>
+                </FormGroup>
                 <button 
                   onClick={() => handleDownloadDeliveryNote(delivery._id)}
                   className={styles.downloadButton}

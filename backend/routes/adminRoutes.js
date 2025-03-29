@@ -12,6 +12,7 @@ const inventoryController = require("../controllers/inventoryController");
 const supplierController = require("../controllers/supplierController");
 const Delivery = require("../models/Delivery");
 const voucherController = require("../controllers/voucherController");
+const { synchronizeOrderWithDelivery } = require('../utils/statusSynchronizer');
 
 router.use(authChainMiddleware);
 router.use(adminChainMiddleware);
@@ -117,26 +118,39 @@ router.put("/deliveries/:id", async (req, res) => {
       });
     }
 
-    // Ánh xạ trạng thái giao hàng sang trạng thái đơn hàng
-    let orderStatus = status;
-    if (status === "shipping") {
-      orderStatus = "shipped";
-    }
+    // Lưu trạng thái ban đầu để rollback nếu cần
+    const originalDeliveryStatus = delivery.status;
+    console.log(`[DEBUG] Bắt đầu cập nhật: Delivery ${delivery._id} từ ${originalDeliveryStatus} -> ${status}`);
 
-    // Sử dụng state pattern
-    const stateResult = await order.changeState(orderStatus);
+    // Cập nhật trạng thái delivery
+    const deliveryStateResult = await delivery.changeState(status);
     
-    if (!stateResult.success) {
-      return res.status(400).json(stateResult);
+    if (!deliveryStateResult.success) {
+      return res.status(400).json(deliveryStateResult);
     }
 
-    // Cập nhật trạng thái giao hàng
-    delivery.status = status;
-    await delivery.save();
+    // Cố gắng đồng bộ hóa trạng thái Order
+    const orderSyncResult = await synchronizeOrderWithDelivery(order, status);
+    
+    if (!orderSyncResult.success) {
+      // Nếu không thể đồng bộ, rollback trạng thái delivery
+      console.log(`[DEBUG] Đồng bộ thất bại, thực hiện rollback về ${originalDeliveryStatus}`);
+      try {
+        await delivery.changeState(originalDeliveryStatus);
+      } catch (rollbackError) {
+        console.error(`[ERROR] Lỗi khi rollback:`, rollbackError);
+      }
+      
+      return res.status(400).json({
+        success: false,
+        message: `Không thể đồng bộ với đơn hàng: ${orderSyncResult.message}`
+      });
+    }
 
+    // Cả hai đều thành công
     res.json({
       success: true,
-      message: stateResult.message,
+      message: deliveryStateResult.message,
       delivery: delivery,
       order: order
     });
@@ -148,7 +162,6 @@ router.put("/deliveries/:id", async (req, res) => {
     });
   }
 });
-
 router.post("/api/vouchers/apply", voucherController.applyVoucher);
 
 module.exports = router;

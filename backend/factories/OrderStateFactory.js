@@ -1,9 +1,9 @@
-const PendingState = require("../states/PendingState");
-const AwaitingState = require("../states/AwaitingState");
-const ShippedState = require("../states/ShippedState");
-const DeliverState = require("../states/DeliveredState");
-const CancelledState = require("../states/CancelledState");
-const ProcessingState = require("../states/ProcessingState");
+const PendingState = require("../states/orderState/PendingState");
+const AwaitingState = require("../states/orderState/AwaitingState");
+const ShippedState = require("../states/orderState/ShippedState");
+const DeliverState = require("../states/orderState/DeliveredState");
+const CancelledState = require("../states/orderState/CancelledState");
+const ProcessingState = require("../states/orderState/ProcessingState");
 
 class OrderStateFactory {
   static createState(stateName, order) {
