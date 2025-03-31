@@ -7,7 +7,7 @@ const Order = require("../models/Order");
 const { authChainMiddleware, adminChainMiddleware } = require('../middleware/chainMiddleware');
 const { createDeliveryNotePDF } = require("../utils/pdfGenerator");
 
- router.use(authChainMiddleware);
+router.use(authChainMiddleware);
 router.use(adminChainMiddleware);
 
 router.get("/", async (req, res) => {
@@ -28,50 +28,9 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { status } = req.body;
-
-    const updatedDelivery = await Delivery.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true }
-    ).populate("shippingInfo");
-
-    if (!updatedDelivery) {
-      return res.status(404).json({ message: "Không tìm thấy đơn giao hàng" });
-    }
-
-    let orderStatus;
-    switch (status) {
-      case "pending":
-        orderStatus = "processing";
-        break;
-      case "shipping":
-        orderStatus = "shipped";
-        break;
-      case "delivered":
-        orderStatus = "delivered";
-        break;
-      case "cancelled":
-        orderStatus = "cancelled";
-        break;
-      default:
-        orderStatus = "processing";
-    }
-
-    const updatedOrder = await Order.findByIdAndUpdate(
-      updatedDelivery.order,
-      { status: orderStatus },
-      { new: true }
-    );
-
-    res.json({ delivery: updatedDelivery, order: updatedOrder });
-  } catch (error) {
-    res.status(500).json({ message: "Lỗi server", error: error.message });
-  }
-});
+// router.put("/:id", async (req, res) => {
+//  ...
+// });
 
 router.get("/:id/delivery-note", async (req, res) => {
   try {

@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { getProductReviews, addProductReview } from '../services/api';
-import { useAuth } from '../contexts/AuthContext';
-import styles from './style.component/ProductReviews.module.css';
+import React, { useState, useEffect, useCallback } from "react";
+import { getProductReviews, addProductReview } from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
+import styles from "./style.component/ProductReviews.module.css";
 
 const ProductReviews = ({ productId }) => {
   const [reviews, setReviews] = useState([]);
-  const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
+  const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { user } = useAuth();
@@ -14,11 +14,12 @@ const ProductReviews = ({ productId }) => {
     try {
       setLoading(true);
       const response = await getProductReviews(productId);
+      console.log('Reviews data structure:', response);
       setReviews(response);
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching reviews:', error);
-      setError('Không thể tải đánh giá. Vui lòng thử lại sau.');
+      console.error("Error fetching reviews:", error);
+      setError("Không thể tải đánh giá. Vui lòng thử lại sau.");
       setLoading(false);
     }
   }, [productId]);
@@ -31,46 +32,118 @@ const ProductReviews = ({ productId }) => {
     e.preventDefault();
     try {
       await addProductReview(productId, newReview);
-      setNewReview({ rating: 5, comment: '' });
+      setNewReview({ rating: 5, comment: "" });
       fetchReviews();
     } catch (error) {
-      console.error('Error submitting review:', error);
-      setError('Không thể gửi đánh giá. Vui lòng thử lại sau.');
+      console.error("Error submitting review:", error);
+      setError("Không thể gửi đánh giá. Vui lòng thử lại sau.");
     }
   };
 
-  if (loading) return <div>Đang tải đánh giá...</div>;
-  if (error) return <div>{error}</div>;
+  // Thêm hàm để hiển thị sao
+  const renderStars = (rating) => {
+    return (
+      <div className={styles.starRating}>
+        {[1, 2, 3, 4, 5].map((star) => (
+          <span
+            key={star}
+            className={`${styles.star} ${star > rating ? styles.emptyStar : ''}`}
+          >
+            ★
+          </span>
+        ))}
+      </div>
+    );
+  };
+
+  // Hàm tạo avatar từ tên người dùng
+  const getInitials = (name) => {
+    if (!name) return '?';
+    return name.charAt(0).toUpperCase();
+  };
+
+  // Hàm định dạng ngày giờ
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('vi-VN', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }).format(date);
+  };
+
+  if (loading) return <div className={styles.loading}>Đang tải đánh giá...</div>;
+  if (error) return <div className={styles.error}>{error}</div>;
 
   return (
     <div className={styles.reviewsSection}>
-      <h3>Đánh giá sản phẩm</h3>
+      <div className={styles.reviewsHeader}>
+        <h3>Đánh giá sản phẩm</h3>
+        <span className={styles.reviewCount}>
+          {reviews.length} đánh giá
+        </span>
+      </div>
+
       {reviews && reviews.length > 0 ? (
-        reviews.map(review => (
-          <div key={review._id} className={styles.review}>
-            <p>Đánh giá: {review.rating}/5</p>
-            <p>{review.comment}</p>
-            <p>Bởi: {review.user.name}</p>
-          </div>
-        ))
+        <div className={styles.reviewList}>
+          {reviews.map((review) => (
+            <div key={review._id} className={styles.review}>
+              <div className={styles.reviewHeader}>
+                <div className={styles.avatarContainer}>
+                  {getInitials(review.user?.username || review.user?.fullName)}
+                </div>
+                <div className={styles.userInfo}>
+                  <p className={styles.username}>
+                    {review.user?.username || review.user?.fullName || "Người dùng ẩn danh"}
+                  </p>
+                  <p className={styles.reviewDate}>
+                    {formatDate(review.createdAt)}
+                  </p>
+                </div>
+              </div>
+              
+              {renderStars(review.rating)}
+              
+              <div className={styles.reviewContent}>
+                {review.comment}
+              </div>
+            </div>
+          ))}
+        </div>
       ) : (
-        <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+        <p className={styles.noReviews}>Chưa có đánh giá nào cho sản phẩm này.</p>
       )}
+
       {user && (
         <form onSubmit={handleSubmitReview} className={styles.reviewForm}>
-          <select
-            value={newReview.rating}
-            onChange={(e) => setNewReview({ ...newReview, rating: parseInt(e.target.value) })}
-          >
-            {[1, 2, 3, 4, 5].map(num => (
-              <option key={num} value={num}>{num}</option>
-            ))}
-          </select>
+          <h4 className={styles.formTitle}>Viết đánh giá của bạn</h4>
+          
+          <div className={styles.ratingContainer}>
+            <span className={styles.ratingLabel}>Đánh giá:</span>
+            <div className={styles.ratingSelect}>
+              {[1, 2, 3, 4, 5].map((num) => (
+                <button
+                  type="button"
+                  key={num}
+                  className={newReview.rating >= num ? styles.active : ''}
+                  onClick={() => setNewReview({ ...newReview, rating: num })}
+                >
+                  ★
+                </button>
+              ))}
+            </div>
+          </div>
+          
           <textarea
             value={newReview.comment}
-            onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-            placeholder="Nhập đánh giá của bạn..."
+            onChange={(e) =>
+              setNewReview({ ...newReview, comment: e.target.value })
+            }
+            placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..."
+            required
           />
+          
           <button type="submit">Gửi đánh giá</button>
         </form>
       )}

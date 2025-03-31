@@ -48,8 +48,6 @@ api.interceptors.response.use(
   }
 );
 
-// Danh sách c c endpoint không cần xác thực
-
 // Hàm để set token vào header của mọi request
 export const setAuthToken = (token) => {
   if (token) {
@@ -144,15 +142,15 @@ export const getRelatedProducts = async (params = {}) => {
   }
 };
 
-export const getProductById = async (id) => {
-  try {
-    const response = await api.get(`/products/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching product by id:", error);
-    throw error;
-  }
-};
+// export const getProductById = async (id) => {
+//   try {
+//     const response = await api.get(`/products/${id}`);
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error fetching product by id:", error);
+//     throw error;
+//   }
+// };
 
 export const createProduct = async (productData) => {
   try {
@@ -260,18 +258,21 @@ export const createOrder = async (cartItems, shippingInfo, totalAmount) => {
 export const getOrders = () => api.get("/orders");
 export const getOrderById = (id) => api.get(`/orders/${id}`);
 
-// Thêm hàm updateOrderStatus
 export const updateOrderStatus = async (orderId, status) => {
   try {
     const response = await api.put(`/admin/orders/${orderId}`, { status });
     return response.data;
   } catch (error) {
     console.error("Error updating order status:", error);
-    throw error;
+    console.error("Error response data:", error.response?.data);
+    return {
+      success: false,
+      message:
+        error.response?.data?.message || "Lỗi khi cập nhật trạng thái đơn hàng",
+    };
   }
 };
 
-// Thêm hàm getCategories
 export const getCategories = async () => {
   try {
     const response = await api.get("/categories");
@@ -299,7 +300,6 @@ export const deleteCategory = async (categoryId) => {
   }
 };
 
-// Admin Dashboard APIs
 export const getAdminProducts = () => api.get("/admin/products");
 
 export const updateAdminProduct = (id, productData) => {
@@ -330,9 +330,6 @@ export const getAdminOrders = () => {
   });
 };
 
-export const updateAdminOrderStatus = (orderId, status) =>
-  api.put(`/admin/orders/${orderId}`, { status });
-
 export const getAdminUsers = () => {
   const token = localStorage.getItem("token");
   return api.get("/admin/users", {
@@ -341,7 +338,6 @@ export const getAdminUsers = () => {
     },
   });
 };
-
 
 export const getAdminStatistics = async (startDate, endDate, period) => {
   const token = localStorage.getItem("token");
@@ -365,8 +361,6 @@ export const getAdminStatistics = async (startDate, endDate, period) => {
     throw error;
   }
 };
-
-// ... existing functions ...
 
 export const getProductReviews = async (productId) => {
   try {
@@ -437,15 +431,15 @@ export const getSubcategories = async (categoryId) => {
   }
 };
 
-export const getCategoryBySlugOrId = async (slugOrId) => {
-  try {
-    const response = await api.get(`/categories/find/${slugOrId}`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching category:", error);
-    throw error;
-  }
-};
+// export const getCategoryBySlugOrId = async (slugOrId) => {
+//   try {
+//     const response = await api.get(`/categories/find/${slugOrId}`);
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error fetching category:", error);
+//     throw error;
+//   }
+// };
 
 export const getProductsByCategorySlug = async (slug) => {
   try {
@@ -512,9 +506,32 @@ export const completePaypalOrder = async (orderData) => {
 
 export const getDeliveries = () => api.get("/admin/deliveries");
 
-export const updateDeliveryStatus = (deliveryId, status) =>
-  api.put(`/admin/deliveries/${deliveryId}`, { status });
+// Trong file frontend/src/services/api.js
+export const updateDeliveryStatus = async (deliveryId, status) => {
+  try {
+    console.log(
+      `[DEBUG] Gửi yêu cầu cập nhật trạng thái: ${deliveryId} -> ${status}`
+    );
+    const response = await api.put(`/admin/deliveries/${deliveryId}`, {
+      status,
+    });
 
+    console.log(`[DEBUG] Phản hồi cập nhật trạng thái:`, response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating delivery status:", error);
+
+    // Trả về thông tin lỗi chi tiết từ server nếu có
+    if (error.response?.data) {
+      return error.response.data;
+    }
+
+    return {
+      success: false,
+      message: error.message || "Lỗi khi cập nhật trạng thái giao hàng",
+    };
+  }
+};
 export const getProvinces = async () => {
   try {
     const response = await api.get("/address/provinces");
@@ -658,14 +675,17 @@ export const changeUserRole = async (userId, role) => {
 // Thêm vào frontend/src/services/api.js
 export const checkAuthToken = () => {
   const token = localStorage.getItem("token");
-  console.log("Current auth token:", token ? "Valid token exists" : "No token found");
+  console.log(
+    "Current auth token:",
+    token ? "Valid token exists" : "No token found"
+  );
   return !!token;
 };
 export const toggleUserStatus = async (userId) => {
   try {
     // Thêm log để debug
     console.log(`Attempting to toggle status for user: ${userId}`);
-    
+
     const response = await api.patch(`/admin/users/${userId}/toggle-status`);
     console.log("Toggle status response:", response.data);
     return response.data;
@@ -675,9 +695,9 @@ export const toggleUserStatus = async (userId) => {
       status: error.response?.status,
       statusText: error.response?.statusText,
       data: error.response?.data,
-      message: error.message
+      message: error.message,
     });
-    
+
     if (error.response?.data?.message) {
       throw new Error(error.response.data.message);
     } else if (error.message) {

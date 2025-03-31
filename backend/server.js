@@ -93,9 +93,8 @@ app.use("/api/categories", categoriesRoutes);
 app.use("/api/address", addressRoutes);
 
 const productController = require("./controllers/productController");
-console.log(productController); // Kiểm tra xem object này có chứa hàm getProductsByCategorySlug không
+console.log(productController); 
 
-// Add this line after other route definitions
 app.get(
   "/api/categories/:slug/products",
   productController.getProductsByCategorySlug

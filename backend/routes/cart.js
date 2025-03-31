@@ -3,9 +3,9 @@ const router = express.Router();
 // const authMiddleware = require('../middleware/authMiddleware');
 const { authChainMiddleware } = require('../middleware/chainMiddleware');
 const Cart = require('../models/Cart');
-const Product = require('../models/Product'); // Thêm dòng này
-const Order = require('../models/Order'); // Thêm dòng này
-const Voucher = require('../models/Voucher'); // Thêm dòng này
+const Product = require('../models/Product'); 
+const Order = require('../models/Order'); 
+const Voucher = require('../models/Voucher'); 
 const voucherController = require('../controllers/voucherController');
 
 // Áp dụng authMiddleware cho tất cả các route của giỏ hàng

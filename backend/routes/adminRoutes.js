@@ -12,6 +12,7 @@ const inventoryController = require("../controllers/inventoryController");
 const supplierController = require("../controllers/supplierController");
 const Delivery = require("../models/Delivery");
 const voucherController = require("../controllers/voucherController");
+const { synchronizeOrderWithDelivery } = require('../utils/statusSynchronizer');
 
 router.use(authChainMiddleware);
 router.use(adminChainMiddleware);
@@ -99,51 +100,68 @@ router.put(
 
 router.put("/deliveries/:id", async (req, res) => {
   try {
-    const { id } = req.params;
     const { status } = req.body;
-
-    // Cập nhật trạng thái giao hàng
-    const updatedDelivery = await Delivery.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true }
-    );
-
-    if (!updatedDelivery) {
-      return res.status(404).json({ message: "Không tìm thấy đơn giao hàng" });
+    const delivery = await Delivery.findById(req.params.id);
+    
+    if (!delivery) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Không tìm thấy đơn giao hàng" 
+      });
+    }
+    
+    const order = await Order.findById(delivery.order);
+    if (!order) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Không tìm thấy đơn hàng" 
+      });
     }
 
-    // Cập nhật trạng thái đơn hàng tương ứng
-    let orderStatus;
-    switch (status) {
-      case "pending":
-        orderStatus = "processing";
-        break;
-      case "shipping":
-        orderStatus = "shipped";
-        break;
-      case "delivered":
-        orderStatus = "delivered";
-        break;
-      case "cancelled":
-        orderStatus = "cancelled";
-        break;
-      default:
-        orderStatus = "processing";
+    // Lưu trạng thái ban đầu để rollback nếu cần
+    const originalDeliveryStatus = delivery.status;
+    console.log(`[DEBUG] Bắt đầu cập nhật: Delivery ${delivery._id} từ ${originalDeliveryStatus} -> ${status}`);
+
+    // Cập nhật trạng thái delivery
+    const deliveryStateResult = await delivery.changeState(status);
+    
+    if (!deliveryStateResult.success) {
+      return res.status(400).json(deliveryStateResult);
     }
 
-    const updatedOrder = await Order.findByIdAndUpdate(
-      updatedDelivery.order,
-      { status: orderStatus },
-      { new: true }
-    );
+    // Cố gắng đồng bộ hóa trạng thái Order
+    const orderSyncResult = await synchronizeOrderWithDelivery(order, status);
+    
+    if (!orderSyncResult.success) {
+      // Nếu không thể đồng bộ, rollback trạng thái delivery
+      console.log(`[DEBUG] Đồng bộ thất bại, thực hiện rollback về ${originalDeliveryStatus}`);
+      try {
+        await delivery.changeState(originalDeliveryStatus);
+      } catch (rollbackError) {
+        console.error(`[ERROR] Lỗi khi rollback:`, rollbackError);
+      }
+      
+      return res.status(400).json({
+        success: false,
+        message: `Không thể đồng bộ với đơn hàng: ${orderSyncResult.message}`
+      });
+    }
 
-    res.json({ delivery: updatedDelivery, order: updatedOrder });
+    // Cả hai đều thành công
+    res.json({
+      success: true,
+      message: deliveryStateResult.message,
+      delivery: delivery,
+      order: order
+    });
   } catch (error) {
-    res.status(500).json({ message: "Lỗi server", error: error.message });
+    console.error("Error updating delivery status:", error);
+    res.status(500).json({ 
+      success: false,
+      message: error.message || "Lỗi khi cập nhật trạng thái"
+    });
   }
 });
-
 router.post("/api/vouchers/apply", voucherController.applyVoucher);
 
 module.exports = router;

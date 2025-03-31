@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const orderController = require("../controllers/orderController");
+const orderController = require("../controllers/orderController")
 // const authMiddleware = require("../middleware/authMiddleware");
-const { authChainMiddleware } = require('../middleware/chainMiddleware');
-const Invoice = require("../models/Invoice"); // Thêm dòng này
+const { authChainMiddleware } = require("../middleware/chainMiddleware");
+const Invoice = require("../models/Invoice"); 
 const { createInvoicePDF } = require("../utils/pdfGenerator");
 
 router.use(authChainMiddleware);

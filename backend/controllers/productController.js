@@ -1,3 +1,4 @@
+
 const Product = require('../models/Product');
 const multer = require('multer');
 const Category = require('../models/Category'); 
@@ -5,6 +6,7 @@ const cloudinary = require('cloudinary');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const CategoryService = require('../services/CategoryService');
 const { ProductModel, ProductBuilder } = require("../models/ProductBuilder");
+
 
 cloudinary.config({
    cloude_name: process.env.CLOUDDINARY_CLOUD_NAME,
@@ -45,6 +47,7 @@ exports.getAllProducts = async (req, res) => {
       const limit = parseInt(req.query.limit) || 12;
       const skip = (page - 1) * limit;
 
+
       const products = await Product.find().skip(skip).limit(limit).populate('category');
 
       const total = await Product.countDocuments();
@@ -58,6 +61,23 @@ exports.getAllProducts = async (req, res) => {
    } catch (error) {
       res.status(500).json({ message: 'Lỗi server', error: error.message });
    }
+
+    const products = await Product.find()
+      .skip(skip)
+      .limit(limit)
+      .populate("category");
+
+    const total = await Product.countDocuments();
+
+    res.json({
+      products,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      hasMore: skip + products.length < total,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi server", error: error.message });
+  }
 };
 exports.getProductById = async (req, res) => {
    try {
@@ -147,15 +167,29 @@ exports.deleteProduct = async (req, res) => {
 };
 
 exports.getProductReviews = async (req, res) => {
-   try {
-      const product = await Product.findById(req.params.id).populate('reviews.user', 'name');
-      if (!product) {
-         return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
-      }
-      res.json(product.reviews);
-   } catch (error) {
-      res.status(500).json({ message: 'Lỗi server', error: error.message });
-   }
+
+   // try {
+   //    const product = await Product.findById(req.params.id).populate('reviews.user', 'name');
+   //    if (!product) {
+   //       return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
+   //    }
+   //    res.json(product.reviews);
+   // } catch (error) {
+   //    res.status(500).json({ message: 'Lỗi server', error: error.message });
+   // }
+
+  try {
+    const product = await Product.findById(req.params.id).populate(
+      "reviews.user",
+      "username fullname"
+    );
+    if (!product) {
+      return res.status(404).json({ message: "Không tìm thấy sản phẩm" });
+    }
+    res.json(product.reviews);
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi server", error: error.message });
+  }
 };
 
 exports.addProductReview = async (req, res) => {
@@ -232,8 +266,15 @@ exports.getProductsByCategory = async (req, res) => {
       const categoryId = req.params.categoryId;
       console.log('Fetching products for category:', categoryId);
 
-      const products = await CategoryService.getProductsByCategory(categoryId, true);
-      console.log('Products found:', products.length);
+
+      // const products = await CategoryService.getProductsByCategory(categoryId, true);
+      // console.log('Products found:', products.length);
+
+    const products = await CategoryService.getProductsByCategory(
+      categoryId,
+      true
+    );
+    console.log("Products found:", products.length);
 
       res.json(products);
    } catch (error) {
@@ -262,9 +303,15 @@ exports.getProductsByParentCategory = async (req, res) => {
          return res.status(404).json({ message: 'Category not found' });
       }
 
-      // Lấy danh sách ID danh mục con cấp 1
-      const subcategories = await CategoryService.getSubcategories(categoryId);
-      const categoryIds = [categoryId, ...subcategories.map((sub) => sub._id)];
+
+      // // Lấy danh sách ID danh mục con cấp 1
+      // const subcategories = await CategoryService.getSubcategories(categoryId);
+      // const categoryIds = [categoryId, ...subcategories.map((sub) => sub._id)];
+
+    // Lấy danh sách ID danh mục con cấp 1
+    const subcategories = await CategoryService.getSubcategories(categoryId);
+    const categoryIds = [categoryId, ...subcategories.map((sub) => sub._id)];
+
 
       const products = await Product.find({ category: { $in: categoryIds } });
       res.json(products);
