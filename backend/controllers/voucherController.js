@@ -1,9 +1,11 @@
 const Voucher = require('../models/Voucher');
 const Cart = require('../models/Cart');
+const VoucherFactory = require("../factories/voucherFactory");
 
 exports.createVoucher = async (req, res) => {
   try {
-    const newVoucher = new Voucher(req.body);
+    const { type, ...voucherData } = req.body;
+    const newVoucher = VoucherFactory.create(type, voucherData);
     await newVoucher.save();
     res.status(201).json(newVoucher);
   } catch (error) {
@@ -14,6 +16,11 @@ exports.createVoucher = async (req, res) => {
 exports.getVouchers = async (req, res) => {
   try {
     const vouchers = await Voucher.find({ isActive: true, endDate: { $gte: new Date() } });
+
+    const formattedVouchers = vouchers.map((voucher) => 
+      VoucherFactory.create(voucher.discountType, voucher)
+    );
+
     res.json(vouchers);
   } catch (error) {
     res.status(500).json({ message: 'Lỗi khi lấy danh sách voucher', error: error.message });
@@ -37,6 +44,8 @@ exports.applyVoucher = async (req, res) => {
         message: 'Mã giảm giá không tồn tại hoặc đã hết hạn'
       });
     }
+
+    const voucherInstance = VoucherFactory.create(voucher.discountType, voucher);
 
     // Kiểm tra số lần sử dụng
     if (voucher.usedCount >= voucher.usageLimit) {
