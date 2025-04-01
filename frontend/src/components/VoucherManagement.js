@@ -17,6 +17,17 @@ const VoucherManagement = () => {
     usageLimit: 1,
     isActive: true
   });
+  
+  // Thêm state quản lý lỗi
+  const [formErrors, setFormErrors] = useState({
+    code: '',
+    discountValue: '',
+    minPurchase: '',
+    startDate: '',
+    endDate: '',
+    usageLimit: '',
+    general: ''
+  });
 
   useEffect(() => {
     fetchVouchers();
@@ -58,9 +69,81 @@ const VoucherManagement = () => {
     }
   };
 
+  // Hàm kiểm tra form hợp lệ
+  const validateForm = () => {
+    let errors = {
+      code: '',
+      discountValue: '',
+      minPurchase: '',
+      startDate: '',
+      endDate: '',
+      usageLimit: '',
+      general: ''
+    };
+    let isValid = true;
+
+    // Kiểm tra mã voucher
+    if (!newVoucher.code.trim()) {
+      errors.code = 'Vui lòng nhập mã voucher';
+      isValid = false;
+    } else if (newVoucher.code.length < 3) {
+      errors.code = 'Mã voucher phải có ít nhất 3 ký tự';
+      isValid = false;
+    }
+
+    // Kiểm tra giá trị giảm giá
+    if (newVoucher.discountValue <= 0) {
+      errors.discountValue = 'Giá trị giảm giá phải lớn hơn 0';
+      isValid = false;
+    } else if (newVoucher.discountType === 'percentage' && newVoucher.discountValue > 100) {
+      errors.discountValue = 'Giảm giá phần trăm không thể vượt quá 100%';
+      isValid = false;
+    }
+
+    // Kiểm tra giá trị đơn hàng tối thiểu
+    if (newVoucher.minPurchase < 0) {
+      errors.minPurchase = 'Giá trị đơn hàng tối thiểu không được âm';
+      isValid = false;
+    }
+
+    // Kiểm tra ngày bắt đầu
+    if (!newVoucher.startDate) {
+      errors.startDate = 'Vui lòng chọn ngày bắt đầu';
+      isValid = false;
+    }
+
+    // Kiểm tra ngày kết thúc
+    if (!newVoucher.endDate) {
+      errors.endDate = 'Vui lòng chọn ngày kết thúc';
+      isValid = false;
+    } else if (new Date(newVoucher.endDate) <= new Date(newVoucher.startDate)) {
+      errors.endDate = 'Ngày kết thúc phải sau ngày bắt đầu';
+      isValid = false;
+    }
+
+    // Kiểm tra giới hạn sử dụng
+    if (newVoucher.usageLimit <= 0) {
+      errors.usageLimit = 'Giới hạn sử dụng phải lớn hơn 0';
+      isValid = false;
+    }
+
+    setFormErrors(errors);
+    return isValid;
+  };
+
   const handleCreateVoucher = async (e) => {
     e.preventDefault();
     console.log('Đang tạo voucher mới:', newVoucher);
+    
+    // Kiểm tra form trước khi gửi
+    if (!validateForm()) {
+      setFormErrors(prev => ({
+        ...prev,
+        general: 'Vui lòng kiểm tra lại thông tin nhập liệu'
+      }));
+      return;
+    }
+    
     try {
       // Gọi API tạo voucher
       const response = await createVoucher(newVoucher);
@@ -85,7 +168,7 @@ const VoucherManagement = () => {
         return [...prevVouchers, formattedVoucher];
       });
 
-      // Reset form
+      // Reset form và lỗi
       setNewVoucher({
         code: '',
         discountType: 'percentage',
@@ -97,13 +180,34 @@ const VoucherManagement = () => {
         usageLimit: 1,
         isActive: true
       });
+      setFormErrors({
+        code: '',
+        discountValue: '',
+        minPurchase: '',
+        startDate: '',
+        endDate: '',
+        usageLimit: '',
+        general: ''
+      });
       
       // Gọi lại API để lấy danh sách mới nhất
       await fetchVouchers();
 
     } catch (error) {
       console.error('Lỗi khi tạo voucher:', error);
-      setError('Không thể tạo voucher. Vui lòng thử lại sau.');
+      
+      // Xử lý lỗi từ API
+      if (error.response && error.response.data && error.response.data.message) {
+        setFormErrors(prev => ({
+          ...prev,
+          general: error.response.data.message
+        }));
+      } else {
+        setFormErrors(prev => ({
+          ...prev,
+          general: 'Không thể tạo voucher. Vui lòng thử lại sau.'
+        }));
+      }
     }
   };
 
@@ -131,60 +235,94 @@ const VoucherManagement = () => {
   return (
     <div className={styles.voucherManagement}>
       <h2>Quản lý Voucher</h2>
+      
+      {/* Hiển thị lỗi chung nếu có */}
+      {formErrors.general && <div className={styles.errorMessage}>{formErrors.general}</div>}
+      
       <form onSubmit={handleCreateVoucher} className={styles.voucherForm}>
-        <input
-          type="text"
-          value={newVoucher.code}
-          onChange={(e) => setNewVoucher({...newVoucher, code: e.target.value})}
-          placeholder="Mã voucher"
-          required
-        />
-        <select
-          value={newVoucher.discountType}
-          onChange={(e) => setNewVoucher({...newVoucher, discountType: e.target.value})}
-        >
-          <option value="percentage">Phần trăm</option>
-          <option value="fixed">Số tiền cố định</option>
-        </select>
-        <input
-          type="number"
-          value={newVoucher.discountValue}
-          onChange={(e) => setNewVoucher({...newVoucher, discountValue: Number(e.target.value)})}
-          placeholder="Giá trị giảm giá"
-          required
-        />
-        <input
-          type="number"
-          value={newVoucher.maxDiscount}
-          onChange={(e) => setNewVoucher({...newVoucher, maxDiscount: Number(e.target.value)})}
-          placeholder="Giảm giá tối đa"
-        />
-        <input
-          type="number"
-          value={newVoucher.minPurchase}
-          onChange={(e) => setNewVoucher({...newVoucher, minPurchase: Number(e.target.value)})}
-          placeholder="Giá trị đơn hàng tối thiểu"
-          required
-        />
-        <input
-          type="date"
-          value={newVoucher.startDate}
-          onChange={(e) => setNewVoucher({...newVoucher, startDate: e.target.value})}
-          required
-        />
-        <input
-          type="date"
-          value={newVoucher.endDate}
-          onChange={(e) => setNewVoucher({...newVoucher, endDate: e.target.value})}
-          required
-        />
-        <input
-          type="number"
-          value={newVoucher.usageLimit}
-          onChange={(e) => setNewVoucher({...newVoucher, usageLimit: Number(e.target.value)})}
-          placeholder="Giới hạn sử dụng"
-          required
-        />
+        <div className={styles.formGroup}>
+          <input
+            type="text"
+            value={newVoucher.code}
+            onChange={(e) => setNewVoucher({...newVoucher, code: e.target.value})}
+            placeholder="Mã voucher"
+            className={formErrors.code ? styles.inputError : ''}
+          />
+          {formErrors.code && <div className={styles.errorText}>{formErrors.code}</div>}
+        </div>
+        
+        <div className={styles.formGroup}>
+          <select
+            value={newVoucher.discountType}
+            onChange={(e) => setNewVoucher({...newVoucher, discountType: e.target.value})}
+          >
+            <option value="percentage">Phần trăm</option>
+            <option value="fixed">Số tiền cố định</option>
+          </select>
+        </div>
+        
+        <div className={styles.formGroup}>
+          <input
+            type="number"
+            value={newVoucher.discountValue}
+            onChange={(e) => setNewVoucher({...newVoucher, discountValue: Number(e.target.value)})}
+            placeholder="Giá trị giảm giá"
+            className={formErrors.discountValue ? styles.inputError : ''}
+          />
+          {formErrors.discountValue && <div className={styles.errorText}>{formErrors.discountValue}</div>}
+        </div>
+        
+        <div className={styles.formGroup}>
+          <input
+            type="number"
+            value={newVoucher.maxDiscount}
+            onChange={(e) => setNewVoucher({...newVoucher, maxDiscount: Number(e.target.value)})}
+            placeholder="Giảm giá tối đa"
+          />
+        </div>
+        
+        <div className={styles.formGroup}>
+          <input
+            type="number"
+            value={newVoucher.minPurchase}
+            onChange={(e) => setNewVoucher({...newVoucher, minPurchase: Number(e.target.value)})}
+            placeholder="Giá trị đơn hàng tối thiểu"
+            className={formErrors.minPurchase ? styles.inputError : ''}
+          />
+          {formErrors.minPurchase && <div className={styles.errorText}>{formErrors.minPurchase}</div>}
+        </div>
+        
+        <div className={styles.formGroup}>
+          <input
+            type="date"
+            value={newVoucher.startDate}
+            onChange={(e) => setNewVoucher({...newVoucher, startDate: e.target.value})}
+            className={formErrors.startDate ? styles.inputError : ''}
+          />
+          {formErrors.startDate && <div className={styles.errorText}>{formErrors.startDate}</div>}
+        </div>
+        
+        <div className={styles.formGroup}>
+          <input
+            type="date"
+            value={newVoucher.endDate}
+            onChange={(e) => setNewVoucher({...newVoucher, endDate: e.target.value})}
+            className={formErrors.endDate ? styles.inputError : ''}
+          />
+          {formErrors.endDate && <div className={styles.errorText}>{formErrors.endDate}</div>}
+        </div>
+        
+        <div className={styles.formGroup}>
+          <input
+            type="number"
+            value={newVoucher.usageLimit}
+            onChange={(e) => setNewVoucher({...newVoucher, usageLimit: Number(e.target.value)})}
+            placeholder="Giới hạn sử dụng"
+            className={formErrors.usageLimit ? styles.inputError : ''}
+          />
+          {formErrors.usageLimit && <div className={styles.errorText}>{formErrors.usageLimit}</div>}
+        </div>
+        
         <button type="submit">Tạo Voucher</button>
       </form>
       <table className={styles.voucherTable}>

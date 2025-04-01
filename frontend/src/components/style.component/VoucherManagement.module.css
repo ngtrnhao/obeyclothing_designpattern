@@ -138,3 +138,32 @@ h2 {
     font-size: 14px;
   }
 }
+
+.errorMessage {
+  color: #ff3d3d;
+  background-color: #ffecec;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  border-left: 3px solid #ff3d3d;
+  font-weight: 500;
+}
+
+.errorText {
+  color: #ff3d3d;
+  font-size: 0.8rem;
+  margin-top: 4px;
+  margin-left: 2px;
+}
+
+.inputError {
+  border: 1px solid #ff3d3d !important;
+  background-color: #fff8f8;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+  width: 100%;
+}
