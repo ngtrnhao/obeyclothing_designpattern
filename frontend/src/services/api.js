@@ -48,9 +48,7 @@ api.interceptors.response.use(
   }
 );
 
-// Danh sách c c endpoint không cần xác thực
 
-// Hàm để set token vào header của mọi request
 export const setAuthToken = (token) => {
   if (token) {
     api.defaults.headers.common["Authorization"] = `Bearer ${token}`;

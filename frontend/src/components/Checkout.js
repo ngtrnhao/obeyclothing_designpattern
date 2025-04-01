@@ -1,5 +1,9 @@
+import { PaymentContext } from "../contexts/PaymentContext";
+import { CODPayment, VNPayPayment, PayPalPayment } from "../strategies/paymentStrategies";
 import React, { useState, useEffect, useCallback } from "react";
 import { useCart } from "../contexts/CartContext";
+import { useNavigate } from "react-router-dom";
+
 import {
   getShippingAddresses,
   addShippingAddress,
@@ -307,63 +311,45 @@ const Checkout = () => {
         alert("Vui lòng chọn địa chỉ giao hàng");
         return;
       }
-
+  
       const shippingInfo = shippingAddresses.find(
         (addr) => addr._id === selectedAddressId
       );
-
+  
       const token = localStorage.getItem("token");
-
-      if (selectedPaymentMethod === "cod") {
-        const response = await axios.post(
-          `${process.env.REACT_APP_API_URL}/api/orders/create-cod-order`,
-          {
-            shippingInfo,
-            cartItems,
-            voucher,
-            totalAmount: total,
-            shippingFee: 30000,
-            discountAmount,
-            finalAmount,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (response.data.order) {
-          clearCart();
-          navigate(`/order-success/${response.data.order._id}`);
-        }
-      } else if (selectedPaymentMethod === "vnpay") {
-        const response = await axios.post(
-          "/api/orders/create-vnpay-payment",
-          {
-            shippingInfo,
-            cartItems,
-            totalAmount: total,
-            shippingFee: 30000,
-            discountAmount: discountAmount || 0,
-            finalAmount: finalAmount,
-            voucher: voucher || null,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (response.data.url) {
-          window.location.href = response.data.url;
-        } else {
-          throw new Error("Không nhận được URL thanh toán");
-        }
+  
+      // Initialize PaymentContext
+      const paymentContext = new PaymentContext();
+  
+      // Select payment strategy based on selectedPaymentMethod
+      switch (selectedPaymentMethod) {
+        case "cod":
+          paymentContext.setStrategy(new CODPayment());
+          break;
+        case "vnpay":
+          paymentContext.setStrategy(new VNPayPayment());
+          break;
+        case "paypal":
+          paymentContext.setStrategy(new PayPalPayment());
+          break;
+        default:
+          alert("Phương thức thanh toán không hợp lệ");
+          return;
       }
+  
+      // Execute the selected payment strategy
+      await paymentContext.executeStrategy({
+        shippingInfo,
+        cartItems,
+        voucher,
+        total,
+        discountAmount,
+        finalAmount,
+        token,
+        clearCart,
+        navigate,
+        totalWithShipping,
+      });
     } catch (error) {
       console.error("Checkout error:", error);
       alert("Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.");
