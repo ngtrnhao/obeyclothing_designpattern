@@ -2,8 +2,6 @@ import { PaymentContext } from "../contexts/PaymentContext";
 import { CODPayment, VNPayPayment, PayPalPayment } from "../strategies/paymentStrategies";
 import React, { useState, useEffect, useCallback } from "react";
 import { useCart } from "../contexts/CartContext";
-import { useNavigate } from "react-router-dom";
-
 import {
   getShippingAddresses,
   addShippingAddress,
