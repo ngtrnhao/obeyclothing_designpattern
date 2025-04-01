@@ -117,33 +117,33 @@ const ProductList = () => {
     }));
   };
 
-  const renderCategories = (categories, level = 0) => {
-    return categories.map(category => (
-      <div key={category._id} className={styles.categoryItem}>
-        <div className={styles.categoryHeader}>
-          {category.children?.length > 0 && (
-            <button 
-              className={styles.toggleButton}
-              onClick={(e) => toggleCategory(category._id, e)}
-            >
-              {expandedCategories[category._id] ? <FaChevronDown /> : <FaChevronRight />}
-            </button>
-          )}
-          <Link 
-            to={`/category/${category.slug}`}
-            className={`${styles.categoryLink} ${slug === category.slug ? styles.activeCategory : ''}`}
-          >
-            {category.name}
-          </Link>
-        </div>
-        {category.children?.length > 0 && expandedCategories[category._id] && (
-          <div className={styles.childCategories}>
-            {renderCategories(category.children, level + 1)}
-          </div>
-        )}
-      </div>
-    ));
-  };
+  // const renderCategories = (categories, level = 0) => {
+  //   return categories.map(category => (
+  //     <div key={category._id} className={styles.categoryItem}>
+  //       <div className={styles.categoryHeader}>
+  //         {category.children?.length > 0 && (
+  //           <button 
+  //             className={styles.toggleButton}
+  //             onClick={(e) => toggleCategory(category._id, e)}
+  //           >
+  //             {expandedCategories[category._id] ? <FaChevronDown /> : <FaChevronRight />}
+  //           </button>
+  //         )}
+  //         <Link 
+  //           to={`/category/${category.slug}`}
+  //           className={`${styles.categoryLink} ${slug === category.slug ? styles.activeCategory : ''}`}
+  //         >
+  //           {category.name}
+  //         </Link>
+  //       </div>
+  //       {category.children?.length > 0 && expandedCategories[category._id] && (
+  //         <div className={styles.childCategories}>
+  //           {renderCategories(category.children, level + 1)}
+  //         </div>
+  //       )}
+  //     </div>
+  //   ));
+  // };
 
   const handleAddToCart = async (e, product) => {
     e.preventDefault();
@@ -215,6 +215,8 @@ const ProductList = () => {
     );
   };
 
+  /* Infinite scroll*/ 
+  //IntersectionObserver  là API của browser theo dõi phần tử xuất hiện ở viewport
   const lastProductRef = useCallback(node => {
     if (loading) return;
     if (observer.current) observer.current.disconnect();

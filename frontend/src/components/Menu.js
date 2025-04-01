@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate, useLocation, Link} from 'react-router-dom';
+import {  useLocation, Link} from 'react-router-dom';
 import { getCategories } from '../services/api';
 import styles from './style.component/Menu.module.css';
 
@@ -11,7 +11,6 @@ const Menu = ({ isOpen, onClose }) => {
   const [expandedCategories, setExpandedCategories] = useState({});
   const menuRef = useRef(null);
   const timeoutRef = useRef(null);
-  const navigate = useNavigate();
   const location = useLocation();
 
   const fetchCategories = useCallback(async () => {

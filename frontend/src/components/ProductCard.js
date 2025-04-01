@@ -18,7 +18,7 @@ const ProductCard = ({ product }) => {
   };
 
   // Kiểm tra sản phẩm giảm giá
-  const isOnSale = product.salePrice && product.salePrice < product.price;
+  // const isOnSale = product.salePrice && product.salePrice < product.price;
 
   return (
     <article className={styles.productCard}>
@@ -27,11 +27,11 @@ const ProductCard = ({ product }) => {
           {isNew() && (
             <span className={`${styles.badge} ${styles.newBadge}`}>New</span>
           )}
-          {isOnSale && (
+          {/* {isOnSale && (
             <span className={`${styles.badge} ${styles.saleBadge}`}>
               {Math.round((1 - product.salePrice / product.price) * 100)}% Off
             </span>
-          )}
+          )} */}
           <img 
             src={imageUrl(product.image)}
             alt={product.name} 

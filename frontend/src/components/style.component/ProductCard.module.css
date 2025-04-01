@@ -95,13 +95,15 @@
 
 .productsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat( auto-fit,minmax(250px, 1fr));
   gap: 30px;
   padding: 20px;
   max-width: 1400px;
   margin: 0 auto;
 }
-
+.singleProduct{
+  grid-template-columns: minmax(400px, 1fr);
+}
 @media (max-width: 1200px) {
   .productsGrid {
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -157,3 +159,23 @@
     margin-top: 8px;
   }
 } 
+
+@media (max-width: 768px) {
+  .searchResults {
+    padding: 10px;
+  }
+  
+  .productsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+  }
+  
+  .singleProductGrid {
+    grid-template-columns: minmax(220px, 1fr);
+  }
+  
+  .twoProductsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+}

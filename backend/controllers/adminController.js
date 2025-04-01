@@ -4,6 +4,7 @@ const User = require("../models/User");
 const Voucher = require("../models/Voucher");
 const moment = require("moment");
 const { createStatisticsReportPDF } = require("../utils/pdfGenerator");
+const Delivery = require("../models/Delivery");
 
 exports.getAllProducts = async (req, res) => {
   try {
@@ -86,14 +87,46 @@ exports.getAllOrders = async (req, res) => {
 
 exports.updateOrderStatus = async (req, res) => {
   try {
-    const updatedOrder = await Order.findByIdAndUpdate(
-      req.params.id,
-      { status: req.body.status },
-      { new: true }
-    );
-    res.json(updatedOrder);
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    console.log(`[DEBUG] Nhận yêu cầu cập nhật đơn hàng ${id} sang trạng thái ${status}`);
+    
+    const order = await Order.findById(id);
+    
+    if (!order) {
+      console.log(`[DEBUG] Không tìm thấy đơn hàng với ID ${id}`);
+      return res.status(404).json({ 
+        success: false, 
+        message: "Không tìm thấy đơn hàng" 
+      });
+    }
+    
+    console.log(`[DEBUG] Đơn hàng hiện tại: ${order._id}, trạng thái: ${order.status}`);
+    
+    // Sử dụng state pattern
+    console.log(`[DEBUG] Gọi order.changeState(${status})`);
+    const stateResult = await order.changeState(status);
+    console.log(`[DEBUG] Kết quả changeState:`, stateResult);
+    
+    // Xử lý kết quả từ state pattern
+    if (!stateResult.success) {
+      console.log(`[DEBUG] Cập nhật thất bại:`, stateResult.message);
+      return res.status(400).json(stateResult);
+    }
+    
+    console.log(`[DEBUG] Cập nhật thành công, trả về response`);
+    return res.json({
+      success: true,
+      message: stateResult.message,
+      order: order
+    });
   } catch (error) {
-    res.status(500).json({ message: "Lỗi khi cập nhật trạng thái đơn hàng" });
+    console.error("[DEBUG] Lỗi ngoại lệ:", error);
+    res.status(500).json({ 
+      success: false,
+      message: error.message || "Lỗi khi cập nhật trạng thái"
+    });
   }
 };
 

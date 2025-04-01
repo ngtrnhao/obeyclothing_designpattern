@@ -16,12 +16,37 @@
   gap: 30px;
   margin: 0 auto;
 }
+.singleProductGrid{
+  display: grid;
+  grid-template-columns: minmax(300px,500px);
+  justify-content: center;
+  gap: 20px;
+  padding: 20px 0 ;
+  margin: 0 auto;
+}
+.twoProductsGrid{
+  display: grid;
+  grid-template-columns: repeat(2,minmax(300px,500px));
+  justify-content:center;
+  gap:20px;
 
+}
+.fewProductsGrid{
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
+  gap: 25px;
+  padding: 20px 0;
+  max-width: 10000px;
+  margin: 0 auto; 
+}
 /* Responsive */
 @media (max-width: 1200px) {
   .productsGrid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 25px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 30px;
+    padding: 0 20px;
+    max-width: 90%;
+    margin: 0 auto;
   }
 }
 

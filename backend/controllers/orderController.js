@@ -741,50 +741,32 @@ exports.cancelOrder = async (req, res) => {
     const userId = req.user._id;
 
     const order = await Order.findById(orderId);
-
     if (!order) {
       return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
     }
 
-    // Kiểm tra quyền hủy đơn hàng
+    // Kiểm tra quyền
     if (order.user.toString() !== userId.toString()) {
       return res
         .status(403)
         .json({ message: "Không có quyền hủy đơn hàng này" });
     }
 
-    // Chỉ cho phép hủy đơn hàng ở trạng thái pending hoặc processing
-    if (!["pending", "processing"].includes(order.status)) {
-      return res.status(400).json({
-        message: "Không thể hủy đơn hàng ở trạng thái hiện tại",
-      });
-    }
+    // Sử dụng State Pattern để hủy đơn hàng
+    const result = await order.cancelOrder();
 
-    // Hoàn trả số lượng sản phẩm vào kho
-    for (const item of order.items) {
-      const product = await Product.findById(item.product);
-      if (product) {
-        product.stock += item.quantity;
-        await product.save();
+    // Cập nhật delivery nếu có
+    if (order.delivery) {
+      const delivery = await Delivery.findById(order.delivery);
+      if (delivery) {
+        // Sử dụng State Pattern cho Delivery
+        await delivery.cancelDelivery();
       }
     }
 
-    // Cập nhật trạng thái đơn hàng
-    order.status = "cancelled";
-    order.cancelledAt = new Date();
-    await order.save();
-
-    // Nếu có delivery record, cập nhật trạng thái
-    if (order.delivery) {
-      await Delivery.findByIdAndUpdate(order.delivery, {
-        status: "cancelled",
-        cancelledAt: new Date(),
-      });
-    }
-
     res.json({
-      message: "Đơn hàng đã được hủy thành công",
-      order,
+      message: result,
+      order: order,
     });
   } catch (error) {
     console.error("Error cancelling order:", error);
