@@ -2,7 +2,6 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const dotenv = require("dotenv");
 const path = require("path");
 // const authMiddleware = require('./middleware/authMiddleware');
 // const adminMiddleware = require('./middleware/adminMiddleware');
@@ -15,7 +14,6 @@ const inventoryController = require("./controllers/inventoryController");
 const deliveryRoutes = require("./routes/deliveryRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 
-dotenv.config();
 
 console.log("ADMIN_SECRET:", process.env.ADMIN_SECRET);
 
@@ -130,13 +128,13 @@ cron.schedule("0 0 * * *", () => {
   inventoryController.checkAndCreatePurchaseOrders();
 });
 
-// Sau đó mới đến các route khác và static files
+
 app.use(express.static(path.join(__dirname, "../frontend/build")));
 
-// Add admin routes
+
 app.use("/api", adminRoutes);
 
-// Add route for delivery management
+
 app.use("/api/admin/deliveries", require("./routes/deliveryRoutes"));
 app.use("/api/deliveries", deliveryRoutes);
 
