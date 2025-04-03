@@ -1,6 +1,6 @@
 require("dotenv").config();
 const express = require("express");
-const mongoose = require("mongoose");
+const dbConnection = require("./config/MongoConnection");
 const cors = require("cors");
 const path = require("path");
 // const authMiddleware = require('./middleware/authMiddleware');
@@ -13,13 +13,14 @@ const cron = require("node-cron");
 const inventoryController = require("./controllers/inventoryController");
 const deliveryRoutes = require("./routes/deliveryRoutes");
 const chatRoutes = require("./routes/chatRoutes");
+//Phần code quan trọng trong việc kết nối server MongoDB với ứng dụng Express.js
 
 
 console.log("ADMIN_SECRET:", process.env.ADMIN_SECRET);
 
 const app = express();
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");
+// const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");
 
 const corsOptions = {
   origin: process.env.ALLOWED_ORIGINS.split(","),
@@ -43,11 +44,14 @@ app.use((req, res, next) => {
   next();
 });
 
-mongoose
-  .connect(process.env.MONGODB_URI)
+//mongoose
+//  .connect(process.env.MONGODB_URI)
+ // .then(() => console.log("MongoDB connected successfully"))
+ // .catch((err) => console.error("MongoDB connection error:", err));
+dbConnection
+  .connect()
   .then(() => console.log("MongoDB connected successfully"))
   .catch((err) => console.error("MongoDB connection error:", err));
-
 // Import routes
 const authRoutes = require("./routes/auth");
 const productRoutes = require("./routes/products");

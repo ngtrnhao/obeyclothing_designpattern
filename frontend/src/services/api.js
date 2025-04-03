@@ -48,7 +48,11 @@ api.interceptors.response.use(
   }
 );
 
+<<<<<<< HEAD
+
+=======
 // Hàm để set token vào header của mọi request
+>>>>>>> 802ad6cf26eb7e1c34aa947dd8ee6d4a6141e2b0
 export const setAuthToken = (token) => {
   if (token) {
     api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
