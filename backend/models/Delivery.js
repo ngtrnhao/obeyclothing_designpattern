@@ -3,7 +3,7 @@ const DeliveryStateFactory = require('../factories/DeliveryStateFactory');
 
 const deliverySchema = new mongoose.Schema({
   order: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true },
-  shippingInfo: { // Define shippingInfo as an embedded object
+  shippingInfo: { 
     fullName: String,
     phone: String,
     streetAddress: String,
@@ -88,7 +88,7 @@ deliverySchema.methods.changeState = async function(newStatus) {
   }
 };
 
-// Các phương thức xử lý trạng thái cụ thể
+// Các phương thức xử lý trạng thái 
 deliverySchema.methods.processPending = function() {
   return this.state.pending();
 };

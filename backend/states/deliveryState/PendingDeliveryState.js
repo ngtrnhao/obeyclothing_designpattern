@@ -1,4 +1,4 @@
-const DeliveryState = require("../../interfaces/DeliveryState");
+const DeliveryState = require("../../interfaces/IDeliveryState");
 
 class PendingDeliveryState extends DeliveryState {
   constructor(delivery) {

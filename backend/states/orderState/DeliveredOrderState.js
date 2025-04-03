@@ -1,4 +1,4 @@
-const OrderState = require("../../interfaces/OderState");
+const OrderState = require("../../interfaces/IOderState");
 
 const DeliverState = class extends OrderState {
   constructor(order) {
@@ -25,7 +25,7 @@ const DeliverState = class extends OrderState {
   await() {
     return "Đơn hàng đã giao thành công, không thể chờ thanh toán";
   }
-  // Thêm các phương thức canXXX
+  
   canPending() {
     return false;
   }

@@ -1,4 +1,4 @@
-const OrderState = require("../../interfaces/OderState");
+const OrderState = require("../../interfaces/IOderState");
 
 class ProcessingState extends OrderState {
   constructor(order) {

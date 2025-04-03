@@ -1,4 +1,4 @@
-const OrderState = require("../../interfaces/OderState");
+const OrderState = require("../../interfaces/IOderState");
 
 class AwaitingState extends OrderState {
   constructor(order) {
@@ -8,7 +8,6 @@ class AwaitingState extends OrderState {
     return "awaiting_payment";
   }
   pending() {
-    this.order.changeState("pending");
     return "Đơn hàng đã thanh toán thành công và chuyển sang trạng thái chờ xử lý";
   }
   process() {
@@ -21,9 +20,9 @@ class AwaitingState extends OrderState {
     return "Không thể giao đơn hàng chưa thanh toán";
   }
   cancel() {
-    this.order.changeState("cancelled");
+    this.order.cancelledAt = new Date();
     this.order.returnProductToStock();
-    return "Đơn hàng bị hủy do lỗi thanh toán ";
+    return "Đơn hàng bị hủy do lỗi thanh toán";
   }
   await() {
     return "Đơn hàng đang chờ thanh toán";
@@ -33,6 +32,18 @@ class AwaitingState extends OrderState {
   }
   canPending() {
     return true;
+  }
+  canProcess() {
+    return false;
+  }
+  canShip() {
+    return false;
+  }
+  canDeliver() {
+    return false;
+  }
+  canAwait() {
+    return false;
   }
 }
 module.exports = AwaitingState;

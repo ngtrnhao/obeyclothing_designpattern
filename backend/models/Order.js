@@ -87,6 +87,12 @@ const orderSchema = new mongoose.Schema(
     deliveredAt: {
       type: Date,
     },
+    cancelledAt: {
+      type: Date,
+    },
+    processedAt: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );
@@ -98,89 +104,103 @@ orderSchema.methods.initializeState = function () {
 //Phương thức thay đổi trạng thái
 orderSchema.methods.changeState = async function (newStatus) {
   try {
-    console.log(`[DEBUG] Bắt đầu chuyển trạng thái từ ${this.status} sang ${newStatus}`);
-    
     // Kiểm tra nếu đang chuyển sang trạng thái hiện tại
     if (this.status === newStatus) {
-      console.log(`[DEBUG] Đơn hàng đã ở trạng thái ${newStatus}`);
       return {
         success: true,
-        message: `Đơn hàng đã ở trạng thái ${newStatus}`
+        message: `Đơn hàng đã ở trạng thái ${newStatus}`,
       };
     }
 
     if (!this.state) {
-      console.log(`[DEBUG] Khởi tạo state vì this.state không tồn tại`);
       this.initializeState();
     }
 
-    console.log(`[DEBUG] State hiện tại: ${this.state.getName()}`);
-
     // Kiểm tra trạng thái hợp lệ
-    const validStates = ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'awaiting_payment'];
+    const validStates = [
+      "pending",
+      "processing",
+      "shipped",
+      "delivered",
+      "cancelled",
+      "awaiting_payment",
+    ];
     if (!validStates.includes(newStatus)) {
-      console.log(`[DEBUG] Trạng thái không hợp lệ: ${newStatus}`);
       throw new Error(`Trạng thái không hợp lệ: ${newStatus}`);
     }
 
     // Ánh xạ tên trạng thái sang tên phương thức
     const methodMap = {
-      'processing': 'process',
-      'shipped': 'ship',
-      'delivered': 'deliver',
-      'cancelled': 'cancel',
-      'awaiting_payment': 'await',
-      'pending': 'pending'
+      processing: "process",
+      shipped: "ship",
+      delivered: "deliver",
+      cancelled: "cancel",
+      awaiting_payment: "await",
+      pending: "pending",
     };
 
     // Sửa cách tạo tên phương thức kiểm tra chuyển đổi
     const baseAction = methodMap[newStatus] || newStatus.toLowerCase();
-    const canChangeMethod = `can${baseAction.charAt(0).toUpperCase() + baseAction.slice(1)}`;
+    const canChangeMethod = `can${
+      baseAction.charAt(0).toUpperCase() + baseAction.slice(1)
+    }`;
 
-    console.log(`[DEBUG] Kiểm tra phương thức: ${canChangeMethod}`);
-    console.log(`[DEBUG] Phương thức tồn tại: ${typeof this.state[canChangeMethod] === 'function'}`);
-    
-    if (typeof this.state[canChangeMethod] !== 'function' || this.state[canChangeMethod]() === false) {
-      console.log(`[DEBUG] Không thể chuyển trạng thái - canChangeMethod thất bại`);
-      throw new Error(`Không thể chuyển từ trạng thái ${this.state.getName()} sang ${newStatus}`);
+    if (
+      typeof this.state[canChangeMethod] !== "function" ||
+      this.state[canChangeMethod]() === false
+    ) {
+      throw new Error(
+        `Không thể chuyển từ trạng thái ${this.state.getName()} sang ${newStatus}`
+      );
     }
 
     // Đặt tên phương thức hành động tương ứng
     const actionMethod = baseAction;
-    
-    console.log(`[DEBUG] Gọi phương thức ${actionMethod}()`);
     const result = await this.state[actionMethod]();
-    console.log(`[DEBUG] Kết quả sau khi gọi ${actionMethod}(): ${result}`);
 
-    if (typeof result === 'string' && result.includes('Không thể')) {
-      console.log(`[DEBUG] Phát hiện thông báo lỗi trong kết quả`);
+    if (typeof result === "string" && result.includes("Không thể")) {
       throw new Error(result);
     }
 
     // Khi cập nhật trạng thái, cần gán thêm timestamp tương ứng
-    if (newStatus === 'shipped' && !this.shippedAt) {
+    if (newStatus === "shipped" && !this.shippedAt) {
       this.shippedAt = new Date();
-    } else if (newStatus === 'delivered' && !this.deliveredAt) {
+    } else if (newStatus === "delivered" && !this.deliveredAt) {
       this.deliveredAt = new Date();
     }
-    
+
     // Cập nhật trạng thái và lưu
-    console.log(`[DEBUG] Cập nhật trạng thái thành ${newStatus}`);
     this.status = newStatus;
     this.state = OrderStateFactory.createState(newStatus, this);
     await this.save();
-    console.log(`[DEBUG] Đã lưu đơn hàng với trạng thái mới`);
+
+    try {
+      const Delivery = mongoose.model("Delivery");
+      const statusSynchronizer = require("../utils/statusSynchronizer");
+
+      // Tìm Delivery liên quan
+      const delivery = await Delivery.findOne({ order: this._id });
+
+      if (delivery) {
+        // Thực hiện đồng bộ
+        const syncResult =
+          await statusSynchronizer.synchronizeDeliveryWithOrder(
+            delivery,
+            newStatus
+          );
+      }
+    } catch (syncError) {
+      // Không throw lỗi để không ảnh hưởng đến kết quả thay đổi trạng thái Order
+    }
 
     return {
       success: true,
-      message: result
+      message: result,
     };
   } catch (error) {
-    console.error(`[DEBUG ERROR] ${error.message}`);
-    console.error(`[DEBUG ERROR] Stack: ${error.stack}`);
     return {
       success: false,
-      message: `Lỗi khi thay đổi trạng thái: ${error.message}`
+      message: `Lỗi khi thay đổi trạng thái Order: ${error.message}`,
     };
   }
 };

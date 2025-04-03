@@ -4,8 +4,10 @@ const VoucherFactory = require("../factories/voucherFactory");
 
 exports.createVoucher = async (req, res) => {
   try {
-    const { type, ...voucherData } = req.body;
-    const newVoucher = VoucherFactory.create(type, voucherData);
+    // Thay đổi từ việc tạo voucher bằng Factory
+    const newVoucher = new Voucher(req.body);
+    console.log("Đang tạo voucher mới:", newVoucher);
+    
     await newVoucher.save();
     res.status(201).json(newVoucher);
   } catch (error) {
@@ -17,11 +19,10 @@ exports.getVouchers = async (req, res) => {
   try {
     const vouchers = await Voucher.find({ isActive: true, endDate: { $gte: new Date() } });
 
-    const formattedVouchers = vouchers.map((voucher) => 
-      VoucherFactory.create(voucher.discountType, voucher)
-    );
-
-    res.json(vouchers);
+    // Chuyển đổi vouchers sang định dạng JSON để trả về
+    const vouchersData = vouchers.map(voucher => voucher.toObject());
+    
+    res.json(vouchersData);
   } catch (error) {
     res.status(500).json({ message: 'Lỗi khi lấy danh sách voucher', error: error.message });
   }
@@ -45,6 +46,22 @@ exports.applyVoucher = async (req, res) => {
       });
     }
 
+    // Log thông tin voucher để debug
+    console.log('Chi tiết voucher:', {
+      code: voucher.code,
+      isActive: voucher.isActive,
+      startDate: voucher.startDate,
+      endDate: voucher.endDate,
+      now: new Date(),
+      usedCount: voucher.usedCount,
+      usageLimit: voucher.usageLimit,
+      isValid: voucher.isValid && voucher.isValid(),
+      discountType: voucher.discountType,
+      discountValue: voucher.discountValue,
+      minPurchase: voucher.minPurchase
+    });
+
+    // Tạo instance từ Factory
     const voucherInstance = VoucherFactory.create(voucher.discountType, voucher);
 
     // Kiểm tra số lần sử dụng
@@ -102,8 +119,9 @@ exports.applyVoucher = async (req, res) => {
       });
     }
 
-    // Tính toán giảm giá
-    const discountAmount = voucher.calculateDiscount(totalAmount);
+    // Tính toán giảm giá bằng Factory
+    const discountAmount = voucherInstance.calculateDiscount(totalAmount);
+    console.log('Giảm giá tính toán được:', discountAmount);
 
     // Chỉ cập nhật cart
     const updatedCart = await Cart.findOneAndUpdate(

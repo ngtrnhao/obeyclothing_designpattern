@@ -1,4 +1,4 @@
-const OrderState = require("../../interfaces/OderState");
+const OrderState = require("../../interfaces/IOderState");
 
 const CancelledState = class extends OrderState {
   constructor(order) {

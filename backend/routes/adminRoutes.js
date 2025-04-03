@@ -97,7 +97,42 @@ router.put(
   adminChainMiddleware,
   inventoryController.confirmReceiptAndUpdateInventory
 );
+router.put("/orders/:id", async (req, res) => {
+  try {
+    const { status } = req.body;
+    const order = await Order.findById(req.params.id);
+    
+    if (!order) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Không tìm thấy đơn hàng" 
+      });
+    }
+    
+    // Lưu trạng thái ban đầu để kiểm tra kết quả
+    const originalOrderStatus = order.status;
+    console.log(`[DEBUG] Bắt đầu cập nhật: Order ${order._id} từ ${originalOrderStatus} -> ${status}`);
 
+    // Cập nhật trạng thái order (đã bao gồm đồng bộ sang Delivery)
+    const orderStateResult = await order.changeState(status);
+    
+    if (!orderStateResult.success) {
+      return res.status(400).json(orderStateResult);
+    }
+
+    res.json({
+      success: true,
+      message: orderStateResult.message,
+      order: order
+    });
+  } catch (error) {
+    console.error("Lỗi khi cập nhật trạng thái đơn hàng:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: `Lỗi server: ${error.message}` 
+    });
+  }
+});
 router.put("/deliveries/:id", async (req, res) => {
   try {
     const { status } = req.body;

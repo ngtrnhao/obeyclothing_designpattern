@@ -104,38 +104,6 @@ class CategoryService {
     }
   }
 
-  // async getCategoryBySlug(slug) {
-  //   try {
-  //     const category = await Category.findOne({ slug }).populate("children");
-  //     if (!category) {
-  //       throw new Error("Không tìm thấy danh mục");
-  //     }
-  //     return category;
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // }
-
-  // async getCategoryBySlugOrId(slugOrId) {
-  //   try {
-  //     let category;
-  //     if (mongoose.Types.ObjectId.isValid(slugOrId)) {
-  //       category = await Category.findById(slugOrId).populate("children");
-  //     } else {
-  //       category = await Category.findOne({ slug: slugOrId }).populate(
-  //         "children"
-  //       );
-  //     }
-
-  //     if (!category) {
-  //       throw new Error("Không tìm thấy danh mục");
-  //     }
-  //     return category;
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // }
-
   async getCategoryPath(categoryId) {
     try {
       let category = await Category.findById(categoryId).populate("parent");
@@ -158,12 +126,16 @@ class CategoryService {
       throw error;
     }
   }
-
   async getAllChildCategories(categoryId) {
     try {
-      const children = await Category.find({ parent: categoryId });
+      const category = await Category.findById(categoryId);
+      if (!category) throw new Error("Không tìm thấy danh mục");
+
+      // Sử dụng phương thức getChildren của Composite Pattern
+      const children = await category.getChildren();
       let allChildren = [...children];
 
+      // Lấy các cháu bằng đệ quy
       for (let child of children) {
         const grandChildren = await this.getAllChildCategories(child._id);
         allChildren = allChildren.concat(grandChildren);
@@ -208,20 +180,5 @@ class CategoryService {
     }
   }
 }
-
-//   async getSubcategories(parentId) {
-//     try {
-//       const category = await Category.findById(parentId);
-//       if (!category) {
-//         throw new Error("Không tìm thấy danh mục cha");
-//       }
-
-//       // Sử dụng phương thức getChildren của Composite Pattern
-//       return await category.getChildren();
-//     } catch (error) {
-//       throw error;
-//     }
-//   }
-// }
 
 module.exports = new CategoryService();
